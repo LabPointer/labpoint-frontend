@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+/*@custom-variant dark (&:where(.dark, .dark *));*/
+
+.navbar {
+    @apply w-full fixed top-0 z-30 py-5 items-center flex flex-col justify-center shadow-md shadow-black/10 bg-white border-b-2 border-black/5;
+}
+
+.nav-title {
+    @apply w-full flex gap-x-1 items-center;
+}
+
+.nav-title svg {
+    @apply min-[375px]:w-6 w-5 min-[375px]:h-6 h-5 stroke-indigo-600 fill-indigo-600;
+}
+
+.nav-title h1 {
+    @apply font-bold text-center min-[375px]:text-lg text-sm  text-indigo-600;
+}
+
+.nav-leading {
+    @apply flex items-center justify-start
+}
+
+.nav-action {
+    @apply w-full flex items-center justify-end gap-4;
+}
+
+.nav-menu {
+    @apply flex items-center justify-center text-center font-semibold gap-2;
+}
+
+.nav-menu a {
+    @apply py-1 px-2.5 rounded-lg hover:shadow-inner hover:bg-black/10;
+}
+
+.navbar-mobile {
+    @apply w-full max-w-5xl flex flex-col items-center justify-center;
+}
+
+.nav-desktop {
+    @apply w-full max-w-5xl px-4 grid grid-cols-3 items-center gap-2;
+}
+
+.nav-mobile {
+    @apply w-full px-8 grid grid-cols-3;
+}
+
+.nav-menu-mobile {
+    @apply w-full flex flex-col px-8 gap-4;
+}
+
+.nav-menu-mobile > a {
+    @apply font-medium px-4 py-2 rounded-lg shadow-md border border-black/5 bg-black/5
+}

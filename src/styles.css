@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/*@custom-variant dark (&:where(.dark, .dark *));*/
+
+@font-face {
+  font-family: Anton;
+  src: url("./assets/fonts/Anton-Regular.ttf");
+}
+
+* {
+  @apply transition-all duration-200 ease-in;
+}
+
+body {
+  @apply m-0 bg-white text-black;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+@theme {
+  --font-anton: "Anton", sans-serif;
+}
+
+.card-grid{
+  @apply sm:grid-cols-3 grid-cols-2;
+}
+
+@media (max-width: 425px) {
+  .card-grid{
+      @apply grid-cols-1;
+  }
+}
+
+.card-aspect-ratio {
+  @apply sm:aspect-[0.7] aspect-[0.6] max-h-80;
+}
