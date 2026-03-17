@@ -12,66 +12,42 @@ export const Route = createFileRoute("/_public/")({
     component: RouteComponent,
 });
 
-async function getSpaces() {
-    const res = await fetch("/api/spaces");
+async function getSpaces(filters?: LabSearchFilters) {
+    const params = new URLSearchParams();
+    if (filters) {
+        if (filters.query) params.set("name", filters.query);
+        if (typeof filters.minCapacity === "number")
+            params.set("capacity", String(filters.minCapacity));
+        if (filters.resources && filters.resources.length > 0)
+            params.set("resources", filters.resources.join(","));
+    }
+
+    const qs = params.toString();
+    const url = qs.length > 0 ? `/api/spaces?${qs}` : "/api/spaces";
+
+    const res = await fetch(url);
     const contentType = res.headers.get("content-type") ?? "";
     if (!res.ok) {
-        throw new Error(`HTTP ${res.status} ao buscar /api/spaces`);
+        throw new Error(`HTTP ${res.status} ao buscar ${url}`);
     }
     if (!contentType.includes("application/json")) {
         const text = await res.text();
-        throw new Error(`Resposta não-JSON em /api/spaces: ${text.slice(0, 120)}`);
+        throw new Error(`Resposta não-JSON em ${url}: ${text.slice(0, 120)}`);
     }
     return (await res.json()) as Spaces[];
 }
 
 function RouteComponent() {
-    const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ["spaces"],
-        queryFn: getSpaces,
-    });
-
     const [queryFilters, setQueryFilters] = useState<LabSearchFilters>();
+
+    const { data, isLoading, error } = useQuery({
+        queryKey: ["spaces", queryFilters],
+        queryFn: () => getSpaces(queryFilters),
+    });
 
     function onSearch(data: LabSearchFilters) {
         setQueryFilters(data);
-        refetch();
     }
-    // Aplica os filtros de busca nos dados retornados pela query
-    const filteredSpaces = data
-        ? data
-              .filter((room) => {
-                  const filters = queryFilters;
-                  if (!filters) return true;
-
-                  // Filtro de busca por nome/termo
-                  const matchesQuery =
-                      !filters.query ||
-                      room.name.toLowerCase().includes(filters.query.toLowerCase());
-
-                  // Filtro de capacidade mínima
-                  const matchesCapacity =
-                      typeof filters.minCapacity === "number"
-                          ? room.capacity >= filters.minCapacity
-                          : true;
-
-                  // Filtro de recursos (todos os recursos selecionados devem estar presentes)
-                  const hasContent =
-                      !filters.resources || filters.resources.length === 0
-                          ? true
-                          : filters.resources.every((res) =>
-                                room.resources?.includes(res),
-                            );
-
-                  return matchesQuery && matchesCapacity && hasContent;
-              })
-              .slice(
-                  0,
-                  queryFilters?.maxResults && queryFilters.maxResults > 0
-                      ? queryFilters.maxResults
-                      : undefined,
-              )
-        : [];
 
     return (
         <>
@@ -92,15 +68,15 @@ function RouteComponent() {
                             </p>
                         </div>
                         <span className="text-sm font-medium text-neutral-500">
-                            {filteredSpaces ? filteredSpaces.length : 0} resultados encontrados
+                            {data ? data.length : 0} resultados encontrados
                         </span>
                     </header>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {isLoading && <div>Loading...</div>}
                         {error && <div>Error: {error.message}</div>}
-                        {filteredSpaces &&
-                            filteredSpaces.map((space) => (
+                        {data &&
+                            data.map((space) => (
                                 <ClassroomCard
                                     key={space.id}
                                     name={space.name}
