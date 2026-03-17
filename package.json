@@ -12,6 +12,7 @@
   "dependencies": {
     "@tailwindcss/vite": "latest",
     "@tanstack/react-devtools": "latest",
+    "@tanstack/react-query": "latest",
     "@tanstack/react-router": "latest",
     "@tanstack/react-router-devtools": "latest",
     "@tanstack/router-plugin": "latest",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@tanstack/devtools-vite": "latest",
+    "@tanstack/eslint-plugin-query": "latest",
     "@testing-library/dom": "latest",
     "@testing-library/react": "latest",
     "@types/node": "latest",
