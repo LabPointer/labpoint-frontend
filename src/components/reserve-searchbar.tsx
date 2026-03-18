@@ -16,33 +16,33 @@ function FieldWrapper({ label, className = "", children }: FieldWrapperProps) {
     );
 }
 
-export const labResources = [
-    "Telão",
-    "Computadores",
-    "Tubo de ensaio"
+export const spaceResources = [
+    "computadores",
+    "telão",
+    "tubos de ensaio"
 ] as const;
 
-export type LabResource = typeof labResources[number];
+export type SpaceResource = typeof spaceResources[number];
 
-export type LabSearchFilters = {
+export type SpaceSearchFilters = {
     query: string;
-    resources: LabResource[];
+    resources: SpaceResource[];
     minCapacity: number;
     maxResults: number;
 };
 
 const maxResultsOptions = [10, 20, 30, 40, 50];
 
-type LabSearchbarProps = {
-    onSearch?: (data: LabSearchFilters) => void;
+type SpaceSearchbarProps = {
+    onSearch?: (query: SpaceSearchFilters) => void;
 };
 
-export default function LabSearchbar({ onSearch }: LabSearchbarProps = {}) {
+export default function SpaceSearchbar({ onSearch }: SpaceSearchbarProps = {}) {
     const [searchQuery, setSearchQuery] = useState("");
     const [resourceQuery, setResourceQuery] = useState("");
     const [minCapacity, setMinCapacity] = useState(20);
     const [maxResults, setMaxResults] = useState(10);
-    const [selectedResources, setSelectedResources] = useState<LabResource[]>([]);
+    const [selectedResources, setSelectedResources] = useState<SpaceResource[]>([]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -60,11 +60,11 @@ export default function LabSearchbar({ onSearch }: LabSearchbarProps = {}) {
         return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
     }
 
-    const filteredResources = labResources.filter(resource => 
+    const filteredResources = spaceResources.filter(resource => 
         normalizeString(resource).includes(normalizeString(resourceQuery))
     );
 
-    function toggleResource(resource: LabResource) {
+    function toggleResource(resource: SpaceResource) {
          if (selectedResources.includes(resource)) {
              setSelectedResources(selectedResources.filter(r => r !== resource));
          } else {
@@ -72,26 +72,22 @@ export default function LabSearchbar({ onSearch }: LabSearchbarProps = {}) {
          }
     };
 
-    function removeResource(resource: LabResource, e: React.MouseEvent) {
+    function removeResource(resource: SpaceResource, e: React.MouseEvent) {
          e.stopPropagation();
          e.preventDefault();
          setSelectedResources(selectedResources.filter(r => r !== resource));
     };
 
     useEffect(function() {
-        const timer = setTimeout(() => {
-            const searchData: LabSearchFilters = {
-                query: searchQuery,
-                resources: selectedResources,
-                minCapacity,
-                maxResults
-            };
-            if (onSearch) {
-                onSearch(searchData);
-            }
-        }, 400);
-
-        return () => clearTimeout(timer);
+        const searchData: SpaceSearchFilters = {
+            query: searchQuery,
+            resources: selectedResources,
+            minCapacity,
+            maxResults
+        };
+        if (onSearch) {
+            onSearch(searchData);
+        }
     }, [searchQuery, selectedResources, minCapacity, maxResults, onSearch]);
 
     return (
@@ -170,7 +166,7 @@ export default function LabSearchbar({ onSearch }: LabSearchbarProps = {}) {
                                                         type="checkbox"
                                                         className="h-4 w-4 rounded border-neutral-300 text-indigo-600 focus:ring-indigo-600"
                                                         checked={selectedResources.includes(resource)}
-                                                        onChange={() => toggleResource(resource as LabResource)}
+                                                        onChange={() => toggleResource(resource as SpaceResource)}
                                                     />
                                                     <span className="text-sm text-neutral-700">{resource}</span>
                                                 </label>

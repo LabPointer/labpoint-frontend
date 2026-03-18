@@ -1,18 +1,19 @@
 import { type Spaces } from "@types";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useState } from "react";
 import LabSearchbar, {
-    type LabSearchFilters,
+    type SpaceSearchFilters,
 } from "@/components/reserve-searchbar";
 import { createFileRoute } from "@tanstack/react-router";
-import ClassroomCard from "@/components/classroom";
+import ClassroomCard from "@/components/space-card";
+import useDebounce from "@/hooks/useDebounce";
 import ReservePopup from "@/components/reserve-popup";
 
 export const Route = createFileRoute("/_public/")({
     component: RouteComponent,
 });
 
-async function getSpaces(filters?: LabSearchFilters) {
+async function getSpaces(filters?: SpaceSearchFilters) {
     const params = new URLSearchParams();
     if (filters) {
         if (filters.query) params.set("name", filters.query);
@@ -21,7 +22,7 @@ async function getSpaces(filters?: LabSearchFilters) {
         if (filters.resources && filters.resources.length > 0)
             params.set("resources", filters.resources.join(","));
     }
-
+    
     const qs = params.toString();
     const url = qs.length > 0 ? `/api/spaces?${qs}` : "/api/spaces";
 
@@ -38,19 +39,41 @@ async function getSpaces(filters?: LabSearchFilters) {
 }
 
 function RouteComponent() {
-    const [queryFilters, setQueryFilters] = useState<LabSearchFilters>();
+    //const [queryFilters, setQueryFilters] = useState<LabSearchFilters>();
+    const [, setQueryFilters, debouncedQueryFilters] = useDebounce<SpaceSearchFilters>({
+        query: "",
+        resources: [],
+        minCapacity: 20,
+        maxResults: 0
+    }, 300);
+    
+    const [isReserveOpen, setIsReserveOpen] = useState(false);
+    const [spaceId, setSpaceId] = useState("");
+    const [spaceName, setSpaceName] = useState("");
+    const [spaceCapacity, setSpaceCapacity] = useState(0);
+    const [spaceResources, setSpaceResources] = useState<string[]>([]);
 
     const { data, isLoading, error } = useQuery({
-        queryKey: ["spaces", queryFilters],
-        queryFn: () => getSpaces(queryFilters),
+        queryKey: ["spaces", debouncedQueryFilters],
+        queryFn: () => getSpaces(debouncedQueryFilters),
     });
 
-    function onSearch(data: LabSearchFilters) {
-        setQueryFilters(data);
-    }
+    const onSearch = useCallback((query: SpaceSearchFilters) => {
+        setQueryFilters(query);
+    }, [setQueryFilters]);
+
+    const onReserve = useCallback((spaceId: string, name: string, capacity: number, resources: string[]) => {
+        setIsReserveOpen(true);
+        setSpaceId(spaceId);
+        setSpaceName(name);
+        setSpaceCapacity(capacity);
+        setSpaceResources(resources);
+    }, []);
 
     return (
         <>
+            <ReservePopup isOpen={isReserveOpen} onClose={() => setIsReserveOpen(false)} spaceId={spaceId} spaceName={spaceName} capacity={spaceCapacity} resources={spaceResources} />
+            
             <section className="mt-[81px] flex items-center justify-center px-4 pb-4 pt-6 md:px-8 md:pb-8">
                 <LabSearchbar onSearch={onSearch} />
             </section>
@@ -75,18 +98,26 @@ function RouteComponent() {
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {isLoading && <div>Loading...</div>}
                         {error && <div>Error: {error.message}</div>}
-                        {data &&
+                        {data && data.length > 0 &&
                             data.map((space) => (
                                 <ClassroomCard
                                     key={space.id}
+                                    id={space.id}
                                     name={space.name}
                                     capacity={space.capacity}
                                     resources={space.resources}
+                                    onReserve={onReserve}
                                 />
-                            ))}
+                            ))
+                        }
                     </div>
                 </div>
             </section>
         </>
     );
 }
+/*
+
+
+
+*/

@@ -2,25 +2,38 @@ import { useState } from "react";
 import { FiX, FiCalendar, FiClock } from "react-icons/fi";
 import { GrResources } from "react-icons/gr";
 import { FaUserFriends } from "react-icons/fa";
+import { useQuery } from "@tanstack/react-query";
 
 export type ReservePopupProps = {
     isOpen: boolean;
     onClose: () => void;
-    roomName: string;
+    spaceId: string;
+    spaceName: string;
     capacity: number;
     resources: string[];
 };
 
+async function getReserves(spaceId: string) {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/reserves/${spaceId}`);
+    return response.json();
+}
+
 export default function ReservePopup({
     isOpen,
     onClose,
-    roomName,
+    spaceId,
+    spaceName,
     capacity,
     resources,
 }: ReservePopupProps) {
     const [date, setDate] = useState("");
     const [startTime, setStartTime] = useState("");
     const [endTime, setEndTime] = useState("");
+
+    const { data, isLoading, error } = useQuery({
+        queryKey: ["reserves", spaceId],
+        queryFn: () => getReserves(spaceId),
+    });
 
     if (!isOpen) return null;
 
@@ -41,7 +54,7 @@ export default function ReservePopup({
 
                 <div className="mb-6 pr-6">
                     <h2 className="text-2xl font-semibold text-neutral-900 mb-1">
-                        Reservar {roomName}
+                        Reservar {spaceName}
                     </h2>
                     <div className="flex flex-wrap items-center gap-1.5 text-sm text-neutral-500">
                         <div className="flex items-center gap-1">
@@ -120,10 +133,10 @@ export default function ReservePopup({
                             Reservas Existentes
                         </h3>
                         <div className="text-sm text-neutral-500">
-                            {date ? (
-                                <p className="italic">Buscando reservas para esta data...</p>
-                            ) : (
-                                <p>Selecione uma data para ver as reservas existentes.</p>
+                            {isLoading && <p>Buscando reservas...</p>}
+                            {error && <p>Erro ao buscar reservas: {error.message}</p>}
+                            {data && data.length > 0 && (
+                                <></>
                             )}
                         </div>
                     </div>
@@ -137,7 +150,8 @@ export default function ReservePopup({
                         Cancelar
                     </button>
                     <button 
-                        className="rounded-lg bg-[#a594f9] px-4 py-2 text-sm font-medium text-white hover:bg-[#9784f1] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
+                        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        disabled={(isLoading) ? true : data && data.length > 0 && startTime && endTime}
                     >
                         Confirmar Reserva
                     </button>
