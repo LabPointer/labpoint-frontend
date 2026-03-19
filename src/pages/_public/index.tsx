@@ -1,4 +1,4 @@
-import { type Spaces } from "@types";
+import type { Spaces } from "@types";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import LabSearchbar, {
