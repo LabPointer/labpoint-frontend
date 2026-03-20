@@ -1,18 +1,27 @@
 export type Spaces = {
-    id: string;
     name: string;
     capacity: number;
     resources: string[];
 }
 
 export type Reserves = {
-    id: string;
-    startFrom: string;
-    endFrom: string;
-    spaceId: string;
+    foundReserves: {
+        id: string;
+        createdAt: string;
+        startAt: string;
+        endAt: string;
+        spaceName: string;
+    }[],
+    conflictingReservation: {
+        id: string;
+        createdAt: string;
+        startAt: string;
+        endAt: string;
+        spaceName: string;
+    }
 }
 
 export type CreateReserveBody = {
-    startFrom: string;
-    endUntil: string;
+    startAt: string;
+    endAt: string;
 }

@@ -2,15 +2,13 @@ import { FaUserFriends } from "react-icons/fa";
 import { GrResources } from "react-icons/gr";
 
 export type SpaceCardProps = {
-    id: string;
     name: string;
     capacity: number;
     resources: string[];
-    onReserve: (spaceId: string, name: string, capacity: number, resources: string[]) => void;
+    onReserve: (name: string, capacity: number, resources: string[]) => void;
 };
 
 export default function SpaceCard({
-    id,
     name,
     capacity,
     resources,
@@ -54,7 +52,7 @@ export default function SpaceCard({
                 <button
                     type="button"
                     className={`flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold bg-indigo-700 text-white shadow-sm shadow-black/30 hover:bg-indigo-600 hover:cursor-pointer`}
-                    onClick={() => onReserve(id, name, capacity, resources)}
+                    onClick={() => onReserve(name, capacity, resources)}
                 >
                     Reserve Agora
                 </button>

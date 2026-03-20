@@ -48,12 +48,11 @@ function RouteComponent() {
     }, 300);
     
     const [isReserveOpen, setIsReserveOpen] = useState(false);
-    const [spaceId, setSpaceId] = useState("");
     const [spaceName, setSpaceName] = useState("");
     const [spaceCapacity, setSpaceCapacity] = useState(0);
     const [spaceResources, setSpaceResources] = useState<string[]>([]);
 
-    const { data, isLoading, error } = useQuery({
+    const spacesQuery = useQuery({
         queryKey: ["spaces", debouncedQueryFilters],
         queryFn: () => getSpaces(debouncedQueryFilters),
     });
@@ -62,9 +61,8 @@ function RouteComponent() {
         setQueryFilters(query);
     }, [setQueryFilters]);
 
-    const onReserve = useCallback((spaceId: string, name: string, capacity: number, resources: string[]) => {
+    const onReserve = useCallback((name: string, capacity: number, resources: string[]) => {
         setIsReserveOpen(true);
-        setSpaceId(spaceId);
         setSpaceName(name);
         setSpaceCapacity(capacity);
         setSpaceResources(resources);
@@ -72,7 +70,7 @@ function RouteComponent() {
 
     return (
         <>
-            <ReservePopup isOpen={isReserveOpen} onClose={() => setIsReserveOpen(false)} spaceId={spaceId} spaceName={spaceName} capacity={spaceCapacity} resources={spaceResources} />
+            <ReservePopup isOpen={isReserveOpen} onClose={() => setIsReserveOpen(false)} spaceName={spaceName} capacity={spaceCapacity} resources={spaceResources} />
             
             <section className="mt-[81px] flex items-center justify-center px-4 pb-4 pt-6 md:px-8 md:pb-8">
                 <LabSearchbar onSearch={onSearch} />
@@ -91,18 +89,17 @@ function RouteComponent() {
                             </p>
                         </div>
                         <span className="text-sm font-medium text-neutral-500">
-                            {data ? data.length : 0} resultados encontrados
+                            {spacesQuery.data ? spacesQuery.data.length : 0} resultados encontrados
                         </span>
                     </header>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {isLoading && <div>Loading...</div>}
-                        {error && <div>Error: {error.message}</div>}
-                        {data && data.length > 0 &&
-                            data.map((space) => (
+                        {spacesQuery.isLoading && <div>Loading...</div>}
+                        {spacesQuery.error && <div>Error: {spacesQuery.error.message}</div>}
+                        {spacesQuery.data && spacesQuery.data.length > 0 &&
+                            spacesQuery.data.map((space) => (
                                 <ClassroomCard
-                                    key={space.id}
-                                    id={space.id}
+                                    key={space.name}
                                     name={space.name}
                                     capacity={space.capacity}
                                     resources={space.resources}

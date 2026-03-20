@@ -8,44 +8,36 @@ import type { CreateReserveBody, Reserves } from "@/@types";
 export type ReservePopupProps = {
     isOpen: boolean;
     onClose: () => void;
-    spaceId: string;
     spaceName: string;
     capacity: number;
     resources: string[];
 };
 
-async function getReserves(spaceId: string, date?: string, startFrom?: string, endUntil?: string) {
+async function getReserves(spaceName: string, date?: string, startFrom?: string, endUntil?: string) {
     const queryParams = new URLSearchParams();
     if (date) queryParams.append("date", date);
     if (startFrom) queryParams.append("startFrom", startFrom);
     if (endUntil) queryParams.append("endUntil", endUntil);
     //const response = await fetch(`${import.meta.env.VITE_API_URL}/reserves/${spaceId}?${queryParams.toString()}`, {
-    const response = await fetch(`/api/reserves/${spaceId}`, {
+    const response = await fetch(`/api/reserves/${spaceName}`, {
         method: "GET",
     });
 
     if (response.ok) {
-        if (response.headers.get("content-type") == "application/json") {
-            console.log("Resposta")
-            return (await response.json()) as Reserves[];
-        }
-        console.log("Resposta1")
-        //return [] as Reserves[];
-        return (await response.json()) as Reserves[];
+        return (await response.json()) as Reserves;
     }
-    console.log("Resposta2")
     throw new Error(await response.text());
 }
 
-async function postReserves(spaceId: string, date?: string, startFrom?: string, endUntil?: string) {
-    if (!date || !startFrom || !endUntil) return;
+async function postReserves(spaceName: string, date?: string, startAt?: string, endAt?: string) {
+    if (!date || !startAt || !endAt) return;
 
     const bodyData: CreateReserveBody = {
-        startFrom: new Date(`${date}T${startFrom}`).toISOString(),
-        endUntil: new Date(`${date}T${endUntil}`).toISOString()
+        startAt: new Date(`${date}T${startAt}`).toISOString(),
+        endAt: new Date(`${date}T${endAt}`).toISOString()
     }
 
-    const response = await fetch(`/api/reserve/create/${spaceId}`, {
+    const response = await fetch(`/api/reserve/create/${spaceName}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -59,27 +51,24 @@ async function postReserves(spaceId: string, date?: string, startFrom?: string, 
 export default function ReservePopup({
     isOpen,
     onClose,
-    spaceId,
     spaceName,
     capacity,
     resources,
 }: ReservePopupProps) {
-    if (!isOpen) return null;
-
     const [selectedDate, setSelectedDate] = useState("");
     const [startTime, setStartTime] = useState("");
     const [endTime, setEndTime] = useState("");
 
     const getReservesQuery = useQuery({
-        queryKey: [selectedDate],
-        queryFn: () => getReserves(spaceId, selectedDate, startTime, endTime),
+        queryKey: [selectedDate, startTime, endTime],
+        queryFn: () => getReserves(spaceName, selectedDate, startTime, endTime),
         enabled: false
     });
 
     const postReserveQuery = useQuery({
         queryKey: [],
         queryFn: async () => {
-            const result = await postReserves(spaceId, selectedDate, startTime, endTime)
+            const result = await postReserves(spaceName, selectedDate, startTime, endTime)
             if (!result) {
                 alert("Erro: Voce precisa selecionar data, hora de inicio e hora de termino para confimar a reserva!");
                 return;
@@ -98,7 +87,11 @@ export default function ReservePopup({
         if (selectedDate) {
             getReservesQuery.refetch();
         }
-    }, [selectedDate]);
+    }, [selectedDate, startTime, endTime]);
+
+    console.log(getReservesQuery.data?.conflictingReservation)
+
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -150,7 +143,7 @@ export default function ReservePopup({
                                         value={selectedDate}
                                         min={new Date().toISOString().split('T')[0]}
                                         onChange={(e) => setSelectedDate(e.target.value)}
-                                        className="block w-full rounded-lg border-0 bg-neutral-100 py-2.5 pl-10 pr-3 text-sm text-neutral-900 focus:ring-2 focus:ring-indigo-500"
+                                        className="block w-full rounded-lg border border-black/12 bg-neutral-100 py-2.5 pl-10 pr-3 text-sm text-neutral-900 focus:ring-2 focus:ring-indigo-500"
                                     />
                                 </div>
                             </div>
@@ -166,7 +159,7 @@ export default function ReservePopup({
                                             type="time"
                                             value={startTime}
                                             onChange={(e) => setStartTime(e.target.value)}
-                                            className="block w-full rounded-lg border-0 bg-neutral-100 py-2.5 pl-10 pr-3 text-sm text-neutral-900 focus:ring-2 focus:ring-indigo-500"
+                                            className="block w-full rounded-lg border border-black/12 bg-neutral-100 py-2.5 pl-10 pr-3 text-sm text-neutral-900 focus:ring-2 focus:ring-indigo-500"
                                         />
                                     </div>
                                 </div>
@@ -181,7 +174,7 @@ export default function ReservePopup({
                                             type="time"
                                             value={endTime}
                                             onChange={(e) => setEndTime(e.target.value)}
-                                            className="block w-full rounded-lg border-0 bg-neutral-100 py-2.5 pl-10 pr-3 text-sm text-neutral-900 focus:ring-2 focus:ring-indigo-500"
+                                            className="block w-full rounded-lg border border-black/12 bg-neutral-100 py-2.5 pl-10 pr-3 text-sm text-neutral-900 focus:ring-2 focus:ring-indigo-500"
                                         />
                                     </div>
                                 </div>
@@ -191,7 +184,7 @@ export default function ReservePopup({
 
                     <hr className="border-neutral-200" />
 
-                    <div>
+                    <div className="min-h-40 bg-neutral-100 p-2 rounded-md border border-black/10 shadow-md shadow-black/15 scroll-auto">
                         <h3 className="text-base font-semibold text-neutral-900 mb-3">
                             Reservas Existentes
                         </h3>
@@ -199,17 +192,20 @@ export default function ReservePopup({
                             {!selectedDate ? (
                                 <p>Selecione uma data para buscar as reservas</p>
                             ) : getReservesQuery.isLoading ? (
-                                <p>Buscando reservas...</p>
+                                <div className="flex items-center gap-2">
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-indigo-600" />
+                                    <span>Buscando reservas...</span>
+                                </div>
                             ) : getReservesQuery.error ? (
                                 <p>
                                     Erro ao buscar reservas:{" "}
                                     {getReservesQuery.error instanceof Error ? getReservesQuery.error.message : String(getReservesQuery.error)}
                                 </p>
-                            ) : getReservesQuery.data && getReservesQuery.data.length > 0 ? (
+                            ) : getReservesQuery.data ? (
                                 <ul className="list-disc list-inside">
-                                    {getReservesQuery.data.map((reserve: any) => (
+                                    {getReservesQuery.data.foundReserves.map((reserve) => (
                                         <li key={reserve.id}>
-                                            {reserve.startFrom.toLocaleString()} - {reserve.endFrom.toLocaleString()}
+                                            <p className={`${reserve === getReservesQuery.data.conflictingReservation ? "text-red-600" : ""}`}>{new Date(reserve.startAt).toLocaleString()} - {new Date(reserve.endAt).toLocaleString()}</p>
                                         </li>
                                     ))}
                                 </ul>
