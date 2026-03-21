@@ -10,16 +10,28 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@base-ui/react": "latest",
+    "@fontsource-variable/inter": "latest",
     "@tailwindcss/vite": "latest",
     "@tanstack/react-devtools": "latest",
+    "@tanstack/react-form": "latest",
+    "@tanstack/react-form-devtools": "latest",
     "@tanstack/react-query": "latest",
     "@tanstack/react-router": "latest",
     "@tanstack/react-router-devtools": "latest",
     "@tanstack/router-plugin": "latest",
+    "class-variance-authority": "latest",
+    "clsx": "latest",
+    "date-fns": "latest",
+    "lucide-react": "latest",
     "react": "latest",
+    "react-day-picker": "latest",
     "react-dom": "latest",
     "react-icons": "latest",
+    "shadcn": "latest",
+    "tailwind-merge": "latest",
     "tailwindcss": "latest",
+    "tw-animate-css": "latest",
     "zod": "latest"
   },
   "devDependencies": {

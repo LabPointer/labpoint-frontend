@@ -1,124 +1,82 @@
-import "@css/navbar.css";
 import { Link } from "@tanstack/react-router";
-import useMatchMedia from "@/hooks/useMatchMedia";
-import { FaBars, FaUser } from "react-icons/fa";
 import useShowMenu from "@/hooks/useShowMenu";
-import { FaX } from "react-icons/fa6";
-import { MdLocationOn } from "react-icons/md";
-import { IoNotifications } from "react-icons/io5";
-
-function desktop() {
-    return (
-        <nav className="navbar">
-            <div className="nav-desktop">
-                <div className="nav-title justify-start">
-                    <MdLocationOn />
-                    <h1>LabPoint</h1>
-                </div>
-
-                <div className="nav-menu">
-                    <Link to="/">Inicio</Link>
-                    <Link to="/">Minhas Reservas</Link>
-                </div>
-
-                <div className="nav-action gap-x-2 pointer-events-auto">
-                    <button
-                        className="p-1.5 rounded-full shadow-inner hover:bg-black/10"
-                        aria-label="Toggle theme"
-                    >
-                        <IoNotifications className="stroke-indigo-600 fill-indigo-600 w-7 h-7 hover:cursor-pointer" />
-                    </button>
-                    <Link
-                        to="/"
-                        className="p-2 rounded-full hover:shadow-inner hover:shadow-black/10 hover:bg-black/10"
-                    >
-                        <FaUser className="stroke-indigo-600 fill-indigo-600 w-6 h-6" />
-                    </Link>
-                </div>
-            </div>
-        </nav>
-    );
-}
-
-function mobile(
-    showMenu: boolean,
-    toggleShowMenu: () => void,
-) {
-    return (
-        <nav className={`navbar overflow-hidden`}>
-            <div className="navbar-mobile">
-                <div className="nav-mobile">
-                    <div className="nav-leading">
-                        <button className="p-2" onClick={toggleShowMenu}>
-                            {showMenu ? (
-                                <FaX className="stroke-indigo-600 fill-indigo-600  w-6 h-6" />
-                            ) : (
-                                <FaBars className="stroke-indigo-600 fill-indigo-600 w-6 h-6" />
-                            )}
-                        </button>
-                    </div>
-
-                    <div className="nav-title justify-center">
-                        <MdLocationOn />
-                        <h1>LabPoint</h1>
-                    </div>
-
-                    <div className="nav-action">
-                        {/*
-                        <button
-                            className="p-2 rounded-full shadow-inner bg-black/10 dark:bg-white/10"
-                            onClick={toggleTheme}
-                            aria-label="Toggle theme"
-                        >
-                            {theme === "light" ? (
-                                <FaMoon className="stroke-blue-300 fill-blue-300 w-6 h-6" />
-                            ) : (
-                                <FaSun className="stroke-yellow-300 fill-yellow-300 w-6 h-6" />
-                            )}
-                        </button>
-                        */}
-                        <button
-                            className="p-1.5 rounded-full shadow-inner hover:bg-black/10"
-                            aria-label="Toggle theme"
-                        >
-                            <IoNotifications className="stroke-indigo-600 fill-indigo-600 w-7 h-7 hover:cursor-pointer" />
-                        </button>
-                    </div>
-                </div>
-
-                <div
-                    className={`nav-menu-mobile ${
-                        showMenu
-                            ? "h-39 mt-4 opacity-100 pointer-events-auto"
-                            : "h-0 opacity-0 pointer-events-none"
-                    }`}
-                >
-                    <div className="flex justify-end">
-                        <Link
-                            to="/"
-                            className="p-2 rounded-full shadow-inner bg-indigo-600"
-                        >
-                            <FaUser className="stroke-white fill-white w-6 h-6" />
-                        </Link>
-                    </div>
-
-                    <Link to="/">Inicio</Link>
-                    <Link to="/">Minhas Reservas</Link>
-                </div>
-            </div>
-        </nav>
-    );
-}
+import { Button } from "@/components/ui/button";
+import { MapPin, Menu, X, Bell, User } from "lucide-react";
 
 export default function Navbar() {
-    const { isDesktop } = useMatchMedia();
     const { showMenu, toggleShowMenu } = useShowMenu();
 
     return (
-        <>
-            {isDesktop
-                ? desktop()
-                : mobile(showMenu, toggleShowMenu)}
-        </>
+        <nav className="sticky top-0 z-50 w-full bg-background border-b border-black/15 shadow-sm h-14 flex flex-col justify-center">
+            <div className="container mx-auto px-4 sm:px-6 flex justify-between items-center h-full">
+                {/* Logo */}
+                <div className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-primary" />
+                    <h1 className="text-xl font-bold tracking-tight text-foreground">LabPoint</h1>
+                </div>
+
+                {/* Desktop Menu */}
+                <div className="hidden md:flex items-center gap-6 absolute left-1/2 -translate-x-1/2">
+                    <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                        Início
+                    </Link>
+                    <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                        Minhas Reservas
+                    </Link>
+                </div>
+
+                {/* Desktop Actions */}
+                <div className="hidden md:flex items-center gap-2">
+                    <Button variant="ghost" size="icon" className="rounded-full text-primary hover:bg-primary/10 transition-colors">
+                        <Bell className="w-5 h-5" />
+                    </Button>
+                    <Button variant="secondary" size="icon" className="rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                        <User className="w-5 h-5" />
+                    </Button>
+                </div>
+
+                {/* Mobile Icons & Toggle */}
+                <div className="flex md:hidden items-center gap-1">
+                    <Button variant="ghost" size="icon" className="rounded-full text-primary hover:bg-primary/10 transition-colors">
+                        <Bell className="w-5 h-5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={toggleShowMenu} className="rounded-full text-primary hover:bg-primary/10 transition-colors">
+                        {showMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                    </Button>
+                </div>
+            </div>
+
+            {/* Mobile Menu Dropdown */}
+            {showMenu && (
+                <div className="absolute top-14 left-0 w-full bg-background border-b border-black/20 shadow-lg flex flex-col md:hidden py-4 px-4 gap-4 z-40 animate-in slide-in-from-top-1 fade-in-0">
+                    <div className="flex flex-col gap-2">
+                        <Link 
+                            to="/" 
+                            className="text-sm font-semibold text-foreground px-3 py-2.5 bg-neutral-100 rounded-md shadow-md border border-black/10"
+                            onClick={toggleShowMenu}
+                        >
+                            Início
+                        </Link>
+                        <Link 
+                            to="/" 
+                            className="text-sm font-semibold text-foreground px-3 py-2.5 bg-neutral-100 rounded-md shadow-md border border-black/10"
+                            onClick={toggleShowMenu}
+                        >
+                            Minhas Reservas
+                        </Link>
+                    </div>
+                    <div className="flex items-center gap-3 pt-3 border-t border-black/20">
+                        <Button 
+                            variant="secondary" 
+                            className="w-full justify-start gap-2 bg-primary/10 text-primary hover:bg-primary/20 font-semibold transition-colors"
+                            onClick={toggleShowMenu}
+                        >
+                            <User className="w-4 h-4" />
+                            <span>Meu Perfil</span>
+                        </Button>
+                    </div>
+                </div>
+            )}
+        </nav>
     );
 }

@@ -1,5 +1,6 @@
-import { FaUserFriends } from "react-icons/fa";
-import { GrResources } from "react-icons/gr";
+import { Users, TestTube, Box } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 export type SpaceCardProps = {
     name: string;
@@ -14,50 +15,71 @@ export default function SpaceCard({
     resources,
     onReserve,
 }: SpaceCardProps) {
+    const formattedName = name ? name.charAt(0).toUpperCase() + name.slice(1) : "";
+
     return (
-        <article className="flex h-full min-h-[180px] flex-col justify-between rounded-2xl border border-black/10 bg-white p-5 shadow-sm shadow-black/20">
-            <header className="mb-3 flex items-start justify-between gap-2">
-                <div className="flex flex-col gap-1">
-                    <h3 className="text-base font-semibold text-neutral-900">
-                        {name}
-                    </h3>
-                    <div className="flex items-center gap-1 text-xs text-neutral-700">
-                        <GrResources className="h-3.5 w-3.5 text-neutral-500" />
-                        {resources.map((res) => (
-                            <span
-                                key={res}
-                                className="bg-neutral-200 px-2 py-1 rounded-full shadow-md border border-black/5"
-                            >
-                                {res}
+        <Card className="flex flex-col h-full bg-background border-black/10 shadow-md hover:shadow-md transition-shadow overflow-hidden group">
+            <CardHeader className="pb-4 border-b border-black/10 bg-muted/20">
+                <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-primary/10 rounded-lg text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                            <TestTube className="w-5 h-5" />
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
+                                Laboratório
                             </span>
-                        ))}
-                        
+                            <CardTitle className="text-lg font-bold text-foreground leading-none">
+                                {formattedName}
+                            </CardTitle>
+                        </div>
                     </div>
                 </div>
-            </header>
-
-            <div className="mb-4 flex flex-col gap-1 text-xs text-neutral-600">
-                <div className="flex items-center gap-2">
-                    <FaUserFriends className="h-3.5 w-3.5 text-neutral-400" />
-                    <span>
-                        Capacidade:{" "}
-                        <span className="font-medium text-neutral-800">
-                            {capacity}
-                        </span>
-                    </span>
+            </CardHeader>
+            <CardContent className="flex-1 py-1 flex flex-col gap-2">
+                {/* Capacidade */}
+                <div className="flex items-center gap-3 bg-muted/30 p-2.5 rounded-lg border border-black/10 shadow-xs">
+                    <div className="p-1.5 bg-background rounded-md shadow-sm border border-black/5 text-muted-foreground">
+                        <Users className="w-4 h-4" />
+                    </div>
+                    <div>
+                        <p className="text-[9px] font-bold uppercase text-muted-foreground">Capacidade</p>
+                        <p className="text-sm font-semibold text-foreground leading-tight">{capacity} lugares</p>
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <button
-                    type="button"
-                    className={`flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold bg-indigo-700 text-white shadow-sm shadow-black/30 hover:bg-indigo-600 hover:cursor-pointer`}
+                {/* Recursos */}
+                <div className="flex flex-col p-2.5 gap-2.5 rounded-lg border border-black/10 shadow-xs">
+                    <div className="flex items-center gap-1.5">
+                        <Box className="w-3.5 h-3.5 text-muted-foreground" />
+                        <h4 className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
+                            Recursos Incluídos
+                        </h4>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                        {resources.length > 0 ? (
+                            resources.map((res) => (
+                                <span
+                                    key={res}
+                                    className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-secondary text-secondary-foreground border border-black/5 shadow-xs"
+                                >
+                                    {res}
+                                </span>
+                            ))
+                        ) : (
+                            <span className="text-xs text-muted-foreground italic px-1">Padrão</span>
+                        )}
+                    </div>
+                </div>
+            </CardContent>
+            <CardFooter className="pt-2 border-black/10">
+                <Button
+                    className="w-full font-semibold shadow-sm cursor-pointer"
                     onClick={() => onReserve(name, capacity, resources)}
                 >
-                    Reserve Agora
-                </button>
-            </div>
-        </article>
+                    Reservar Agora
+                </Button>
+            </CardFooter>
+        </Card>
     );
 }
-
