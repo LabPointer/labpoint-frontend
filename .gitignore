@@ -3,10 +3,11 @@ node_modules
 dist
 dist-ssr
 *.local
-count.txt
 .env
 .nitro
 .tanstack
 .wrangler
-package-lock.json
-bun.lock
+.output
+.vinxi
+__unconfig*
+todos.json
