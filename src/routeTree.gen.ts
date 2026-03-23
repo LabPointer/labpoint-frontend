@@ -8,49 +8,66 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './pages/__root'
-import { Route as PublicIndexRouteImport } from './pages/_public/index'
-import { Route as PrivateReportarRouteImport } from './pages/_private/reportar'
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/_public/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PrivateReportarRoute = PrivateReportarRouteImport.update({
-  id: '/_private/reportar',
-  path: '/reportar',
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/reportar': typeof PrivateReportarRoute
+  '/about': typeof AboutRoute
   '/': typeof PublicIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
-  '/reportar': typeof PrivateReportarRoute
+  '/about': typeof AboutRoute
   '/': typeof PublicIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_private/reportar': typeof PrivateReportarRoute
+  '/about': typeof AboutRoute
   '/_public/': typeof PublicIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/reportar' | '/'
+  fullPaths: '/about' | '/' | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/reportar' | '/'
-  id: '__root__' | '/_private/reportar' | '/_public/'
+  to: '/about' | '/' | '/api/auth/$'
+  id: '__root__' | '/about' | '/_public/' | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  PrivateReportarRoute: typeof PrivateReportarRoute
+  AboutRoute: typeof AboutRoute
   PublicIndexRoute: typeof PublicIndexRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_public/': {
       id: '/_public/'
       path: '/'
@@ -58,20 +75,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_private/reportar': {
-      id: '/_private/reportar'
-      path: '/reportar'
-      fullPath: '/reportar'
-      preLoaderRoute: typeof PrivateReportarRouteImport
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  PrivateReportarRoute: PrivateReportarRoute,
+  AboutRoute: AboutRoute,
   PublicIndexRoute: PublicIndexRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

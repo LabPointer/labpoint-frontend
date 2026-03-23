@@ -1,10 +1,16 @@
 {
-  "include": ["**/*.ts", "**/*.tsx", "**/*.css"],
+  "include": ["**/*.ts", "**/*.tsx"],
   "compilerOptions": {
     "target": "esnext",
     "jsx": "react-jsx",
     "module": "ESNext",
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "baseUrl": ".",
+    "paths": {
+      "#/*": ["./src/*"],
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"]
+    },
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["vite/client"],
 
     /* Bundler mode */
@@ -19,14 +25,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
-		"rootDir": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@types": ["./src/@types/index.d.ts"],
-      "@css/*": ["./src/css/*"],
-      "@components/*": ["./src/components/*"],
-      "@hooks/*": ["./src/hooks/*"]
-    }
+    "noUncheckedSideEffectImports": true
   }
 }
