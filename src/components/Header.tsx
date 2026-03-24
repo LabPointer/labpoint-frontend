@@ -14,7 +14,7 @@ export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     return (
-        <header className="sticky top-0 z-50 px-4 border-b border-indigo-100/40 shadow-sm bg-white/95 backdrop-blur-md transition-all duration-300">
+        <header className="sticky top-0 z-50 px-4 border-b border-indigo-100/40 shadow-sm bg-white">
             <nav className="w-full flex justify-center items-center">
                 <div className="w-full max-w-5xl page-wrap flex items-center justify-between h-14 sm:h-16">
                     {/* ESQUERDA: Logotipo Labpoint */}
@@ -22,9 +22,9 @@ export default function Header() {
                         <h2 className="m-0 shrink-0 text-base sm:text-lg font-bold tracking-tight">
                             <Link
                                 to="/"
-                                className="inline-flex items-center gap-2 text-indigo-700 hover:text-indigo-800 transition-colors cursor-pointer group"
+                                className="inline-flex items-center gap-2 text-indigo-700 hover:text-indigo-800 cursor-pointer group"
                             >
-                                <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600 fill-indigo-100 group-hover:scale-110 transition-transform" />
+                                <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600 fill-indigo-100 group-hover:scale-110" />
                                 <span className="tracking-tighter">
                                     Labpoint
                                 </span>
@@ -44,7 +44,7 @@ export default function Header() {
                                     className="nav-link flex items-center gap-2 text-sm font-medium"
                                     activeProps={{
                                         className:
-                                            "text-indigo-600 bg-indigo-50/50",
+                                            "text-indigo-600 bg-indigo-100/60 shadow-inner",
                                     }}
                                 />
                             }
@@ -62,7 +62,7 @@ export default function Header() {
                                     className="nav-link flex items-center gap-2 text-sm font-medium"
                                     activeProps={{
                                         className:
-                                            "text-indigo-600 bg-indigo-50/50",
+                                            "text-indigo-600 bg-indigo-100/60 shadow-inner",
                                     }}
                                 />
                             }

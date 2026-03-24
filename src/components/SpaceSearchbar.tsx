@@ -63,19 +63,16 @@ export default function SpaceSearchbar({ onSearch }: SpaceSearchbarProps = {}) {
         setSelectedResources(selectedResources.filter((r) => r !== resource));
     }
 
-    useEffect(
-        function () {
-            const searchData: SpaceSearchFilters = {
-                query: searchQuery,
-                resources: selectedResources,
-                minCapacity: minCapacity === "" ? 0 : minCapacity,
-            };
-            if (onSearch) {
-                onSearch(searchData);
-            }
-        },
-        [searchQuery, selectedResources, minCapacity, onSearch],
-    );
+    useEffect(() => {
+        const searchData: SpaceSearchFilters = {
+            query: searchQuery,
+            resources: selectedResources,
+            minCapacity: minCapacity === "" ? 0 : minCapacity,
+        };
+        if (onSearch) {
+            onSearch(searchData);
+        }
+    }, [searchQuery, selectedResources, minCapacity, onSearch]);
 
     return (
         <section className="w-full flex justify-center px-4 py-6">
@@ -191,7 +188,7 @@ export default function SpaceSearchbar({ onSearch }: SpaceSearchbarProps = {}) {
                             </div>
                             <Input
                                 type="number"
-                                placeholder="Lugares..."
+                                placeholder="Lotação..."
                                 min={1}
                                 value={minCapacity}
                                 onChange={(e) =>
