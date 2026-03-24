@@ -15,7 +15,6 @@ import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import appCss from "../styles.css?url";
 
 import type { QueryClient } from "@tanstack/react-query";
-import { Suspense } from "react";
 
 interface MyRouterContext {
     queryClient: QueryClient;
@@ -54,9 +53,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             <body className="font-sans transition-all duration-200 ease-in">
                 <TanStackQueryProvider>
                     <Header />
-                    <Suspense fallback={<div>Loading...</div>}>
-                        {children}
-                    </Suspense>
+                    {children}
                     <Footer />
                     <TanStackDevtools
                         config={{
