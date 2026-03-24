@@ -14,22 +14,18 @@ export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     return (
-        <header className="sticky top-0 z-50 px-4 border-b border-indigo-100/40 shadow-sm bg-white/95 backdrop-blur-md transition-all duration-300">
+        <header className="sticky top-0 z-50 px-4 border-b border-indigo-100/40 shadow-sm bg-white">
             <nav className="w-full flex justify-center items-center">
-                <div className="w-full max-w-5xl page-wrap flex items-center justify-between h-14 sm:h-16">
+                <div className="w-full max-w-5xl flex items-center justify-between h-14 sm:h-16">
                     {/* ESQUERDA: Logotipo Labpoint */}
                     <div className="flex items-center justify-start flex-1">
-                        <h2 className="m-0 shrink-0 text-base sm:text-lg font-bold tracking-tight">
-                            <Link
-                                to="/"
-                                className="inline-flex items-center gap-2 text-indigo-700 hover:text-indigo-800 transition-colors cursor-pointer group"
-                            >
-                                <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600 fill-indigo-100 group-hover:scale-110 transition-transform" />
-                                <span className="tracking-tighter">
-                                    Labpoint
-                                </span>
-                            </Link>
-                        </h2>
+                        <Link
+                            to="/"
+                            className="inline-flex items-center gap-2 text-indigo-700 hover:text-indigo-800 cursor-pointer group"
+                        >
+                            <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600 fill-indigo-100 group-hover:scale-110" />
+                            <span className="tracking-tighter font-bold">Labpoint</span>
+                        </Link>
                     </div>
 
                     {/* CENTRO: Menu de Navegação (Desktop) */}
@@ -44,7 +40,7 @@ export default function Header() {
                                     className="nav-link flex items-center gap-2 text-sm font-medium"
                                     activeProps={{
                                         className:
-                                            "text-indigo-600 bg-indigo-50/50",
+                                            "text-indigo-600 bg-indigo-100/60 shadow-inner",
                                     }}
                                 />
                             }
@@ -62,7 +58,7 @@ export default function Header() {
                                     className="nav-link flex items-center gap-2 text-sm font-medium"
                                     activeProps={{
                                         className:
-                                            "text-indigo-600 bg-indigo-50/50",
+                                            "text-indigo-600 bg-indigo-100/60 shadow-inner",
                                     }}
                                 />
                             }
@@ -80,18 +76,18 @@ export default function Header() {
                                 size="icon-sm"
                                 className="relative text-muted-foreground hover:text-indigo-600"
                             >
-                                <Bell className="" />
-                                <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center bg-indigo-600 scale-75">
+                                <Bell className="scale-140" />
+                                <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center bg-indigo-600 scale-90">
                                     2
                                 </Badge>
                             </Button>
 
                             <Avatar
                                 size="default"
-                                className="cursor-pointer border border-indigo-100"
+                                className="cursor-pointer border-1 border-indigo-100"
                             >
                                 <AvatarImage src="" />
-                                <AvatarFallback className="bg-indigo-600 text-white">
+                                <AvatarFallback className="bg-indigo-600 text-white font-bold">
                                     NM
                                 </AvatarFallback>
                                 <AvatarBadge className="bg-green-500" />
@@ -120,7 +116,7 @@ export default function Header() {
             <div
                 className={`
                     md:hidden absolute top-full left-0 w-full bg-white backdrop-blur-xl border-b border-indigo-100 shadow-2xl overflow-hidden
-                    origin-top transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
+                    origin-top transition-all duration-200 ease-in-out
                     ${isMenuOpen ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0 pointer-events-none"}
                 `}
             >
@@ -169,15 +165,15 @@ export default function Header() {
                         </p>
                         <Button
                             variant="ghost"
-                            className="justify-start gap-4 h-12 rounded-xl text-muted-foreground border border-black/10 shadow-sm"
+                            className="justify-start gap-4 h-12 rounded-xl text-indigo-600 border border-black/10 shadow-sm"
                         >
-                            <Bell className="w-5 h-5 transition-colors" />
+                            <Bell className="w-5 h-5 transition-colors text-indigo-600" />
                             Notificações
                             <Badge className="ml-auto bg-indigo-600">2</Badge>
                         </Button>
                         <Button
                             variant="ghost"
-                            className="justify-start gap-4 h-12 rounded-xl text-muted-foreground border border-black/10 shadow-sm"
+                            className="justify-start gap-4 h-12 bg-indigo-700 rounded-xl text-white border border-black/10 shadow-sm"
                         >
                             <User className="w-5 h-5" />
                             Meu Perfil

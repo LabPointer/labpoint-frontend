@@ -112,14 +112,21 @@ function App() {
                                 critérios de pesquisa.
                             </p>
                         </div>
-                        <span className="text-sm font-medium text-neutral-500">
-                            {spacesQuery.data ? spacesQuery.data.length : 0}{" "}
-                            resultados encontrados
-                        </span>
+                        {spacesQuery.isFetching && spacesQuery.data ? (
+                            <span className="text-sm font-medium text-neutral-500 flex items-center gap-2">
+                                <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                                carregando
+                            </span>
+                        ) : (
+                            <span className="text-sm font-medium text-neutral-500">
+                                {spacesQuery.data ? spacesQuery.data.length : 0}{" "}
+                                resultados encontrados
+                            </span>
+                        )}
                     </header>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {spacesQuery.isLoading || spacesQuery.isFetching ? (
+                        {spacesQuery.isFetching && !spacesQuery.data ? (
                             <div className="col-span-full flex flex-col items-center justify-center py-20 gap-4 text-muted-foreground">
                                 <Loader2 className="w-10 h-10 animate-spin text-primary" />
                                 <p className="text-sm font-medium">

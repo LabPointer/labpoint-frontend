@@ -73,7 +73,7 @@ export default function SpaceCard({
                             resources.map((res) => (
                                 <span
                                     key={res}
-                                    className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-secondary text-secondary-foreground border border-black/5 shadow-xs"
+                                    className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-neutral-100 text-secondary-foreground border border-black/10 shadow-xs"
                                 >
                                     {res}
                                 </span>
@@ -88,7 +88,7 @@ export default function SpaceCard({
             </CardContent>
             <CardFooter className="pt-2 border-black/10">
                 <Button
-                    className="w-full font-semibold shadow-sm cursor-pointer"
+                    className="w-full font-semibold shadow-sm cursor-pointer hover:bg-indigo-600"
                     onClick={() => onReserve(name, capacity, resources)}
                 >
                     Reservar Agora
