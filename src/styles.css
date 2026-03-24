@@ -9,7 +9,7 @@
 */
 
 * {
-  @apply duration-300 ease-out
+  @apply duration-200 ease-out
   /*transition: color 300ms ease, background-color 300ms ease, border-color 300ms ease, shadow 300ms ease, transform 300ms ease;*/
 }
 

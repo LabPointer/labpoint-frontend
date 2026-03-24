@@ -112,7 +112,7 @@ export default function SpaceSearchbar({ onSearch }: SpaceSearchbarProps = {}) {
                                 render={
                                     <Button
                                         variant="outline"
-                                        className="w-full sm:w-[140px] justify-between bg-muted/30 hover:bg-muted/60 font-normal transition-colors"
+                                        className="w-full sm:w-[180px] justify-between bg-muted/30 hover:bg-muted/60 font-normal transition-colors"
                                     />
                                 }
                             >
@@ -182,13 +182,13 @@ export default function SpaceSearchbar({ onSearch }: SpaceSearchbarProps = {}) {
                         </Popover>
 
                         {/* Input de Capacidade */}
-                        <div className="relative w-full sm:w-[140px]">
+                        <div className="relative w-full sm:w-[180px]">
                             <div className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
                                 <Users className="w-4 h-4" />
                             </div>
                             <Input
                                 type="number"
-                                placeholder="Lotação..."
+                                placeholder="Lotação minima..."
                                 min={1}
                                 value={minCapacity}
                                 onChange={(e) =>
