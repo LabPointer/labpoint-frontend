@@ -4,13 +4,19 @@ import type { SpaceQuery } from '~/types/spaces';
 import { useDebounceFn } from '@vueuse/core';
 import SpaceReservePopup from '~/components/SpaceReservePopup.vue';
 
-const showPopup = ref<boolean>(true);
+const showPopup = ref<boolean>(false);
 
 const filters = ref<SpaceQuery>({
     query: '',
     resources: [],
     capacity: 0
 });
+
+const spacePopupProps = ref<{
+    spaceName: string
+    capacity: number
+    resources: string[]
+}>({ spaceName: '', capacity: 0, resources: [] });
 
 // Computa os parâmetros para envio para a API, limpando valores vazios
 const queryParams = computed(() => {
@@ -36,11 +42,21 @@ const { data: spaces, status, error } = await useFetch<Space[]>('http://localhos
 const handleFilterChange = useDebounceFn((newFilters: SpaceQuery) => {
     filters.value = newFilters;
 }, 200);
+
+const onReserveOpenPopup = (spaceName: string, capacity: number, resources: string[]) => {
+    spacePopupProps.value = { spaceName, capacity, resources };
+    showPopup.value = true;
+}
+
+const onReserveClosePopup = () => {
+    showPopup.value = false;
+    spacePopupProps.value = { spaceName: '', capacity: 0, resources: [] };
+}
 </script>
 
 <template>
   <div v-show="showPopup" class="fixed top-0 left-0 w-full h-[calc(100vh-65px)] mt-[65px] pt-[24px] bg-black/20 z-40 backdrop-blur-sm flex justify-center">
-    <SpaceReservePopup />
+    <SpaceReservePopup :spaceName="spacePopupProps.spaceName" :capacity="spacePopupProps.capacity" :resources="spacePopupProps.resources" @onClose="onReserveClosePopup"/>
   </div>
   
   <div class="flex flex-col gap-y-6 my-4 w-full">
@@ -93,7 +109,8 @@ const handleFilterChange = useDebounceFn((newFilters: SpaceQuery) => {
           :key="space.name"
           :title="space.name"
           :capacity="Number(space.capacity)"
-          :resources="space.resources"
+          :resources="space.resources",
+          @onReserve="onReserveOpenPopup"
         />
       </div>
 

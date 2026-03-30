@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import type { SpaceCardProps } from '~/types/spaces';
 
+const emit = defineEmits<{
+  (e: 'onReserve', spaceName: string, capacity: number, resources: string[]): void
+}>()
+
 withDefaults(defineProps<SpaceCardProps>(), {
   type: 'LABORATÓRIO',
   icon: 'i-lucide-test-tube'
@@ -64,6 +68,7 @@ withDefaults(defineProps<SpaceCardProps>(), {
           variant="solid"
           class="rounded-full font-bold h-11 shadow-sm text-[14px]"
           :ui="{ base: 'rounded-full cursor-pointer bg-indigo-700 hover:bg-indigo-600 active:bg-indigo-600' }"
+          @click="emit('onReserve', title, capacity, resources)"
         >
           Reservar Agora
         </UButton>
