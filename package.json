@@ -1,69 +1,27 @@
 {
   "name": "labpoint",
-  "private": true,
   "type": "module",
-  "imports": {
-    "#/*": "./src/*"
-  },
+  "private": true,
   "scripts": {
-    "dev": "vite dev --port 3000",
-    "dev:host": "vite dev --port 3000 --host",
-    "build": "vite build",
-    "preview": "vite preview",
-    "test": "vitest run",
-    "format": "biome format",
-    "lint": "biome lint",
-    "check": "biome check"
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "dev:host": "nuxt dev --host",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@base-ui/react": "latest",
+    "@internationalized/date": "latest",
+    "@nuxt/fonts": "latest",
+    "@nuxt/icon": "latest",
+    "@nuxt/ui": "latest",
     "@tailwindcss/vite": "latest",
-    "@tanstack/query-db-collection": "latest",
-    "@tanstack/react-db": "latest",
-    "@tanstack/react-devtools": "latest",
-    "@tanstack/react-form": "latest",
-    "@tanstack/react-query": "latest",
-    "@tanstack/react-query-devtools": "latest",
-    "@tanstack/react-router": "latest",
-    "@tanstack/react-router-devtools": "latest",
-    "@tanstack/react-router-ssr-query": "latest",
-    "@tanstack/react-start": "latest",
-    "@tanstack/router-core": "latest",
-    "@tanstack/router-plugin": "latest",
-    "better-auth": "latest",
-    "class-variance-authority": "latest",
-    "clsx": "latest",
-    "date-fns": "latest",
-    "lucide-react": "latest",
-    "react": "latest",
-    "react-day-picker": "latest",
-    "react-dom": "latest",
-    "react-icons": "latest",
-    "tailwind-merge": "latest",
+    "@vueuse/core": "latest",
+    "nuxt": "latest",
+    "nuxt-toast": "latest",
     "tailwindcss": "latest",
-    "tw-animate-css": "latest",
+    "vue": "latest",
+    "vue-router": "latest",
     "zod": "latest"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "latest",
-    "@tailwindcss/typography": "latest",
-    "@tanstack/devtools-vite": "latest",
-    "@testing-library/dom": "latest",
-    "@testing-library/react": "latest",
-    "@types/node": "^24",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "latest",
-    "jsdom": "latest",
-    "typescript": "latest",
-    "vite": "latest",
-    "vite-tsconfig-paths": "latest",
-    "vitest": "latest"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "lightningcss"
-    ]
   }
 }

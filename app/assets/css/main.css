@@ -1,0 +1,16 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+* {
+    @apply duration-200 ease-out;
+    /* transition: color 300ms ease, background-color 300ms ease, border-color 300ms ease, shadow 300ms ease; */
+    transition-property: color, background-color, border-color, outline-color, text-decoration-color, box-shadow, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to;
+}
+
+body {
+    @apply bg-neutral-100 text-neutral-900;
+}
+
+#query-form > * {
+    @apply transition-all duration-200 ease-out;
+}
