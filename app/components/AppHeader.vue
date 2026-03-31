@@ -45,7 +45,7 @@ const closeMenu = () => {
                 </button>
 
                 <!-- Login Button (Desktop) -->
-                <NuxtLink to="/login"
+                <NuxtLink to="/"
                     class="hidden md:flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 active:scale-[0.98]">
                     <Icon name="i-lucide-user" class="h-5 w-5" />
                     <span>Entrar</span>
@@ -77,7 +77,7 @@ const closeMenu = () => {
                     <span>Minhas Reservas</span>
                 </NuxtLink>
                 <hr class="my-2 border-neutral-300" />
-                <NuxtLink to="/login" @click="closeMenu"
+                <NuxtLink to="/" @click="closeMenu"
                     class="flex items-center gap-3 rounded-lg bg-indigo-600 px-4 py-3 text-base font-semibold text-white shadow-sm">
                     <Icon name="i-lucide-user" class="h-5 w-5" />
                     <span>Entrar</span>

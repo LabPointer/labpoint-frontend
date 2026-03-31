@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import type { SpaceCardProps } from '~/types/spaces';
+import type { SpaceInfo } from '~/types/index';
 
 const emit = defineEmits<{
-  (e: 'onReserve', spaceName: string, capacity: number, resources: string[]): void
+  (e: 'onReserve', spaceInfo: SpaceInfo): void
 }>()
 
-withDefaults(defineProps<SpaceCardProps>(), {
-  type: 'LABORATÓRIO',
-  icon: 'i-lucide-test-tube'
-})
+const props = defineProps<SpaceInfo>()
 </script>
 
 <template>
@@ -16,11 +13,11 @@ withDefaults(defineProps<SpaceCardProps>(), {
     <template #header>
       <div class="flex items-center gap-4">
         <div class="w-12 h-12 rounded-[14px] bg-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
-          <Icon :name="icon" class="w-5.5 h-5.5" />
+          <Icon name="uil:desktop" class="w-5.5 h-5.5" />
         </div>
         <div>
-          <p class="text-[10px] font-bold text-neutral-500 tracking-wider uppercase mb-0.5">{{ type }}</p>
-          <h3 class="text-[1.1rem] font-bold text-neutral-900 leading-tight">{{ title }}</h3>
+          <p class="text-[10px] font-bold text-neutral-500 tracking-wider uppercase mb-0.5">Laboratório</p>
+          <h3 class="text-[1.1rem] font-bold text-neutral-900 leading-tight">{{ props.name.charAt(0).toUpperCase() + props.name.slice(1) }}</h3>
         </div>
       </div>
     </template>
@@ -68,7 +65,7 @@ withDefaults(defineProps<SpaceCardProps>(), {
           variant="solid"
           class="rounded-full font-bold h-11 shadow-sm text-[14px]"
           :ui="{ base: 'rounded-full cursor-pointer bg-indigo-700 hover:bg-indigo-600 active:bg-indigo-600' }"
-          @click="emit('onReserve', title, capacity, resources)"
+          @click="emit('onReserve', props)"
         >
           Reservar Agora
         </UButton>

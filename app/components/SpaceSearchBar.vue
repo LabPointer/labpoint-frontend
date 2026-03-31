@@ -1,29 +1,41 @@
 <script setup lang="ts">
-import type { SpaceQuery } from '~/types/spaces';
+import type { SelectMenuItem } from '@nuxt/ui';
+import { RefSymbol } from '@vue/reactivity';
+import type { SpaceQuery } from '~/types/index';
 
 const emit = defineEmits<{
     (e: 'onQuery', filters: SpaceQuery): void
 }>()
 
 const query = ref('')
-const selectedResources = ref<{
+const capacity = ref<number>(0)
+const resourceItems = ref<SelectMenuItem[]>([
+    {
+        type: 'item',
+        label: 'Computadores',
+        icon: 'uil:desktop'
+    },
+    {
+        type: 'item',
+        label: 'Telão',
+        icon: 'uil:monitor'
+    },
+    {
+        type: 'item',
+        label: 'Tubos de Ensaio',
+        icon: 'i-lucide-test-tube'
+    }
+])
+const resourceValues = ref<{
     label: string;
-    value: string;
     icon: string;
 }[]>([])
-const capacity = ref<number>(0)
 
-const resources = [
-    { label: 'Computadores', value: 'computadores', icon: 'i-lucide-monitor' },
-    { label: 'Telão', value: 'telão', icon: 'i-lucide-projector' },
-    { label: 'Tubo de Ensaio', value: 'tubos de ensaio', icon: 'i-lucide-test-tube' }
-]
-
-// Monitora as alterações nas ref e emite um evento de callback com os objetos atuais
-watch([query, selectedResources, capacity], () => {
+// Watch for variable changes and emit callback
+watch([query, resourceValues, capacity], () => {
     emit('onQuery', {
         query: query.value,
-        resources: selectedResources.value.map(r => r.value),
+        resources: resourceValues.value.map((resource) => resource.label.toLowerCase()),
         capacity: capacity.value
     })
 }, { deep: true })
@@ -48,14 +60,12 @@ watch([query, selectedResources, capacity], () => {
 
                 <!-- Resources Dropdown (Multi-select) -->
                 <div class="w-full md:w-auto">
-                    <USelectMenu v-model="selectedResources" :options="resources" :items="resources" multiple
-                        placeholder="Recursos..." icon="i-lucide-filter" size="xl" value-attribute="value"
-                        option-attribute="label" class="min-w-[200px] w-full md:max-w-[200px]"
-                        :ui="{
+                    <USelectMenu v-model="resourceValues" :items="resourceItems" multiple placeholder="Recursos..."
+                        icon="i-lucide-filter" size="xl" value-attribute="value" option-attribute="label"
+                        class="min-w-[200px] w-full md:max-w-[200px]" :ui="{
                             base: 'rounded-full'
-                            
-                        }"
-                        :search-input="{
+
+                        }" :search-input="{
                             ui: {
                                 base: 'rounded-none shadow-black/7'
                             }
