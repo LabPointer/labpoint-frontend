@@ -3,7 +3,8 @@ import { CalendarDate, getLocalTimeZone, today, type DateValue } from '@internat
 import type { CheckboxGroupItem, FormError, FormSubmitEvent, SelectMenuItem } from '@nuxt/ui';
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
 import { z } from 'zod';
-import type { HorarioData, ReserveData, SpaceInfo } from '~/types/index';
+import { useFastify } from '~~/composables';
+import type { HorarioData, SpaceInfo } from '~~/types';
 
 // Props and emits
 const emit = defineEmits<{
@@ -45,7 +46,7 @@ const allDaySlots: HorarioData[] = [...morningSlots, ...afternoonSlots, ...night
 
 // Shift slots
 const turnosItems = computed<CheckboxGroupItem[]>(() => {
-    const reservedSlots = new Set(reserves.value?.flatMap(r => r.horarios) || [])
+    const reservedSlots = new Set(reserves.value?.data?.data.foundReserves.flatMap(r => r.horarios) || [])
 
     return [
         {
@@ -77,7 +78,7 @@ const orientation = computed(() => isSmOrGreater.value ? 'horizontal' : 'vertica
 
 // Times
 const timesItems = computed<SelectMenuItem[]>(() => {
-    const reservedSlots = new Set(reserves.value?.flatMap(r => r.horarios) || [])
+    const reservedSlots = new Set(reserves.value?.data?.data.foundReserves.flatMap(r => r.horarios) || [])
 
     return [
         { type: 'label', label: 'Matutino' },
@@ -180,7 +181,7 @@ watch(() => [...state.horarios], () => {
 })
 
 // Fetch reserves
-const isFetchingReserves = ref(false)
+//const isFetchingReserves = ref(false)
 
 const reserveParams = computed(() => {
     return {
@@ -189,33 +190,23 @@ const reserveParams = computed(() => {
     }
 })
 
-const fetchUrl = computed(() => `http://localhost:3001/reserves/${reserveParams.value.spaceName}/${reserveParams.value.date}`)
-
-const { data: reserves, status, error, refresh } = await useFetch<ReserveData[]>(fetchUrl, {
-    lazy: true,
-    transform: (response: any) => {
-        if (response.status === "error") {
-            throw new Error(response.message || 'Erro na API');
+const { data: reserves, status, error: errorReserves, refresh, pending: isFetchingReserves } = useAsyncData("reserves", async () => {
+    if (!open.value) return;
+    const api = useFastify();
+    const { data, error } = await api.GET(`/reserves/{spaceName}/{date}`, {
+        params: {
+            path: {
+                spaceName: reserveParams.value.spaceName,
+                date: reserveParams.value.date,
+            }
         }
-        return response.data.foundReserves as ReserveData[];
-    },
-    onRequest: () => {
-        isFetchingReserves.value = true
-    },
-    onRequestError: (request) => {
-        isFetchingReserves.value = false
-        toast.error({ title: 'Erro ao buscar reservas', message: request.error.message, position: 'bottomCenter' })
-    },
-    onResponse: () => {
-        isFetchingReserves.value = false
-    },
-    onResponseError: (response) => {
-        isFetchingReserves.value = false
-        toast.error({ title: 'Erro ao buscar reservas', message: response.response.statusText || 'Erro na API', position: 'bottomCenter' })
-    },
-    watch: [dateValue],
-    immediate: true
-});
+    });
+    return { data, error };
+}, {
+    watch: [dateValue, open],
+    immediate: true,
+    lazy: true,
+})
 
 // Callbacks
 const onResetCb = () => {
@@ -239,42 +230,37 @@ const isLoadingSubmit = ref(false)
 
 const onSubmitCb = async (event: FormSubmitEvent<Schema>) => {
     isLoadingSubmit.value = true
-    try {
-        const dateStr = `${event.data.data.toISOString().split('T')[0]}`
 
-        await $fetch(`http://localhost:3001/reserve/create/${encodeURIComponent(props.name)}`, {
-            method: 'POST',
-            body: {
-                date: dateStr,
-                horarios: state.horarios,
+    const api = useFastify();
+    const { error } = await api.POST(`/reserve/create/{spaceName}`, {
+        params: {
+            path: {
+                spaceName: props.name,
             }
-        })
-
-        toast.success({ title: 'Reserva realizada com sucesso!', position: 'bottomCenter' })
-
-        // Refresh reserves first, then reset form
-        await refresh()
-        onResetCb()
-    } catch (error: any) {
-        let errorMsg = 'Não foi possível concluir a reserva.'
-        if (error.response && error.response._data && error.response._data.message) {
-            errorMsg = error.response._data.message
-        } else if (error.message) {
-            errorMsg = error.message
+        },
+        body: {
+            date: `${event.data.data.toISOString().split('T')[0]}`,
+            horarios: state.horarios,
         }
-        toast.error({
-            title: 'Erro ao reservar',
-            message: errorMsg,
-            position: 'bottomCenter'
-        })
-    } finally {
+    })
+
+    if (error) {
+        toast.error({ title: 'Erro ao reservar', message: error.message, position: 'bottomCenter' })
         isLoadingSubmit.value = false
+        return
     }
+
+    toast.success({ title: 'Reserva realizada com sucesso!', position: 'bottomCenter' })
+
+    // Refresh reserves first, then reset form
+    await refresh()
+    onResetCb()
+    isLoadingSubmit.value = false
 }
 </script>
 
 <template>
-    <UModal v-model:open="open">
+    <UModal v-model:open="open" title="Nova reserva" description="Selecione a data e os horários para realizar sua reserva.">
         <template #header>
             <Icon name="i-lucide-calendar" class="w-5 h-5 text-indigo-600" />
             <h2 class="text-xl font-bold text-neutral-900">Nova reserva</h2>
@@ -318,8 +304,8 @@ const onSubmitCb = async (event: FormSubmitEvent<Schema>) => {
                         </div>
                     </div>
                 </div>
-                <UForm :state="state" :schema="schema" class="space-y-4 rounded-2xl bg-white" @reset="onResetCb"
-                    @submit="onSubmitCb" :validate="validateCb">
+                <UForm v-if="!errorReserves" :state="state" :schema="schema" class="space-y-4 rounded-2xl bg-white"
+                    @reset="onResetCb" @submit="onSubmitCb" :validate="validateCb">
                     <!-- Date field -->
                     <UFormField label="Data da reserva" name="date" class="w-full" :ui="{}">
                         <UInputDate ref="inputDate" v-model="dateValue" locale="pt-BR"
@@ -375,6 +361,16 @@ const onSubmitCb = async (event: FormSubmitEvent<Schema>) => {
                         </UButton>
                     </UFieldGroup>
                 </UForm>
+                <div v-else
+                    class="bg-red-50 border border-red-200 text-red-700 p-5 rounded-[16px] flex items-start gap-4 shadow-sm">
+                    <Icon name="i-lucide-alert-circle" class="w-6 h-6 mt-0.5 shrink-0" />
+                    <div>
+                        <h4 class="font-bold text-base">Erro ao conectar com a API</h4>
+                        <p class="text-[13px] mt-1 opacity-90">Não foi possível buscar as informações. Certifique-se de
+                            que a API está
+                            rodando no localhost e de que a URL está correta. (Detalhe: {{ errorReserves.message }})</p>
+                    </div>
+                </div>
             </div>
         </template>
     </UModal>
