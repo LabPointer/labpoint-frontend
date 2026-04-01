@@ -8,7 +8,8 @@
     "dev:host": "nuxt dev --host",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "generate:types": "openapi-typescript http://localhost:3001/docs/openapi.json -o types/api.d.ts"
   },
   "dependencies": {
     "@internationalized/date": "latest",
@@ -19,9 +20,13 @@
     "@vueuse/core": "latest",
     "nuxt": "latest",
     "nuxt-toast": "latest",
+    "openapi-fetch": "latest",
     "tailwindcss": "latest",
     "vue": "latest",
     "vue-router": "latest",
     "zod": "latest"
+  },
+  "devDependencies": {
+    "openapi-typescript": "latest"
   }
 }
