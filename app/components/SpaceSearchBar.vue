@@ -51,7 +51,7 @@ watch([query, resourceValues, capacity], () => {
             </div>
 
             <!-- Filters Row -->
-            <div class="flex flex-col md:flex-row gap-4 items-stretch">
+            <div class="flex flex-col md:flex-row gap-2 items-stretch">
                 <!-- Search Input -->
                 <div class="w-full">
                     <UInput v-model="query" icon="i-lucide-search" placeholder="Buscar por laboratório ou sala..."
