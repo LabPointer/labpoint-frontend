@@ -19,7 +19,10 @@ export default defineAppConfig({
             base: "ring-3 ring-neutral-300 hover:ring-neutral-400 shadow-md",
         }
     },
-
-    
+    navigationMenu: {
+      slots: {
+        link: "data-active:bg-neutral-100 data-active:shadow-inner rounded-lg data-active:text-indigo-600 text-neutral-600 hover:text-neutral-800",
+      }
+    }    
   }
 })

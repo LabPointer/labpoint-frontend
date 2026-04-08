@@ -40,7 +40,6 @@ const { data: spaces, status, error, refresh } = useAsyncData("spaces", async ()
   lazy: true,
   watch: [queryParams],
   immediate: true,
-
 })
 
 const handleFilterChange = useDebounceFn((newFilters: SpaceQuery) => {
@@ -138,7 +137,7 @@ const onReserveClosePopup = () => {
       </div>
 
       <!-- Grid de Componentes (Quando existe sucesso na busca e dados retornados) -->
-      <div v-else-if="hasSpaces" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-else-if="hasSpaces" class="w-full justify-items-center items-center grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         <SpaceCard v-for="space in getSpaces" :key="space.id || space.name" :name="space.name"
           :capacity="Number(space.capacity)" :resources="space.resources || []" , @onReserve="onReserveOpenPopup" />
       </div>
