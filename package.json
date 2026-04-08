@@ -20,6 +20,7 @@
     "@vueuse/core": "latest",
     "nuxt": "latest",
     "nuxt-toast": "latest",
+    "nuxt-typed-router": "latest",
     "openapi-fetch": "latest",
     "tailwindcss": "latest",
     "vue": "latest",

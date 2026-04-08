@@ -14,5 +14,14 @@ export default defineNuxtConfig({
     preference: 'light',
     storageKey: 'custom-key-color-mode'
   },
-  modules: ['@nuxt/fonts', '@nuxt/icon', '@nuxt/ui', 'nuxt-toast'],
+  modules: [
+    '@nuxt/fonts',
+    '@nuxt/icon',
+    '@nuxt/ui',
+    'nuxt-toast',
+    'nuxt-typed-router'
+  ],
+  experimental: {
+    typedPages: true
+  }
 })
