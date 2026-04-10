@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { SpaceInfo, SpaceQuery } from '~~/types';
 import { useDebounceFn } from '@vueuse/core';
-import { useFastify } from '~~/composables';
 
 const showPopup = ref<boolean>(false);
 
