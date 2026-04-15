@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { SelectMenuItem } from '@nuxt/ui';
 import { RefSymbol } from '@vue/reactivity';
-import type { SpaceQuery } from '~~/types/index';
 
 const emit = defineEmits<{
     (e: 'onQuery', filters: SpaceQuery): void

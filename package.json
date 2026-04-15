@@ -9,7 +9,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "generate:types": "openapi-typescript http://localhost:3001/docs/openapi.json -o types/api.d.ts"
+    "generate:types": "openapi-typescript http://localhost:3001/docs/openapi.json -o shared/types/api.d.ts"
   },
   "dependencies": {
     "@internationalized/date": "latest",

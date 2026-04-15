@@ -1,5 +1,5 @@
 import createClient from "openapi-fetch";
-import type { paths } from "~~/types";
+import type { paths } from "~~/shared/types";
 
 const getBaseUrl = () => {
   if (typeof window !== "undefined") {

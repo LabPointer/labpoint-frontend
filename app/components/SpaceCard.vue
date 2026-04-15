@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { SpaceInfo } from '~~/types';
 
 const emit = defineEmits<{
   (e: 'onReserve', spaceInfo: SpaceInfo): void
