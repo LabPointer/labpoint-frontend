@@ -3,7 +3,6 @@ import { CalendarDate, getLocalTimeZone, today, type DateValue } from '@internat
 import type { CheckboxGroupItem, FormError, FormSubmitEvent, SelectMenuItem } from '@nuxt/ui';
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
 import { z } from 'zod';
-import type { HorarioData, SpaceInfo } from '~~/types';
 
 // Props and emits
 const emit = defineEmits<{
