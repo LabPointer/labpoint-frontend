@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import type { SpaceInfo } from '#shared/types/spaces'
 
 const emit = defineEmits<{
   (e: 'onReserve', spaceInfo: SpaceInfo): void
 }>()
 
 const props = defineProps<SpaceInfo>()
+
 </script>
 
 <template>

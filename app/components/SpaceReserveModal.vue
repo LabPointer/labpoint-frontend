@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { HorarioData, SpaceInfo } from '#shared/types/spaces'
 import { CalendarDate, getLocalTimeZone, today, type DateValue } from '@internationalized/date';
 import type { CheckboxGroupItem, FormError, FormSubmitEvent, SelectMenuItem } from '@nuxt/ui';
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
