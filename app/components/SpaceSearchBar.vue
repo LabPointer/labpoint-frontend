@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SelectMenuItem } from '@nuxt/ui';
-import { RefSymbol } from '@vue/reactivity';
+import type { SpaceQuery } from '~~/shared/types';
 
 const emit = defineEmits<{
     (e: 'onQuery', filters: SpaceQuery): void
@@ -12,21 +12,25 @@ const resourceItems = ref<SelectMenuItem[]>([
     {
         type: 'item',
         label: 'Computadores',
+        value: "COMPUTADORES",
         icon: 'uil:desktop'
     },
     {
         type: 'item',
         label: 'Telão',
+        value: "TELAO",
         icon: 'uil:monitor'
     },
     {
         type: 'item',
         label: 'Tubos de Ensaio',
+        value: "TUBOS_DE_ENSAIO",
         icon: 'i-lucide-test-tube'
     }
 ])
 const resourceValues = ref<{
     label: string;
+    value: string;
     icon: string;
 }[]>([])
 
@@ -34,19 +38,19 @@ const resourceValues = ref<{
 watch([query, resourceValues, capacity], () => {
     emit('onQuery', {
         query: query.value,
-        resources: resourceValues.value.map((resource) => resource.label.toLowerCase()),
+        resources: resourceValues.value.map((resource) => resource.value as "TELAO" | "COMPUTADORES" | "TUBOS_DE_ENSAIO"),
         capacity: capacity.value
     })
 }, { deep: true })
 </script>
 
 <template>
-    <div class="w-full max-w-5xl mx-auto">
-        <div class="bg-white rounded-[24px] border border-black/10 shadow-sm p-6 hover:shadow-md">
+    <section class="w-full max-w-5xl mx-auto">
+        <div class="bg-white dark:bg-neutral-900 rounded-md border border-black/10 dark:border-white/10 shadow-sm dark:shadow-white/10 p-6 hover:shadow-md">
             <!-- Title & Subtitle -->
             <div class="mb-4">
-                <h1 class="text-lg font-bold text-neutral-900 tracking-tight">Reserva de Laboratório</h1>
-                <p class="text-neutral-500 text-sm mt-2">Pesquise e filtre os espaços disponíveis.</p>
+                <h1 class="text-lg font-bold tracking-tight">Reserva de Laboratório</h1>
+                <p class="text-neutral-500 dark:text-neutral-400 text-sm mt-2">Pesquise e filtre os espaços disponíveis.</p>
             </div>
 
             <!-- Filters Row -->
@@ -62,8 +66,7 @@ watch([query, resourceValues, capacity], () => {
                     <USelectMenu v-model="resourceValues" :items="resourceItems" multiple placeholder="Recursos..."
                         icon="i-lucide-filter" size="md" value-attribute="value" option-attribute="label"
                         class="min-w-[200px] w-full md:max-w-[200px]" :ui="{
-                            base: 'rounded-full'
-
+                            base: 'rounded-md'
                         }" :search-input="{
                             ui: {
                                 base: 'rounded-none shadow-black/7'
@@ -78,7 +81,7 @@ watch([query, resourceValues, capacity], () => {
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 </template>
 
 <style scoped></style>

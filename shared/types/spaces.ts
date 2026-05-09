@@ -1,6 +1,8 @@
+export type ResourceInfo = ("TELAO" | "COMPUTADORES" | "TUBOS_DE_ENSAIO")[]
+
 export type SpaceQuery = {
     query: string
-    resources: string[]
+    resources: ResourceInfo
     capacity: number
 }
 

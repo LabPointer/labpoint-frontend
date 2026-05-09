@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+@custom-variant dark (&:where(.dark, .dark *));
 
 * {
     @apply duration-200 ease-out;
@@ -8,9 +9,9 @@
 }
 
 body {
-    @apply bg-neutral-100 text-neutral-900;
+    @apply text-neutral-900 dark:text-white bg-linear-to-br from-white via-indigo-100/50 to-white dark:from-neutral-900 dark:via-indigo-800/15 dark:to-neutral-900;
 }
 
-#query-form > * {
+#query-form>* {
     @apply transition-all duration-200 ease-out;
 }

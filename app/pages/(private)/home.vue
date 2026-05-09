@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import type { SpaceInfo, SpaceQuery } from '~~/types';
+import type { ResourceInfo, SpaceInfo, SpaceQuery } from '~~/shared/types';
 import { useDebounceFn } from '@vueuse/core';
+import { useAsyncData } from 'nuxt/app';
+import { ref, computed } from 'vue';
 
 const showPopup = ref<boolean>(false);
 
@@ -18,17 +20,17 @@ const queryParams = computed(() => {
   return {
     name: filters.value.query || undefined,
     capacity: filters.value.capacity > 0 ? filters.value.capacity : undefined,
-    resources: filters.value.resources.length > 0 ? filters.value.resources.join(',') : undefined
+    resources: filters.value.resources.length > 0 ? filters.value.resources : undefined
   }
 })
 
 const { data: spaces, status, error, refresh } = useAsyncData("spaces", async () => {
-  const api = useFastify();
+  const api = useApi();
   const { data, error, response } = await api.GET("/spaces", {
     params: {
       query: {
         name: queryParams.value.name,
-        capacity: queryParams.value.capacity?.toString() || undefined,
+        capacity: queryParams.value.capacity,
         resources: queryParams.value.resources
       }
     }
@@ -50,7 +52,7 @@ const hasSpaces = computed(() => {
   if (spaces.value) {
     const data = spaces.value.data;
     if (!data) return false;
-    if (data.data.length > 0) {
+    if (data.length > 0) {
       return true;
     }
   }
@@ -61,8 +63,8 @@ const getSpaces = computed(() => {
   if (spaces.value) {
     const data = spaces.value.data;
     if (!data) return [];
-    if (data.data.length > 0) {
-      return data.data;
+    if (data.length > 0) {
+      return data;
     }
   }
   return [];
@@ -83,26 +85,26 @@ const onReserveClosePopup = () => {
   <SpaceReserveModal v-model:open="showPopup" :name="spacePopupProps.name" :capacity="spacePopupProps.capacity"
     :resources="spacePopupProps.resources" @onClose="onReserveClosePopup" />
 
-  <div class="flex flex-col gap-y-6 my-4 mb-8 w-full">
+  <UMain class="min-h-[calc(100vh-161px)] flex flex-col gap-y-6 my-4 mb-8 w-full px-4">
     <!-- Barra de Pesquisa -->
     <SpaceSearchBar @onQuery="handleFilterChange" />
 
-    <div class="max-w-5xl mx-auto w-full px-4 flex flex-col gap-6">
+    <section class="max-w-5xl mx-auto w-full px-4 flex flex-col gap-6">
 
       <!-- Cabeçalho (Título e Label de Resultados) -->
       <div class="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
         <div>
-          <h2 class="text-xl font-bold text-neutral-900 tracking-tight">Laboratórios & Salas de Aula Disponíveis</h2>
+          <h2 class="text-xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight">Laboratórios & Salas de Aula Disponíveis</h2>
           <p class="text-[13px] text-neutral-500 mt-1">Navegue pelos espaços que correspondem aos seus critérios de
             pesquisa.</p>
         </div>
 
         <div class="text-[13px] font-semibold text-neutral-500 shrink-0">
           <span v-if="status === 'pending'">Carregando...</span>
-          <span v-else-if="spaces">{{ spaces.data?.data.length || 0 }} resultado{{ (spaces.data?.data.length || 0) !== 1
+          <span v-else-if="spaces">{{ spaces?.data?.length || 0 }} resultado{{ (spaces?.data?.length || 0) !== 1
             ? 's' : '' }}
             encontrado{{
-              (spaces.data?.data.length || 0) !== 1 ? 's' : '' }}</span>
+              (spaces?.data?.length || 0) !== 1 ? 's' : '' }}</span>
         </div>
       </div>
 
@@ -136,11 +138,13 @@ const onReserveClosePopup = () => {
       </div>
 
       <!-- Grid de Componentes (Quando existe sucesso na busca e dados retornados) -->
-      <div v-else-if="hasSpaces" class="w-full justify-items-center items-center grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        <SpaceCard v-for="space in getSpaces" :key="space.id || space.name" :name="space.name"
-          :capacity="Number(space.capacity)" :resources="space.resources || []" , @onReserve="onReserveOpenPopup" />
+      <div v-else-if="hasSpaces"
+        class="w-full justify-items-center items-center grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <SpaceCard v-for="space in getSpaces" :key="space.space?.id || space.space?.name"
+          :name="space.space?.name as string" :capacity="Number(space.space?.capacity)"
+          :resources="space.space?.resources || []" @onReserve="onReserveOpenPopup" />
       </div>
 
-    </div>
-  </div>
+    </section>
+  </UMain>
 </template>

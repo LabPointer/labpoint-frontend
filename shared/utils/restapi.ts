@@ -10,4 +10,4 @@ const getBaseUrl = () => {
 
 const client = createClient<paths>({ baseUrl: getBaseUrl() });
 
-export const useFastify = () => client;
+export const useApi = () => client;

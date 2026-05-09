@@ -7,18 +7,46 @@ const route = useRoute();
 const menuItems = computed<NavigationMenuItem[]>(() => [
     {
         label: 'Início',
-        to: '/',
+        to: '/home',
+        active: route.path.startsWith('/home')
     },
     {
-        label: 'Minhas Reservas',
-        to: '/minhas-reservas',
-        active: route.path.startsWith('/minhas-reservas')
+        label: 'Calendário',
+        to: '/calendar',
+        active: route.path.startsWith('/calendar')
     },
+    {
+        label: 'Historico',
+        to: '/history',
+        active: route.path.startsWith('/history')
+    }
 ]);
+
+const colorMode = useColorMode()
 
 const profileItems = ref<DropdownMenuItem[][]>([
     [
         { label: 'Perfil', icon: 'i-lucide-user', click: () => navigateTo('/profile') },
+        {
+            label: 'Tema',
+            icon: computed(() => colorMode.preference !== 'dark' ? 'i-lucide-sun' : 'i-lucide-moon'),
+            children: [
+                {
+                    label: 'Light',
+                    icon: 'i-lucide-sun',
+                    onSelect: () => {
+                        colorMode.preference = 'light'
+                    }
+                },
+                {
+                    label: 'Dark',
+                    icon: 'i-lucide-moon',
+                    onSelect: () => {
+                        colorMode.preference = 'dark'
+                    }
+                }
+            ]
+        }
     ],
     [
         { label: 'Sair', icon: 'i-lucide-log-out', color: 'error', click: () => navigateTo('/login') },
@@ -27,11 +55,13 @@ const profileItems = ref<DropdownMenuItem[][]>([
 </script>
 
 <template>
-    <UHeader mode="slideover">
+    <UHeader mode="slideover" :ui="{
+        root: 'border-b border-black/10 dark:border-white/10 shadow-md dark:shadow-white/10',
+    }">
         <template #title>
             <NuxtLink to="/" class="flex items-center gap-2 transition-opacity hover:opacity-90">
-                <Icon name="i-lucide-map-pin" class="h-6 w-6 text-indigo-600" />
-                <span class="text-xl font-bold tracking-tight text-indigo-600">LabPoint</span>
+                <Icon name="i-lucide-map-pin" class="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                <span class="text-xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400">LabPoint</span>
             </NuxtLink>
         </template>
 

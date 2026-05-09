@@ -1,9 +1,9 @@
 <template>
   <div>
     <NuxtLayout>
-      <UMain class="px-6 py-2">
+      <UApp>
         <NuxtPage />
-      </UMain>
+      </UApp>
     </NuxtLayout>
   </div>
 </template>

@@ -1,22 +1,29 @@
 <script lang="ts" setup>
 const date = new Date()
-const year = date.getFullYear()
+const currentYear = date.getFullYear()
+
+const footerLinks = [
+    {
+        label: "GitHub",
+        href: "https://github.com/BangbooBot",
+        icon: "i-simple-icons-github"
+    },
+]
 </script>
 
 <template>
-    <UFooter>
-        <template #left>
-            <div class="flex items-center gap-2">
-                <Icon name="i-lucide-map-pin" class="h-6 w-6 text-indigo-600" />
-                <span class="text-xl font-bold tracking-tight text-indigo-600">Labpoint</span>
+    <UFooter class="border-t border-black/10 dark:border-white/50">
+        <nav class="container max-w-5xl mx-auto flex flex-col gap-y-2 items-center">
+            <div class="flex flex-row gap-2 items-center">
+                <p class="text-center text-black dark:text-white">© {{ currentYear }} LabPoint. Todos os direitos reservados.</p>
             </div>
-        </template>
-
-        <p class="text-sm">Copyright © {{ new Date().getFullYear() }}.</p>
-
-        <template #right>
-            <UButton icon="i-simple-icons-github" color="neutral" variant="ghost" to="https://github.com/nuxt/nuxt"
-                target="_blank" aria-label="GitHub" />
-        </template>
+            <div class="flex flex-row gap-3 items-center">
+                <template v-for="link in footerLinks" :key="link.href">
+                    <a :href="link.href" target="_blank" rel="noopener noreferrer">
+                        <UButton :icon="link.icon" color="neutral" variant="ghost" size="md" aria-label="GitHub" />
+                    </a>
+                </template>
+            </div>
+        </nav>
     </UFooter>
 </template>

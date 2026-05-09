@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/reserves/create/{spaceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cria uma nova reserva
+         * @description Cria uma reserva para um espaço específico na data e horários fornecidos
+         */
+        post: operations["postCreateReserve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/spaces": {
         parameters: {
             query?: never;
@@ -12,58 +32,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Lista todos os laboratorios.
-         * @description /spaces?name=lab&capacity=20&resources=TELAO
+         * Busca por laboratorios
+         * @description Retorna uma lista de laboratorios
          */
-        get: {
-            parameters: {
-                query?: {
-                    id?: string;
-                    name?: string;
-                    capacity?: string;
-                    resources?: string | string[];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {string} */
-                            status: "success";
-                            data: ({
-                                id?: number | string;
-                                name: string;
-                                capacity: number | string;
-                                resources: string[] | null;
-                            } & {
-                                [key: string]: unknown;
-                            })[];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {string} */
-                            status: "error";
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
+        get: operations["getSpaces"];
         put?: never;
         post?: never;
         delete?: never;
@@ -72,215 +44,21 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/reserves/{spaceName}/{date}": {
+    "/reserves/find/{spaceId}/{date}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Lista todas as reservas de um espaço. */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    spaceName: string;
-                    date: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {string} */
-                            status: "success";
-                            data: {
-                                foundReserves: ({
-                                    id: string;
-                                    /** Format: date-time */
-                                    createdAt: string;
-                                    /** Format: date */
-                                    date: string;
-                                    horarios: string[];
-                                    spaceName: string;
-                                } & {
-                                    [key: string]: unknown;
-                                })[];
-                            };
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {string} */
-                            status: "error";
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
+        /**
+         * Busca reservas por espaço e data
+         * @description Retorna uma lista de reservas para um determinado espaço em uma data específica
+         */
+        get: operations["getReserve"];
         put?: never;
         post?: never;
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/reserve/create/{spaceName}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Registra uma reserva para um espaço. */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    spaceName: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /** Format: date */
-                        date: string;
-                        horarios: string[];
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {string} */
-                            status: "success";
-                            message: string;
-                            data: unknown;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {string} */
-                            status: "error";
-                            message: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {string} */
-                            status: "error";
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/reserve/cancel/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Deleta uma reserva pelo id */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {string} */
-                            status: "success";
-                            message: string;
-                            data: unknown;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {string} */
-                            status: "error";
-                            message: string;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {string} */
-                            status: "error";
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
         options?: never;
         head?: never;
         patch?: never;
@@ -289,7 +67,41 @@ export interface paths {
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: never;
+    schemas: {
+        ReserveBody: {
+            /** Format: date */
+            date?: string;
+            schedules?: ("M_AULA_1" | "M_AULA_2" | "M_AULA_3" | "M_AULA_4" | "M_AULA_5" | "V_AULA_1" | "V_AULA_2" | "V_AULA_3" | "V_AULA_4" | "V_AULA_5" | "N_AULA_1" | "N_AULA_2" | "N_AULA_3" | "N_AULA_4")[];
+        };
+        SpaceResources: {
+            /** Format: int64 */
+            id?: number;
+            /** @enum {string} */
+            resource?: "TELAO" | "COMPUTADORES" | "TUBOS_DE_ENSAIO";
+            space?: components["schemas"]["Spaces"];
+        };
+        Spaces: {
+            /** Format: int64 */
+            id?: number;
+            name?: string;
+            /** Format: int32 */
+            capacity?: number;
+            resources?: ("TELAO" | "COMPUTADORES" | "TUBOS_DE_ENSAIO")[];
+        };
+        SpacesResponse: {
+            space?: components["schemas"]["Spaces"];
+            resources?: components["schemas"]["SpaceResources"][];
+        };
+        Reserves: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: date */
+            reservedDate?: string;
+            /** @enum {string} */
+            schedule?: "M_AULA_1" | "M_AULA_2" | "M_AULA_3" | "M_AULA_4" | "M_AULA_5" | "V_AULA_1" | "V_AULA_2" | "V_AULA_3" | "V_AULA_4" | "V_AULA_5" | "N_AULA_1" | "N_AULA_2" | "N_AULA_3" | "N_AULA_4";
+            space?: components["schemas"]["Spaces"];
+        };
+    };
     responses: never;
     parameters: never;
     requestBodies: never;
@@ -297,4 +109,101 @@ export interface components {
     pathItems: never;
 }
 export type $defs = Record<string, never>;
-export type operations = Record<string, never>;
+export interface operations {
+    postCreateReserve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                spaceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReserveBody"];
+            };
+        };
+        responses: {
+            /** @description Reserva criada com sucesso */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Espaço não encontrado ou erro na criação da reserva */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getSpaces: {
+        parameters: {
+            query?: {
+                name?: string;
+                capacity?: number;
+                resources?: ("TELAO" | "COMPUTADORES" | "TUBOS_DE_ENSAIO")[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Laboratorios encontrados */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SpacesResponse"][];
+                };
+            };
+            /** @description Nenhum laboratorio encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SpacesResponse"][];
+                };
+            };
+        };
+    };
+    getReserve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                spaceId: number;
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lista de reservas encontrada */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Reserves"][];
+                };
+            };
+            /** @description Nenhuma reserva encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Reserves"][];
+                };
+            };
+        };
+    };
+}
