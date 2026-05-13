@@ -12,7 +12,7 @@ const footerLinks = [
 </script>
 
 <template>
-    <UFooter class="border-t border-black/10 dark:border-white/50">
+    <UFooter class="border-t border-black/10 dark:border-white/10">
         <nav class="container max-w-5xl mx-auto flex flex-col gap-y-2 items-center">
             <div class="flex flex-row gap-2 items-center">
                 <p class="text-center text-black dark:text-white">© {{ currentYear }} LabPoint. Todos os direitos reservados.</p>

@@ -4,6 +4,8 @@ import type { FormSubmitEvent } from '@nuxt/ui'
 
 const route = useRoute()
 
+const api = useApi()
+
 const schema = z.object({
     matricula: z.string('Matricula invalida'),
     password: z.string('Senha invalida').min(6, 'Senha deve ter pelo menos 6 caracteres')
@@ -19,17 +21,43 @@ const state = reactive<Partial<Schema>>({
 const formRef = ref()
 const toast = useToast()
 
+const isLoading = ref(false)
+
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-    toast.success({ 
-        title: 'Sucesso', 
-        message: 'Login realizado com sucesso!', 
-        color: 'green', 
-        position: 'bottomCenter', 
-        timeout: 1000,
-        onClosed: () => {
-            navigateTo('/home')
-        }
-    })
+    isLoading.value = true
+    try {
+        await $fetch("/api/login", {
+            method: 'POST',
+            body: {
+                registration: event.data.matricula,
+                password: event.data.password
+            }
+        })
+
+        toast.success({
+            title: 'Sucesso',
+            message: 'Login realizado com sucesso!',
+            color: 'green',
+            position: 'bottomCenter',
+            timeout: 1000,
+            onClosing: () => {
+                navigateTo('/home')
+            }
+        })
+    } catch (error: any) {
+        const statusCode = error.response?.status
+        const isAuthError = statusCode === 401 || statusCode === 403
+
+        toast.error({
+            title: 'Erro',
+            message: isAuthError ? 'Matricula ou senha invalidos!' : 'Falha ao tentar realizar login!',
+            color: 'red',
+            position: 'bottomCenter',
+            timeout: 3000,
+        })
+    } finally {
+        isLoading.value = false
+    }
 }
 
 function onReset() {
@@ -43,29 +71,31 @@ function onReset() {
     <section class="w-full flex justify-center">
         <UCard title="Labpoint" description="Bem vindo(a)" class="w-full max-w-md" :ui="{
             root: 'rounded-md border-black/15 shadow-md shadow-black/10',
-            title: 'font-bold text-3xl text-blue-600 text-center',
+            title: 'font-bold text-3xl text-blue-600 dark:text-blue-400 text-center',
             description: 'text-center text-base'
         }">
             <UForm :ref="formRef" id="login-form" :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
                 <UFormField label="Matrícula" name="matricula">
-                    <UInput v-model="state.matricula" class="w-full" />
+                    <UInput v-model="state.matricula" class="w-full" :disabled="isLoading" />
                 </UFormField>
 
                 <UFormField label="Senha" name="password">
-                    <UInput v-model="state.password" type="password" class="w-full" />
+                    <UInput v-model="state.password" type="password" class="w-full" :disabled="isLoading" />
                 </UFormField>
 
-                <UButton label="Esqueceu a senha?" variant="link" color="info" class="px-0 cursor-pointer" />
+                <UButton label="Esqueceu a senha?" variant="link" color="info" class="px-0 cursor-pointer"
+                    :disabled="isLoading" />
             </UForm>
 
             <template #footer>
                 <div class="flex justify-end gap-x-4">
-                    <UButton variant="subtle" color="neutral" @click="onReset" class="cursor-pointer">
+                    <UButton variant="subtle" color="neutral" @click="onReset" class="cursor-pointer"
+                        :loading="isLoading">
                         Resetar
                     </UButton>
 
                     <UButton type="submit" form="login-form" color="primary" @click="formRef?.submit()"
-                        class="cursor-pointer">
+                        class="cursor-pointer" :loading="isLoading">
                         Entrar
                     </UButton>
                 </div>

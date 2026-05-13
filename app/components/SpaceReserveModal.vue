@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { HorarioData, SpaceInfo } from '#shared/types/spaces'
+import type { Schedules, SpaceInfo } from '#shared/types/spaces'
 import { CalendarDate, getLocalTimeZone, today, type DateValue } from '@internationalized/date';
 import type { CheckboxGroupItem, FormError, FormSubmitEvent, SelectMenuItem } from '@nuxt/ui';
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
@@ -38,14 +38,14 @@ watch(dateValue, (newVal, oldValue) => {
 })
 
 // Shift groups
-const morningSlots: HorarioData[] = ["M-Aula1", "M-Aula2", "M-Aula3", "M-Aula4", "M-Aula5"]
-const afternoonSlots: HorarioData[] = ["V-Aula1", "V-Aula2", "V-Aula3", "V-Aula4", "V-Aula5"]
-const nightSlots: HorarioData[] = ["N-Aula1", "N-Aula2", "N-Aula3", "N-Aula4"]
-const allDaySlots: HorarioData[] = [...morningSlots, ...afternoonSlots, ...nightSlots]
+const morningSlots: Schedules[] = ["M_AULA_1", "M_AULA_2", "M_AULA_3", "M_AULA_4", "M_AULA_5"]
+const afternoonSlots: Schedules[] = ["V_AULA_1", "V_AULA_2", "V_AULA_3", "V_AULA_4", "V_AULA_5"]
+const nightSlots: Schedules[] = ["N_AULA_1", "N_AULA_2", "N_AULA_3", "N_AULA_4"]
+const allDaySlots: Schedules[] = [...morningSlots, ...afternoonSlots, ...nightSlots]
 
 // Shift slots
 const turnosItems = computed<CheckboxGroupItem[]>(() => {
-    const reservedSlots = new Set(reserves.value?.data?.data.foundReserves.flatMap(r => r.horarios) || [])
+    const reservedSlots = new Set(reserves?.value?.data?.map(r => r.schedule) || [])
 
     return [
         {
@@ -77,28 +77,28 @@ const orientation = computed(() => isSmOrGreater.value ? 'horizontal' : 'vertica
 
 // Times
 const timesItems = computed<SelectMenuItem[]>(() => {
-    const reservedSlots = new Set(reserves.value?.data?.data.foundReserves.flatMap(r => r.horarios) || [])
+    const reservedSlots = new Set(reserves?.value?.data?.map(r => r.schedule) || [])
 
     return [
         { type: 'label', label: 'Matutino' },
-        { type: 'item', label: '07:30 - 08:30', value: "M-Aula1", disabled: reservedSlots.has("M-Aula1") },
-        { type: 'item', label: '08:30 - 09:30', value: "M-Aula2", disabled: reservedSlots.has("M-Aula2") },
-        { type: 'item', label: '09:30 - 10:30', value: "M-Aula3", disabled: reservedSlots.has("M-Aula3") },
-        { type: 'item', label: '10:30 - 11:30', value: "M-Aula4", disabled: reservedSlots.has("M-Aula4") },
-        { type: 'item', label: '11:30 - 12:30', value: "M-Aula5", disabled: reservedSlots.has("M-Aula5") },
+        { type: 'item', label: '07:30 - 08:30', value: "M_AULA_1", disabled: reservedSlots.has("M_AULA_1") },
+        { type: 'item', label: '08:30 - 09:30', value: "M_AULA_2", disabled: reservedSlots.has("M_AULA_2") },
+        { type: 'item', label: '09:30 - 10:30', value: "M_AULA_3", disabled: reservedSlots.has("M_AULA_3") },
+        { type: 'item', label: '10:30 - 11:30', value: "M_AULA_4", disabled: reservedSlots.has("M_AULA_4") },
+        { type: 'item', label: '11:30 - 12:30', value: "M_AULA_5", disabled: reservedSlots.has("M_AULA_5") },
         { type: 'separator' },
         { type: 'label', label: 'Vespertino' },
-        { type: 'item', label: '13:00 - 14:00', value: "V-Aula1", disabled: reservedSlots.has("V-Aula1") },
-        { type: 'item', label: '14:00 - 15:00', value: "V-Aula2", disabled: reservedSlots.has("V-Aula2") },
-        { type: 'item', label: '15:00 - 16:00', value: "V-Aula3", disabled: reservedSlots.has("V-Aula3") },
-        { type: 'item', label: '16:00 - 17:00', value: "V-Aula4", disabled: reservedSlots.has("V-Aula4") },
-        { type: 'item', label: '17:00 - 18:00', value: "V-Aula5", disabled: reservedSlots.has("V-Aula5") },
+        { type: 'item', label: '13:00 - 14:00', value: "V_AULA_1", disabled: reservedSlots.has("V_AULA_1") },
+        { type: 'item', label: '14:00 - 15:00', value: "V_AULA_2", disabled: reservedSlots.has("V_AULA_2") },
+        { type: 'item', label: '15:00 - 16:00', value: "V_AULA_3", disabled: reservedSlots.has("V_AULA_3") },
+        { type: 'item', label: '16:00 - 17:00', value: "V_AULA_4", disabled: reservedSlots.has("V_AULA_4") },
+        { type: 'item', label: '17:00 - 18:00', value: "V_AULA_5", disabled: reservedSlots.has("V_AULA_5") },
         { type: 'separator' },
         { type: 'label', label: 'Noturno' },
-        { type: 'item', label: '18:30 - 19:30', value: "N-Aula1", disabled: reservedSlots.has("N-Aula1") },
-        { type: 'item', label: '19:30 - 20:30', value: "N-Aula2", disabled: reservedSlots.has("N-Aula2") },
-        { type: 'item', label: '20:30 - 21:30', value: "N-Aula3", disabled: reservedSlots.has("N-Aula3") },
-        { type: 'item', label: '21:30 - 22:30', value: "N-Aula4", disabled: reservedSlots.has("N-Aula4") },
+        { type: 'item', label: '18:30 - 19:30', value: "N_AULA_1", disabled: reservedSlots.has("N_AULA_1") },
+        { type: 'item', label: '19:30 - 20:30', value: "N_AULA_2", disabled: reservedSlots.has("N_AULA_2") },
+        { type: 'item', label: '20:30 - 21:30', value: "N_AULA_3", disabled: reservedSlots.has("N_AULA_3") },
+        { type: 'item', label: '21:30 - 22:30', value: "N_AULA_4", disabled: reservedSlots.has("N_AULA_4") },
     ]
 })
 
@@ -191,11 +191,11 @@ const reserveParams = computed(() => {
 
 const { data: reserves, status, error: errorReserves, refresh, pending: isFetchingReserves } = useAsyncData("reserves", async () => {
     if (!open.value) return;
-    const api = useFastify();
-    const { data, error } = await api.GET(`/reserves/{spaceName}/{date}`, {
+    const api = useApi();
+    const { data, error } = await api.GET(`/reserves/find/{spaceId}/{date}`, {
         params: {
             path: {
-                spaceName: reserveParams.value.spaceName,
+                spaceId: props.id,
                 date: reserveParams.value.date,
             }
         }
@@ -230,21 +230,21 @@ const isLoadingSubmit = ref(false)
 const onSubmitCb = async (event: FormSubmitEvent<Schema>) => {
     isLoadingSubmit.value = true
 
-    const api = useFastify();
-    const { error } = await api.POST(`/reserve/create/{spaceName}`, {
+    const api = useApi();
+    const { error } = await api.POST(`/reserves/create/{spaceId}`, {
         params: {
             path: {
-                spaceName: props.name,
+                spaceId: props.id,
             }
         },
         body: {
             date: `${event.data.data.toISOString().split('T')[0]}`,
-            horarios: state.horarios,
+            schedules: event.data.horarios as Schedules[],
         }
     })
 
     if (error) {
-        toast.error({ title: 'Erro ao reservar', message: error.message, position: 'bottomCenter' })
+        toast.error({ title: 'Erro ao reservar', message: "Houve um erro ao tentar realizar a reserva", position: 'bottomCenter' })
         isLoadingSubmit.value = false
         return
     }
@@ -261,49 +261,49 @@ const onSubmitCb = async (event: FormSubmitEvent<Schema>) => {
 <template>
     <UModal v-model:open="open" title="Nova reserva" description="Selecione a data e os horários para realizar sua reserva.">
         <template #header>
-            <Icon name="i-lucide-calendar" class="w-5 h-5 text-indigo-600" />
-            <h2 class="text-xl font-bold text-neutral-900">Nova reserva</h2>
+            <Icon name="i-lucide-calendar" class="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <h2 class="text-xl font-bold text-neutral-900 dark:text-neutral-100">Nova reserva</h2>
             <UButton color="neutral" variant="outline" size="sm" icon="i-lucide-x" class="ml-auto rounded-full"
                 @click="onCloseCb" />
         </template>
         <template #body>
             <div class="flex flex-col gap-y-4">
                 <div class="w-full flex flex-col gap-y-4">
-                    <div class="flex items-center gap-x-4 shadow-md shadow-black/15 rounded-lg p-2 ring-1 ring-black/8">
+                    <div class="flex items-center gap-x-4 dark:bg-neutral-800/50 shadow-md shadow-black/15 rounded-lg p-2 ring-1 ring-black/8 dark:ring-white/15">
                         <div class="flex items-center justify-center bg-indigo-500/20 p-2 rounded-lg shadow-inner">
-                            <Icon name="i-lucide-monitor" class="w-5 h-5 text-indigo-600" />
+                            <Icon name="i-lucide-monitor" class="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                         </div>
                         <div class="flex flex-col min-w-0">
-                            <h2 class="text-[12px] font-bold text-neutral-500">LABORATORIO</h2>
-                            <h2 class="text-[14px] font-bold text-neutral-600 truncate">{{
+                            <h2 class="text-[12px] font-bold text-neutral-500 dark:text-neutral-200">LABORATORIO</h2>
+                            <h2 class="text-[14px] font-bold text-neutral-600 dark:text-neutral-300 truncate">{{
                                 props.name.charAt(0).toUpperCase() + props.name.slice(1) }}</h2>
                         </div>
                     </div>
                     <div
                         class="w-full flex flex-row max-[500px]:flex-wrap gap-x-4 max-[500px]:gap-y-2 items-center justify-between">
                         <div
-                            class="min-[500px]:flex-1 min-w-0 max-[500px]:w-full flex items-center gap-x-4 shadow-md shadow-black/15 rounded-lg p-2 ring-1 ring-black/8">
-                            <Icon name="i-lucide-users" class="w-5 h-5 text-neutral-600 shrink-0" />
+                            class="min-[500px]:flex-1 min-w-0 max-[500px]:w-full flex items-center gap-x-4 dark:bg-neutral-800/50 shadow-md shadow-black/15 rounded-lg p-2 ring-1 ring-black/8 dark:ring-white/15">
+                            <Icon name="i-lucide-users" class="w-5 h-5 text-neutral-600 dark:text-neutral-300 shrink-0" />
                             <div class="flex flex-col min-w-0">
-                                <h2 class="text-[11px] font-bold text-neutral-500">LOTAÇÃO</h2>
-                                <h2 class="text-[12px] font-bold text-neutral-800 truncate">{{ props.capacity }} lugares
+                                <h2 class="text-[11px] font-bold text-neutral-500 dark:text-neutral-300">LOTAÇÃO</h2>
+                                <h2 class="text-[12px] font-bold text-neutral-800 dark:text-neutral-400 truncate">{{ props.capacity }} lugares
                                 </h2>
                             </div>
                         </div>
 
                         <div
-                            class="min-[500px]:flex-1 min-w-0 max-[500px]:w-full flex items-center gap-x-4 shadow-md shadow-black/15 rounded-lg p-2 ring-1 ring-black/8">
-                            <Icon name="uil:box" class="w-5 h-5 text-neutral-600 shrink-0" />
+                            class="min-[500px]:flex-1 min-w-0 max-[500px]:w-full flex items-center gap-x-4 dark:bg-neutral-800/50 shadow-md shadow-black/15 rounded-lg p-2 ring-1 ring-black/8 dark:ring-white/15">
+                            <Icon name="uil:box" class="w-5 h-5 text-neutral-600 dark:text-neutral-300 shrink-0" />
                             <div class="flex flex-col min-w-0">
-                                <h2 class="text-[11px] font-bold text-neutral-500 truncate">RECURSOS</h2>
-                                <h2 class="text-[12px] font-bold text-neutral-800 truncate">
+                                <h2 class="text-[11px] font-bold text-neutral-500 dark:text-neutral-300 truncate">RECURSOS</h2>
+                                <h2 class="text-[12px] font-bold text-neutral-800 dark:text-neutral-400 truncate">
                                     {{ props.resources.join(',') }}
                                 </h2>
                             </div>
                         </div>
                     </div>
                 </div>
-                <UForm v-if="!errorReserves" :state="state" :schema="schema" class="space-y-4 rounded-2xl bg-white"
+                <UForm v-if="!errorReserves" :state="state" :schema="schema" class="space-y-4 rounded-2xl"
                     @reset="onResetCb" @submit="onSubmitCb" :validate="validateCb">
                     <!-- Date field -->
                     <UFormField label="Data da reserva" name="date" class="w-full" :ui="{}">
@@ -311,7 +311,7 @@ const onSubmitCb = async (event: FormSubmitEvent<Schema>) => {
                             :min-date="today('America/Sao_Paulo')" :is-date-unavailable="isDateUnavailable"
                             :disabled="isFetchingReserves || isLoadingSubmit"
                             :loading="isFetchingReserves || isLoadingSubmit"
-                            class="w-full bg-white hover:bg-neutral-100 ring-1 ring-neutral-300 hover:ring-neutral-400 shadow-md"
+                            class="w-full shadow-md"
                             variant="subtle">
                             <template #trailing>
                                 <UPopover :reference="inputDate?.inputsRef[3]?.$el">
@@ -353,7 +353,7 @@ const onSubmitCb = async (event: FormSubmitEvent<Schema>) => {
                             Limpar
                         </UButton>
 
-                        <UButton type="submit" class="bg-indigo-700 hover:bg-indigo-600 active:bg-indigo-600"
+                        <UButton type="submit"
                             :disabled="!state.data || state.horarios.length === 0 || isFetchingReserves || isLoadingSubmit"
                             :loading="isLoadingSubmit || isFetchingReserves">
                             Reservar

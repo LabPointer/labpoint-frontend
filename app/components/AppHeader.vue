@@ -49,7 +49,13 @@ const profileItems = ref<DropdownMenuItem[][]>([
         }
     ],
     [
-        { label: 'Sair', icon: 'i-lucide-log-out', color: 'error', click: () => navigateTo('/login') },
+        { label: 'Sair', icon: 'i-lucide-log-out', color: 'error', onSelect: async () => {
+            await fetch("/api/logout", {
+                method: 'POST'
+            }).finally(() => {
+                navigateTo('/')
+            })
+        } },
     ]
 ]);
 </script>

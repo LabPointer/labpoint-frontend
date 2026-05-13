@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/spaces/create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cria um novo espaço
+         * @description Cria um novo espaço no sistema
+         */
+        post: operations["postCreateSpace"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/reserves/create/{spaceId}": {
         parameters: {
             query?: never;
@@ -24,6 +44,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Registra um novo usuário
+         * @description Registra um novo usuário no sistema
+         */
+        post: operations["register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Logout
+         * @description Realiza o logout do usuário
+         */
+        post: operations["logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Login
+         * @description Realiza o login do usuário
+         */
+        post: operations["login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/spaces": {
         parameters: {
             query?: never;
@@ -36,6 +116,26 @@ export interface paths {
          * @description Retorna uma lista de laboratorios
          */
         get: operations["getSpaces"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/resources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Busca por recursos
+         * @description Retorna uma lista de recursos. Destinado ao autocomplete.
+         */
+        get: operations["getResources"];
         put?: never;
         post?: never;
         delete?: never;
@@ -64,33 +164,90 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/spaces/delete/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Deleta um espaço
+         * @description Deleta um espaço do sistema
+         */
+        delete: operations["deleteSpace"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        ReserveBody: {
+        CreateSpaceRequestDTO: {
+            name: string;
+            description?: string;
+            /** Format: int32 */
+            capacity: number;
+            resources: string[];
+        };
+        ErroResponseDTO: {
+            /** @enum {string} */
+            status?: "100 CONTINUE" | "101 SWITCHING_PROTOCOLS" | "102 PROCESSING" | "103 EARLY_HINTS" | "200 OK" | "201 CREATED" | "202 ACCEPTED" | "203 NON_AUTHORITATIVE_INFORMATION" | "204 NO_CONTENT" | "205 RESET_CONTENT" | "206 PARTIAL_CONTENT" | "207 MULTI_STATUS" | "208 ALREADY_REPORTED" | "226 IM_USED" | "300 MULTIPLE_CHOICES" | "301 MOVED_PERMANENTLY" | "302 FOUND" | "303 SEE_OTHER" | "304 NOT_MODIFIED" | "307 TEMPORARY_REDIRECT" | "308 PERMANENT_REDIRECT" | "400 BAD_REQUEST" | "401 UNAUTHORIZED" | "402 PAYMENT_REQUIRED" | "403 FORBIDDEN" | "404 NOT_FOUND" | "405 METHOD_NOT_ALLOWED" | "406 NOT_ACCEPTABLE" | "407 PROXY_AUTHENTICATION_REQUIRED" | "408 REQUEST_TIMEOUT" | "409 CONFLICT" | "410 GONE" | "411 LENGTH_REQUIRED" | "412 PRECONDITION_FAILED" | "413 CONTENT_TOO_LARGE" | "413 PAYLOAD_TOO_LARGE" | "414 URI_TOO_LONG" | "415 UNSUPPORTED_MEDIA_TYPE" | "416 REQUESTED_RANGE_NOT_SATISFIABLE" | "417 EXPECTATION_FAILED" | "418 I_AM_A_TEAPOT" | "421 MISDIRECTED_REQUEST" | "422 UNPROCESSABLE_CONTENT" | "422 UNPROCESSABLE_ENTITY" | "423 LOCKED" | "424 FAILED_DEPENDENCY" | "425 TOO_EARLY" | "426 UPGRADE_REQUIRED" | "428 PRECONDITION_REQUIRED" | "429 TOO_MANY_REQUESTS" | "431 REQUEST_HEADER_FIELDS_TOO_LARGE" | "451 UNAVAILABLE_FOR_LEGAL_REASONS" | "500 INTERNAL_SERVER_ERROR" | "501 NOT_IMPLEMENTED" | "502 BAD_GATEWAY" | "503 SERVICE_UNAVAILABLE" | "504 GATEWAY_TIMEOUT" | "505 HTTP_VERSION_NOT_SUPPORTED" | "506 VARIANT_ALSO_NEGOTIATES" | "507 INSUFFICIENT_STORAGE" | "508 LOOP_DETECTED" | "509 BANDWIDTH_LIMIT_EXCEEDED" | "510 NOT_EXTENDED" | "511 NETWORK_AUTHENTICATION_REQUIRED";
+            message?: string;
+        };
+        ReserveRequestDTO: {
             /** Format: date */
             date?: string;
             schedules?: ("M_AULA_1" | "M_AULA_2" | "M_AULA_3" | "M_AULA_4" | "M_AULA_5" | "V_AULA_1" | "V_AULA_2" | "V_AULA_3" | "V_AULA_4" | "V_AULA_5" | "N_AULA_1" | "N_AULA_2" | "N_AULA_3" | "N_AULA_4")[];
         };
-        SpaceResources: {
-            /** Format: int64 */
-            id?: number;
+        RegisterRequestDTO: {
+            username: string;
+            /** Format: email */
+            email: string;
+            registration: string;
+            password: string;
             /** @enum {string} */
-            resource?: "TELAO" | "COMPUTADORES" | "TUBOS_DE_ENSAIO";
-            space?: components["schemas"]["Spaces"];
+            role: "OWNER" | "ADMIN" | "USER";
+        };
+        LoginRequestDTO: {
+            registration: string;
+            password: string;
+        };
+        LoginResponseDTO: {
+            token: string;
+        };
+        SpaceRequestDTO: {
+            name?: string;
+            /** Format: int32 */
+            capacity?: number;
+            resources?: string[];
         };
         Spaces: {
-            /** Format: int64 */
+            /** Format: int32 */
             id?: number;
             name?: string;
             /** Format: int32 */
             capacity?: number;
-            resources?: ("TELAO" | "COMPUTADORES" | "TUBOS_DE_ENSAIO")[];
         };
-        SpacesResponse: {
+        SpacesResponseDTO: {
+            /** Format: int32 */
+            id: number;
+            name: string;
+            /** Format: int32 */
+            capacity: number;
+            resources?: string[];
+            spaceResponse?: components["schemas"]["Spaces"];
+        };
+        SpaceResources: {
+            /** Format: int32 */
+            id?: number;
+            name?: string;
             space?: components["schemas"]["Spaces"];
-            resources?: components["schemas"]["SpaceResources"][];
         };
         Reserves: {
             /** Format: int64 */
@@ -110,6 +267,37 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    postCreateSpace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSpaceRequestDTO"];
+            };
+        };
+        responses: {
+            /** @description Espaço criado com sucesso */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Erro ao criar espaço */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+        };
+    };
     postCreateReserve: {
         parameters: {
             query?: never;
@@ -121,7 +309,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ReserveBody"];
+                "application/json": components["schemas"]["ReserveRequestDTO"];
             };
         };
         responses: {
@@ -141,12 +329,90 @@ export interface operations {
             };
         };
     };
+    register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterRequestDTO"];
+            };
+        };
+        responses: {
+            /** @description Usuário registrado com sucesso */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Usuário já registrado */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+        };
+    };
+    logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Logout realizado com sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequestDTO"];
+            };
+        };
+        responses: {
+            /** @description Login realizado com sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LoginResponseDTO"];
+                };
+            };
+            /** @description Usuário ou senha incorretos */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     getSpaces: {
         parameters: {
-            query?: {
-                name?: string;
-                capacity?: number;
-                resources?: ("TELAO" | "COMPUTADORES" | "TUBOS_DE_ENSAIO")[];
+            query: {
+                params: components["schemas"]["SpaceRequestDTO"];
             };
             header?: never;
             path?: never;
@@ -160,7 +426,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["SpacesResponse"][];
+                    "*/*": components["schemas"]["SpacesResponseDTO"][];
                 };
             };
             /** @description Nenhum laboratorio encontrado */
@@ -168,9 +434,36 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "*/*": components["schemas"]["SpacesResponse"][];
+                content?: never;
+            };
+        };
+    };
+    getResources: {
+        parameters: {
+            query: {
+                name: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Recursos encontrados */
+            200: {
+                headers: {
+                    [name: string]: unknown;
                 };
+                content: {
+                    "*/*": components["schemas"]["SpaceResources"][];
+                };
+            };
+            /** @description Nenhum recurso encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -200,9 +493,34 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "*/*": components["schemas"]["Reserves"][];
+                content?: never;
+            };
+        };
+    };
+    deleteSpace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Espaço deletado com sucesso */
+            204: {
+                headers: {
+                    [name: string]: unknown;
                 };
+                content?: never;
+            };
+            /** @description Espaço não encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

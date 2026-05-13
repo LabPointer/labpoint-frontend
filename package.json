@@ -16,7 +16,7 @@
     "@nuxt/fonts": "latest",
     "@nuxt/icon": "latest",
     "@nuxt/ui": "latest",
-    "@nuxtjs/color-mode": "^4.0.0",
+    "@nuxtjs/color-mode": "latest",
     "@tailwindcss/vite": "latest",
     "@vueuse/core": "latest",
     "nuxt": "latest",
