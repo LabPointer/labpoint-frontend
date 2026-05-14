@@ -62,7 +62,7 @@ const profileItems = ref<DropdownMenuItem[][]>([
 
 <template>
     <UHeader mode="slideover" :ui="{
-        root: 'border-b border-black/10 dark:border-white/10 shadow-md dark:shadow-white/10',
+        root: 'border-b bg-white/10 dark:bg-black/50 backdrop-blur-lg dark:backdrop-brightness-150 border-black/10 dark:border-white/10 shadow-md dark:shadow-white/10',
     }">
         <template #title>
             <NuxtLink to="/" class="flex items-center gap-2 transition-opacity hover:opacity-90">

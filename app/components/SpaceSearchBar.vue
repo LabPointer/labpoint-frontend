@@ -46,7 +46,7 @@ watch([query, resourceValues, capacity], () => {
 
 <template>
     <section class="w-full max-w-5xl mx-auto">
-        <div class="bg-white dark:bg-neutral-900 rounded-md border border-black/10 dark:border-white/10 shadow-sm dark:shadow-white/10 p-6 hover:shadow-md">
+        <div class="bg-neutral-100/70 dark:bg-neutral-900/50 rounded-md border border-black/10 dark:border-white/15 shadow-sm dark:shadow-white/10 p-6 hover:shadow-md">
             <!-- Title & Subtitle -->
             <div class="mb-4">
                 <h1 class="text-lg font-bold tracking-tight">Reserva de Laboratório</h1>

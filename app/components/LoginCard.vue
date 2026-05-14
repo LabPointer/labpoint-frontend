@@ -70,7 +70,7 @@ function onReset() {
 <template>
     <section class="w-full flex justify-center">
         <UCard title="Labpoint" description="Bem vindo(a)" class="w-full max-w-md" :ui="{
-            root: 'rounded-md border-black/15 shadow-md shadow-black/10',
+            root: 'rounded-md bg-white/10 dark:bg-neutral-950/50 dark:backdrop-brightness-160 ring ring-indigo-700/10 dark:ring-violet-400/15 shadow-md shadow-violet-900/10 dark:shadow-violet-500/20',
             title: 'font-bold text-3xl text-blue-600 dark:text-blue-400 text-center',
             description: 'text-center text-base'
         }">

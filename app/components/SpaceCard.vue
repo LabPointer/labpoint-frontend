@@ -10,7 +10,7 @@ const props = defineProps<SpaceInfo>()
 </script>
 
 <template>
-  <UCard class="w-full max-w-2xs rounded-md shadow-md border border-black/10 dark:border-white/10">
+  <UCard class="w-full max-w-2xs bg-white/50 dark:bg-black/50 dark:backdrop-brightness-150 rounded-md shadow-md border border-black/10 dark:border-white/10">
     <template #header>
       <div class="flex items-center gap-4">
         <div class="w-8 h-8 rounded-[8px] bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
@@ -25,7 +25,7 @@ const props = defineProps<SpaceInfo>()
 
     <div class="space-y-2">
       <!-- Capacity box -->
-      <div class="border border-neutral-300 dark:border-neutral-700 shadow-sm rounded-sm px-3 py-2 flex items-center gap-2 bg-neutral-100 dark:bg-neutral-900">
+      <div class="border border-neutral-300 dark:border-neutral-700 shadow-sm rounded-sm px-3 py-2 flex items-center gap-2 bg-neutral-100 dark:bg-neutral-900/30">
         <div class="w-8 h-8 rounded-xl bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center text-neutral-500 shrink-0">
           <Icon name="i-lucide-users" size="16" />
         </div>
@@ -36,7 +36,7 @@ const props = defineProps<SpaceInfo>()
       </div>
 
       <!-- Resources box -->
-      <div class="border border-neutral-300 dark:border-neutral-700 shadow-sm rounded-sm py-2 px-4 bg-neutral-100 dark:bg-neutral-900">
+      <div class="border border-neutral-300 dark:border-neutral-700 shadow-sm rounded-sm py-2 px-4 bg-neutral-100 dark:bg-neutral-900/30">
         <div class="flex items-center gap-2 mb-3">
           <Icon name="i-lucide-box" class="text-neutral-500" size="16" />
           <p class="text-[9px] font-bold text-neutral-500 tracking-wider uppercase">Recursos Incluídos</p>
