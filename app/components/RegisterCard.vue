@@ -7,15 +7,23 @@ const route = useRoute()
 const api = useApi()
 
 const schema = z.object({
-    registration: z.string('Matricula invalida'),
-    password: z.string('Senha invalida').min(6, 'Senha deve ter pelo menos 6 caracteres')
+    username: z.string().min(4, 'Nome de usuario deve ter pelo menos 4 caracteres'),
+    email: z.email('Email invalido'),
+    registration: z.string().min(6, 'Matricula deve ter pelo menos 6 caracteres'),
+    password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
+    passwordConfirm: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
+    role: z.enum(['OWNER', 'ADMIN', 'USER'])
 })
 
 type Schema = z.output<typeof schema>
 
 const state = reactive<Partial<Schema>>({
+    username: undefined,
+    email: undefined,
     registration: undefined,
-    password: undefined
+    password: undefined,
+    passwordConfirm: undefined,
+    role: undefined
 })
 
 const formRef = ref()
@@ -24,41 +32,49 @@ const toast = useToast()
 const isLoading = ref(false)
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
+    if (event.data.password !== event.data.passwordConfirm) {
+        toast.error({
+            title: 'Erro',
+            message: 'Senhas nao coincidem!',
+            color: 'red',
+            position: 'bottomCenter',
+            timeout: 3000,
+        })
+        return
+    }
+    
     isLoading.value = true
-    api.POST("/auth/login", {
+    api.POST("/auth/register", {
         body: {
+            username: event.data.username,
+            email: event.data.email,
             registration: event.data.registration,
-            password: event.data.password
+            password: event.data.password,
+            role: event.data.role
         }
     })
     .then(res => {
         const { status } = res.response
 
-        if (status !== 200 || !res.data) {
+        if (status !== 201) {
             toast.error({
                 title: 'Erro',
-                message: 'Matricula ou senha invalidos!',
+                message: 'Erro ao registrar usuario!',
                 color: 'red',
                 position: 'bottomCenter',
                 timeout: 3000,
             })
             return
-        }
-
-        const authInfo = res.data;
-        setAuthInfo({
-            ...authInfo,
-            expireIn: authInfo.tokenExpireIn?.toString() || ""
-        } satisfies z.infer<typeof authInfoSchema>)        
+        }      
 
         toast.success({
             title: 'Sucesso',
-            message: 'Login realizado com sucesso!',
+            message: 'Cadastro realizado com sucesso!',
             color: 'green',
             position: 'bottomCenter',
             timeout: 1000,
             onClosing: () => {
-                navigateTo('/home')
+                navigateTo('/')
             }
         })
     }).catch(error => {
@@ -88,7 +104,15 @@ function onReset() {
             description: 'text-center text-base'
         }">
             <UForm :ref="formRef" id="login-form" :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
-                <UFormField label="Matrícula" name="matricula">
+                <UFormField label="Nome de usuário" name="username">
+                    <UInput v-model="state.username" class="w-full" :disabled="isLoading" />
+                </UFormField>
+
+                <UFormField label="Email" name="email">
+                    <UInput v-model="state.email" type="email" class="w-full" :disabled="isLoading" />
+                </UFormField>
+
+                <UFormField label="Matrícula" name="registration">
                     <UInput v-model="state.registration" class="w-full" :disabled="isLoading" />
                 </UFormField>
 
@@ -96,12 +120,16 @@ function onReset() {
                     <UInput v-model="state.password" type="password" class="w-full" :disabled="isLoading" />
                 </UFormField>
 
-                <div class="flex justify-between items-center">
-                    <UButton label="Esqueceu a senha?" variant="link" color="info" class="px-0 cursor-pointer"
-                        :disabled="isLoading" />
+                <UFormField label="Confirmação de senha" name="passwordConfirm">
+                    <UInput v-model="state.passwordConfirm" type="password" class="w-full" :disabled="isLoading" />
+                </UFormField>
 
-                    <NuxtLink to="/register" class="cursor-pointer text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-500 font-medium">Criar uma conta?</NuxtLink>
-                </div>
+                <UFormField label="Cargo" name="role">
+                    <USelect v-model="state.role" :items="['OWNER', 'ADMIN', 'USER']" class="w-full"
+                        :disabled="isLoading" />
+                </UFormField>
+
+                <NuxtLink to="/" class="cursor-pointer text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-500 font-medium">Voltar a pagina de login?</NuxtLink>
             </UForm>
 
             <template #footer>
@@ -113,7 +141,7 @@ function onReset() {
 
                     <UButton type="submit" form="login-form" color="primary" @click="formRef?.submit()"
                         class="cursor-pointer" :loading="isLoading">
-                        Entrar
+                        Cadastrar
                     </UButton>
                 </div>
             </template>

@@ -4,6 +4,8 @@ import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui';
 // Close menu on navigation
 const route = useRoute();
 
+const api = useApi()
+
 const menuItems = computed<NavigationMenuItem[]>(() => [
     {
         label: 'Início',
@@ -49,10 +51,9 @@ const profileItems = ref<DropdownMenuItem[][]>([
         }
     ],
     [
-        { label: 'Sair', icon: 'i-lucide-log-out', color: 'error', onSelect: async () => {
-            await fetch("/api/logout", {
-                method: 'POST'
-            }).finally(() => {
+        { label: 'Sair', icon: 'i-lucide-log-out', color: 'error', onSelect: () => {
+            api.POST("/auth/logout").finally(() => {
+                useCookie('auth-info').value = undefined
                 navigateTo('/')
             })
         } },
