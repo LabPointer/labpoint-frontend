@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ResourceInfo, SpaceInfo, SpaceQuery } from '~~/shared/types';
+import type { SpaceInfo, SpaceQuery } from '~~/shared/types';
 import { useDebounceFn } from '@vueuse/core';
 import { useAsyncData } from 'nuxt/app';
 import { ref, computed } from 'vue';
@@ -29,7 +29,12 @@ const { data: spaces, status, pending, error, refresh } = useAsyncData("spaces",
   const { data, error, response } = await api.GET("/spaces", {
     params: {
       query: {
-        params: queryParams.value
+        name: queryParams.value.name,
+        capacity: queryParams.value.capacity,
+        resources: queryParams.value.resources,
+        subjects: undefined,
+        offset: 0,
+        limit: 10
       }
     }
   });
@@ -46,11 +51,11 @@ const handleFilterChange = useDebounceFn((newFilters: SpaceQuery) => {
   refresh();
 }, 200);
 
-const getSpacesCount = computed(() => spaces.value?.data?.length || 0);
+const getSpacesCount = computed(() => spaces.value?.data?.spaces?.length || 0);
 
 const hasSpaces = computed(() => getSpacesCount.value > 0);
 
-const getSpaces = computed(() => spaces.value?.data || []);
+const getSpaces = computed(() => spaces.value?.data?.spaces || []);
 
 const onReserveOpenPopup = (spaceInfo: SpaceInfo) => {
   spacePopupProps.value = { id: spaceInfo.id, name: spaceInfo.name, capacity: spaceInfo.capacity, resources: spaceInfo.resources };
@@ -64,8 +69,8 @@ const onReserveClosePopup = () => {
 </script>
 
 <template>
-  <SpaceReserveModal v-model:open="showPopup" :id="spacePopupProps.id" :name="spacePopupProps.name" :capacity="spacePopupProps.capacity"
-    :resources="spacePopupProps.resources" @onClose="onReserveClosePopup" />
+  <SpaceReserveModal v-model:open="showPopup" :id="spacePopupProps.id" :name="spacePopupProps.name"
+    :capacity="spacePopupProps.capacity" :resources="spacePopupProps.resources" @onClose="onReserveClosePopup" />
 
   <UMain class="min-h-[calc(100vh-161px)] flex flex-col gap-y-6 my-4 mb-8 w-full px-4">
     <!-- Barra de Pesquisa -->
@@ -76,7 +81,8 @@ const onReserveClosePopup = () => {
       <!-- Cabeçalho (Título e Label de Resultados) -->
       <div class="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
         <div>
-          <h2 class="text-xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight">Laboratórios & Salas de Aula Disponíveis</h2>
+          <h2 class="text-xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight">Laboratórios & Salas de
+            Aula Disponíveis</h2>
           <p class="text-[13px] text-neutral-500 mt-1">Navegue pelos espaços que correspondem aos seus critérios de
             pesquisa.</p>
         </div>
@@ -105,13 +111,15 @@ const onReserveClosePopup = () => {
       </div>
 
       <!-- Caixa Branca quando não há dados (Empty State) -->
-      <div v-else-if="!hasSpaces" class="bg-white dark:bg-neutral-900/70 border border-black/10 dark:border-white/10 rounded-md p-16 text-center shadow-sm">
+      <div v-else-if="!hasSpaces"
+        class="bg-white dark:bg-neutral-900/70 border border-black/10 dark:border-white/10 rounded-md p-16 text-center shadow-sm">
         <div
           class="w-16 h-16 bg-neutral-50 dark:bg-neutral-800 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-neutral-100 dark:border-neutral-700">
           <Icon name="i-lucide-search-x" class="w-8 h-8 text-neutral-400 dark:text-neutral-500" />
         </div>
         <h3 class="text-[1.15rem] font-bold text-neutral-900 dark:text-neutral-100">Nenhum dado encontrado</h3>
-        <p class="text-[13px] text-neutral-500 dark:text-neutral-400 mt-2 max-w-sm mx-auto">Não encontramos nenhum laboratório ou sala com
+        <p class="text-[13px] text-neutral-500 dark:text-neutral-400 mt-2 max-w-sm mx-auto">Não encontramos nenhum
+          laboratório ou sala com
           esses
           filtros. Tente reduzir as restrições de sua busca em recursos ou lotação.</p>
       </div>
@@ -119,10 +127,8 @@ const onReserveClosePopup = () => {
       <!-- Grid de Componentes (Quando existe sucesso na busca e dados retornados) -->
       <div v-else-if="hasSpaces"
         class="w-full justify-items-center items-center grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        <SpaceCard v-for="space in getSpaces" :key="space.id"
-          :id="space.id"
-          :name="space.name as string" :capacity="space.capacity"
-          :resources="space.resources || []" @onReserve="onReserveOpenPopup" />
+        <SpaceCard v-for="space in getSpaces" :key="space.id" :id="space.id" :name="space.name as string"
+          :capacity="space.capacity" :resources="space.resources || []" @onReserve="onReserveOpenPopup" />
       </div>
 
     </section>

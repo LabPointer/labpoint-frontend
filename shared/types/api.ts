@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/subjects/create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cria uma matéria
+         * @description Cria uma matéria no sistema
+         */
+        post: operations["createSubject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/spaces/create": {
         parameters: {
             query?: never;
@@ -18,6 +38,26 @@ export interface paths {
          * @description Cria um novo espaço no sistema
          */
         post: operations["postCreateSpace"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/resources/create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cria um recurso
+         * @description Cria um recurso no sistema
+         */
+        post: operations["postCreateResource"];
         delete?: never;
         options?: never;
         head?: never;
@@ -57,7 +97,7 @@ export interface paths {
          * Registra um novo usuário
          * @description Registra um novo usuário no sistema
          */
-        post: operations["register"];
+        post: operations["postRegister"];
         delete?: never;
         options?: never;
         head?: never;
@@ -77,7 +117,7 @@ export interface paths {
          * Logout
          * @description Realiza o logout do usuário
          */
-        post: operations["logout"];
+        post: operations["PostLogout"];
         delete?: never;
         options?: never;
         head?: never;
@@ -97,7 +137,87 @@ export interface paths {
          * Login
          * @description Realiza o login do usuário
          */
-        post: operations["login"];
+        post: operations["postLogin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/subjects/update/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Edita uma matéria
+         * @description Edita uma matéria no sistema
+         */
+        patch: operations["updateSubject"];
+        trace?: never;
+    };
+    "/spaces/update/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Editar espaço
+         * @description Edita um espaço existente
+         */
+        patch: operations["patchSpace"];
+        trace?: never;
+    };
+    "/resources/update/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Edita um recurso
+         * @description Edita um recurso no sistema
+         */
+        patch: operations["updateResource"];
+        trace?: never;
+    };
+    "/subjects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lista todas as matérias
+         * @description Lista todas as matérias cadastradas
+         */
+        get: operations["getSubjects"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -164,6 +284,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Login
+         * @description Realiza o login do usuário
+         */
+        get: operations["getUsers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/subjects/delete/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Deleta uma matéria
+         * @description Deleta uma matéria no sistema
+         */
+        delete: operations["deleteSubject"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/spaces/delete/{id}": {
         parameters: {
             query?: never;
@@ -184,21 +344,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/resources/delete/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Deleta um recurso
+         * @description Deleta um recurso no sistema
+         */
+        delete: operations["deleteResource"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        ErroResponseDTO: {
+            /** @enum {string} */
+            status?: "100 CONTINUE" | "101 SWITCHING_PROTOCOLS" | "102 PROCESSING" | "103 EARLY_HINTS" | "200 OK" | "201 CREATED" | "202 ACCEPTED" | "203 NON_AUTHORITATIVE_INFORMATION" | "204 NO_CONTENT" | "205 RESET_CONTENT" | "206 PARTIAL_CONTENT" | "207 MULTI_STATUS" | "208 ALREADY_REPORTED" | "226 IM_USED" | "300 MULTIPLE_CHOICES" | "301 MOVED_PERMANENTLY" | "302 FOUND" | "303 SEE_OTHER" | "304 NOT_MODIFIED" | "307 TEMPORARY_REDIRECT" | "308 PERMANENT_REDIRECT" | "400 BAD_REQUEST" | "401 UNAUTHORIZED" | "402 PAYMENT_REQUIRED" | "403 FORBIDDEN" | "404 NOT_FOUND" | "405 METHOD_NOT_ALLOWED" | "406 NOT_ACCEPTABLE" | "407 PROXY_AUTHENTICATION_REQUIRED" | "408 REQUEST_TIMEOUT" | "409 CONFLICT" | "410 GONE" | "411 LENGTH_REQUIRED" | "412 PRECONDITION_FAILED" | "413 CONTENT_TOO_LARGE" | "413 PAYLOAD_TOO_LARGE" | "414 URI_TOO_LONG" | "415 UNSUPPORTED_MEDIA_TYPE" | "416 REQUESTED_RANGE_NOT_SATISFIABLE" | "417 EXPECTATION_FAILED" | "418 I_AM_A_TEAPOT" | "421 MISDIRECTED_REQUEST" | "422 UNPROCESSABLE_CONTENT" | "422 UNPROCESSABLE_ENTITY" | "423 LOCKED" | "424 FAILED_DEPENDENCY" | "425 TOO_EARLY" | "426 UPGRADE_REQUIRED" | "428 PRECONDITION_REQUIRED" | "429 TOO_MANY_REQUESTS" | "431 REQUEST_HEADER_FIELDS_TOO_LARGE" | "451 UNAVAILABLE_FOR_LEGAL_REASONS" | "500 INTERNAL_SERVER_ERROR" | "501 NOT_IMPLEMENTED" | "502 BAD_GATEWAY" | "503 SERVICE_UNAVAILABLE" | "504 GATEWAY_TIMEOUT" | "505 HTTP_VERSION_NOT_SUPPORTED" | "506 VARIANT_ALSO_NEGOTIATES" | "507 INSUFFICIENT_STORAGE" | "508 LOOP_DETECTED" | "509 BANDWIDTH_LIMIT_EXCEEDED" | "510 NOT_EXTENDED" | "511 NETWORK_AUTHENTICATION_REQUIRED";
+            message?: string;
+        };
         CreateSpaceRequestDTO: {
             name: string;
             description?: string;
             /** Format: int32 */
             capacity: number;
-            resources: string[];
-        };
-        ErroResponseDTO: {
-            /** @enum {string} */
-            status?: "100 CONTINUE" | "101 SWITCHING_PROTOCOLS" | "102 PROCESSING" | "103 EARLY_HINTS" | "200 OK" | "201 CREATED" | "202 ACCEPTED" | "203 NON_AUTHORITATIVE_INFORMATION" | "204 NO_CONTENT" | "205 RESET_CONTENT" | "206 PARTIAL_CONTENT" | "207 MULTI_STATUS" | "208 ALREADY_REPORTED" | "226 IM_USED" | "300 MULTIPLE_CHOICES" | "301 MOVED_PERMANENTLY" | "302 FOUND" | "303 SEE_OTHER" | "304 NOT_MODIFIED" | "307 TEMPORARY_REDIRECT" | "308 PERMANENT_REDIRECT" | "400 BAD_REQUEST" | "401 UNAUTHORIZED" | "402 PAYMENT_REQUIRED" | "403 FORBIDDEN" | "404 NOT_FOUND" | "405 METHOD_NOT_ALLOWED" | "406 NOT_ACCEPTABLE" | "407 PROXY_AUTHENTICATION_REQUIRED" | "408 REQUEST_TIMEOUT" | "409 CONFLICT" | "410 GONE" | "411 LENGTH_REQUIRED" | "412 PRECONDITION_FAILED" | "413 CONTENT_TOO_LARGE" | "413 PAYLOAD_TOO_LARGE" | "414 URI_TOO_LONG" | "415 UNSUPPORTED_MEDIA_TYPE" | "416 REQUESTED_RANGE_NOT_SATISFIABLE" | "417 EXPECTATION_FAILED" | "418 I_AM_A_TEAPOT" | "421 MISDIRECTED_REQUEST" | "422 UNPROCESSABLE_CONTENT" | "422 UNPROCESSABLE_ENTITY" | "423 LOCKED" | "424 FAILED_DEPENDENCY" | "425 TOO_EARLY" | "426 UPGRADE_REQUIRED" | "428 PRECONDITION_REQUIRED" | "429 TOO_MANY_REQUESTS" | "431 REQUEST_HEADER_FIELDS_TOO_LARGE" | "451 UNAVAILABLE_FOR_LEGAL_REASONS" | "500 INTERNAL_SERVER_ERROR" | "501 NOT_IMPLEMENTED" | "502 BAD_GATEWAY" | "503 SERVICE_UNAVAILABLE" | "504 GATEWAY_TIMEOUT" | "505 HTTP_VERSION_NOT_SUPPORTED" | "506 VARIANT_ALSO_NEGOTIATES" | "507 INSUFFICIENT_STORAGE" | "508 LOOP_DETECTED" | "509 BANDWIDTH_LIMIT_EXCEEDED" | "510 NOT_EXTENDED" | "511 NETWORK_AUTHENTICATION_REQUIRED";
-            message?: string;
+            resources?: string[];
+            subjects?: string[];
         };
         ReserveRequestDTO: {
             /** Format: date */
@@ -224,42 +405,89 @@ export interface components {
             /** Format: int64 */
             tokenExpireIn?: number;
         };
-        SpaceRequestDTO: {
+        Subject: {
+            /** Format: int32 */
+            id?: number;
+            name?: string;
+        };
+        PatchSpaceRequestDTO: {
             name?: string;
             /** Format: int32 */
             capacity?: number;
             resources?: string[];
+            subjects?: string[];
         };
-        Spaces: {
+        Resource: {
             /** Format: int32 */
             id?: number;
             name?: string;
-            /** Format: int32 */
-            capacity?: number;
         };
-        SpacesResponseDTO: {
+        SpaceDTO: {
             /** Format: int32 */
             id: number;
             name: string;
             /** Format: int32 */
             capacity: number;
             resources?: string[];
-            spaceResponse?: components["schemas"]["Spaces"];
+            subjects?: string[];
         };
-        SpaceResources: {
+        SpacesResponseDTO: {
+            spaces?: components["schemas"]["SpaceDTO"][];
+            /** Format: int32 */
+            offset?: number;
+            /** Format: int32 */
+            limit?: number;
+            /** Format: int32 */
+            total?: number;
+        };
+        GrantedAuthority: {
+            authority?: string;
+        };
+        Reserve: {
             /** Format: int32 */
             id?: number;
-            name?: string;
-            space?: components["schemas"]["Spaces"];
-        };
-        Reserves: {
-            /** Format: int64 */
-            id?: number;
+            /** Format: date-time */
+            createdAt?: string;
             /** Format: date */
             reservedDate?: string;
             /** @enum {string} */
             schedule?: "M_AULA_1" | "M_AULA_2" | "M_AULA_3" | "M_AULA_4" | "M_AULA_5" | "V_AULA_1" | "V_AULA_2" | "V_AULA_3" | "V_AULA_4" | "V_AULA_5" | "N_AULA_1" | "N_AULA_2" | "N_AULA_3" | "N_AULA_4";
-            space?: components["schemas"]["Spaces"];
+            user?: components["schemas"]["User"];
+            space?: components["schemas"]["Space"];
+        };
+        Space: {
+            /** Format: int32 */
+            id?: number;
+            name?: string;
+            description?: string;
+            /** Format: int32 */
+            capacity?: number;
+        };
+        User: {
+            /** Format: uuid */
+            id?: string;
+            username?: string;
+            email?: string;
+            registration?: string;
+            password?: string;
+            /** @enum {string} */
+            role?: "OWNER" | "ADMIN" | "USER";
+            enabled?: boolean;
+            authorities?: components["schemas"]["GrantedAuthority"][];
+            accountNonExpired?: boolean;
+            credentialsNonExpired?: boolean;
+            accountNonLocked?: boolean;
+        };
+        UserRequestDTO: {
+            registration?: string;
+            username?: string;
+            email?: string;
+            /** @enum {string} */
+            role?: "OWNER" | "ADMIN" | "USER";
+            /** Format: int32 */
+            offset?: number;
+            /** Format: int32 */
+            limit?: number;
         };
     };
     responses: never;
@@ -270,6 +498,37 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    createSubject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": string;
+            };
+        };
+        responses: {
+            /** @description Matéria criada com sucesso */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Erro ao criar matéria */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+        };
+    };
     postCreateSpace: {
         parameters: {
             query?: never;
@@ -284,13 +543,44 @@ export interface operations {
         };
         responses: {
             /** @description Espaço criado com sucesso */
-            204: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
             /** @description Erro ao criar espaço */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+        };
+    };
+    postCreateResource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": string;
+            };
+        };
+        responses: {
+            /** @description Recurso criado com sucesso */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Erro ao criar recurso */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -317,7 +607,7 @@ export interface operations {
         };
         responses: {
             /** @description Reserva criada com sucesso */
-            204: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -332,7 +622,7 @@ export interface operations {
             };
         };
     };
-    register: {
+    postRegister: {
         parameters: {
             query?: never;
             header?: never;
@@ -346,7 +636,7 @@ export interface operations {
         };
         responses: {
             /** @description Usuário registrado com sucesso */
-            204: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -363,7 +653,7 @@ export interface operations {
             };
         };
     };
-    logout: {
+    PostLogout: {
         parameters: {
             query?: never;
             header?: never;
@@ -381,7 +671,7 @@ export interface operations {
             };
         };
     };
-    login: {
+    postLogin: {
         parameters: {
             query?: never;
             header?: never;
@@ -412,10 +702,160 @@ export interface operations {
             };
         };
     };
+    updateSubject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": string;
+            };
+        };
+        responses: {
+            /** @description Matéria editada com sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Subject"];
+                };
+            };
+            /** @description Erro ao editar matéria */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+        };
+    };
+    patchSpace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatchSpaceRequestDTO"];
+            };
+        };
+        responses: {
+            /** @description Espaço editado com sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Erro ao editar espaço */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+        };
+    };
+    updateResource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": string;
+            };
+        };
+        responses: {
+            /** @description Recurso editado com sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Resource"];
+                };
+            };
+            /** @description Erro ao editar recurso */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+            /** @description Recurso não encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+        };
+    };
+    getSubjects: {
+        parameters: {
+            query?: {
+                name?: string;
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Matérias listadas com sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Subject"][];
+                };
+            };
+            /** @description Nenhuma matéria encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+        };
+    };
     getSpaces: {
         parameters: {
-            query: {
-                params: components["schemas"]["SpaceRequestDTO"];
+            query?: {
+                name?: string;
+                capacity?: number;
+                resources?: number[];
+                subjects?: number[];
+                offset?: number;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -429,7 +869,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["SpacesResponseDTO"][];
+                    "*/*": components["schemas"]["SpacesResponseDTO"];
                 };
             };
             /** @description Nenhum laboratorio encontrado */
@@ -443,8 +883,10 @@ export interface operations {
     };
     getResources: {
         parameters: {
-            query: {
-                name: string;
+            query?: {
+                name?: string;
+                page?: number;
+                size?: number;
             };
             header?: never;
             path?: never;
@@ -458,7 +900,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["SpaceResources"][];
+                    "*/*": components["schemas"]["Resource"][];
                 };
             };
             /** @description Nenhum recurso encontrado */
@@ -488,7 +930,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["Reserves"][];
+                    "*/*": components["schemas"]["Reserve"][];
                 };
             };
             /** @description Nenhuma reserva encontrada */
@@ -497,6 +939,64 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    getUsers: {
+        parameters: {
+            query: {
+                params: components["schemas"]["UserRequestDTO"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Login realizado com sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UserRequestDTO"][];
+                };
+            };
+            /** @description Usuário nao encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteSubject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Matéria deletada com sucesso */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Matéria não encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
             };
         };
     };
@@ -524,6 +1024,35 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    deleteResource: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Recurso deletado com sucesso */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Recurso não encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
             };
         };
     };

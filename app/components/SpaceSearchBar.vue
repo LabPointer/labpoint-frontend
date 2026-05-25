@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { SelectMenuItem } from '@nuxt/ui';
+import { useDebounceFn, type onStartTyping } from '@vueuse/core';
 import type { SpaceQuery } from '~~/shared/types';
 
 const emit = defineEmits<{
@@ -8,26 +9,41 @@ const emit = defineEmits<{
 
 const query = ref('')
 const capacity = ref<number>(0)
-const resourceItems = ref<SelectMenuItem[]>([
-    {
-        type: 'item',
-        label: 'Computadores',
-        value: "COMPUTADORES",
-        icon: 'uil:desktop'
-    },
-    {
-        type: 'item',
-        label: 'Telão',
-        value: "TELAO",
-        icon: 'uil:monitor'
-    },
-    {
-        type: 'item',
-        label: 'Tubos de Ensaio',
-        value: "TUBOS_DE_ENSAIO",
-        icon: 'i-lucide-test-tube'
-    }
-])
+const resourceSearch = ref('')
+const handleFilterChange = useDebounceFn((newResourceSearch: string) => {
+    resourceSearch.value = newResourceSearch;
+    refresh();
+}, 100);
+const { data: resources, status, pending, error, refresh } = useAsyncData("resources", async () => {
+    const api = useApi();
+    const { data, error, response } = await api.GET("/resources", {
+        params: {
+            query: {
+                name: resourceSearch.value
+            }
+        }
+    });
+
+    return { data, error };
+}, {
+    watch: [resourceSearch],
+    immediate: true,
+    server: false,
+})
+const resourceItems = computed(() => {
+    console.log("RESOURCE")
+    const { value } = resources;
+    if (!value) return [];
+    const data = value.data;
+    if (!data) return []
+    return data.map(r => {
+        return {
+            type: 'item',
+            label: r.name ?? "Unknow",
+            value: r.id ?? 0,
+        } as SelectMenuItem
+    })
+})
 const resourceValues = ref<{
     label: string;
     value: string;
@@ -46,11 +62,13 @@ watch([query, resourceValues, capacity], () => {
 
 <template>
     <section class="w-full max-w-5xl mx-auto">
-        <div class="bg-neutral-100/70 dark:bg-neutral-900/50 rounded-md border border-black/10 dark:border-white/15 shadow-sm dark:shadow-white/10 p-6 hover:shadow-md">
+        <div
+            class="bg-neutral-100/70 dark:bg-neutral-900/50 rounded-md border border-black/10 dark:border-white/15 shadow-sm dark:shadow-white/10 p-6 hover:shadow-md">
             <!-- Title & Subtitle -->
             <div class="mb-4">
                 <h1 class="text-lg font-bold tracking-tight">Reserva de Laboratório</h1>
-                <p class="text-neutral-500 dark:text-neutral-400 text-sm mt-2">Pesquise e filtre os espaços disponíveis.</p>
+                <p class="text-neutral-500 dark:text-neutral-400 text-sm mt-2">Pesquise e filtre os espaços disponíveis.
+                </p>
             </div>
 
             <!-- Filters Row -->
@@ -64,10 +82,11 @@ watch([query, resourceValues, capacity], () => {
                 <!-- Resources Dropdown (Multi-select) -->
                 <div class="w-full md:w-auto">
                     <USelectMenu v-model="resourceValues" :items="resourceItems" multiple placeholder="Recursos..."
-                        icon="i-lucide-filter" size="md" value-attribute="value" option-attribute="label"
-                        class="min-w-[200px] w-full md:max-w-[200px]" :ui="{
+                        icon="i-lucide-filter" size="md" @update:search-term="handleFilterChange" value-attribute="value"
+                        option-attribute="label" class="min-w-50 w-full md:max-w-50" :ui="{
                             base: 'rounded-md'
                         }" :search-input="{
+
                             ui: {
                                 base: 'rounded-none shadow-black/7'
                             }

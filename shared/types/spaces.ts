@@ -1,4 +1,4 @@
-export type ResourceInfo = ("TELAO" | "COMPUTADORES" | "TUBOS_DE_ENSAIO")[]
+//export type ResourceInfo = ("TELAO" | "COMPUTADORES" | "TUBOS_DE_ENSAIO")[]
 
 export type SpaceQuery = {
     query: string
