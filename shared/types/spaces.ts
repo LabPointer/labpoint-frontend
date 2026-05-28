@@ -1,13 +1,16 @@
+//export type ResourceInfo = ("TELAO" | "COMPUTADORES" | "TUBOS_DE_ENSAIO")[]
+
 export type SpaceQuery = {
     query: string
-    resources: string[]
+    resources: ResourceInfo
     capacity: number
 }
 
 export type SpaceInfo = {
+    id: number
     name: string
     capacity: number
     resources: string[]
 }
 
-export type HorarioData = "M-Aula1" | "M-Aula2" | "M-Aula3" | "M-Aula4" | "M-Aula5" | "V-Aula1" | "V-Aula2" | "V-Aula3" | "V-Aula4" | "V-Aula5" | "N-Aula1" | "N-Aula2" | "N-Aula3" | "N-Aula4"
+export type Schedules = "M_AULA_1" | "M_AULA_2" | "M_AULA_3" | "M_AULA_4" | "M_AULA_5" | "V_AULA_1" | "V_AULA_2" | "V_AULA_3" | "V_AULA_4" | "V_AULA_5" | "N_AULA_1" | "N_AULA_2" | "N_AULA_3" | "N_AULA_4"

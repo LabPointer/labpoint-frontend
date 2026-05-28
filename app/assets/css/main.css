@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+@custom-variant dark (&:where(.dark, .dark *));
 
 * {
     @apply duration-200 ease-out;
@@ -8,9 +9,11 @@
 }
 
 body {
-    @apply bg-neutral-100 text-neutral-900;
+    @apply text-neutral-900 dark:text-white bg-linear-to-br from-[color-mix(in_oklab,var(--color-violet-500),white_80%)] to-white dark:from-[color-mix(in_oklab,var(--color-violet-800),black_60%)] dark:to-black;
 }
 
-#query-form > * {
+#query-form>* {
     @apply transition-all duration-200 ease-out;
 }
+/*bg-linear-to-tr from-[color-mix(in_oklab,var(--color-yellow-800),black_60%)] to-black*/
+/*text-neutral-900 dark:text-white bg-linear-to-br from-white via-indigo-100/50 to-white dark:from-neutral-900 dark:via-indigo-950/50 dark:to-neutral-900*/
