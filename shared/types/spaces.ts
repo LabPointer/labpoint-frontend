@@ -2,7 +2,7 @@
 
 export type SpaceQuery = {
     query: string
-    resources: ResourceInfo
+    resources: number[]
     capacity: number
 }
 

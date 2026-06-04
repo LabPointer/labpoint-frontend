@@ -3,58 +3,27 @@ import type { SelectMenuItem } from '@nuxt/ui';
 import { useDebounceFn, type onStartTyping } from '@vueuse/core';
 import type { SpaceQuery } from '~~/shared/types';
 
+const props = defineProps<{ resources: Map<number, string> }>()
+
 const emit = defineEmits<{
     (e: 'onQuery', filters: SpaceQuery): void
 }>()
 
+//const resourceItems = ref<string[]>(props.resources.values().toArray())
+
 const query = ref('')
 const capacity = ref<number>(0)
-const resourceSearch = ref('')
-const handleFilterChange = useDebounceFn((newResourceSearch: string) => {
-    resourceSearch.value = newResourceSearch;
-    refresh();
-}, 100);
-const { data: resources, status, pending, error, refresh } = useAsyncData("resources", async () => {
-    const api = useApi();
-    const { data, error, response } = await api.GET("/resources", {
-        params: {
-            query: {
-                name: resourceSearch.value
-            }
-        }
-    });
+const resourceValues = ref<string[]>([])
 
-    return { data, error };
-}, {
-    watch: [resourceSearch],
-    immediate: true,
-    server: false,
-})
-const resourceItems = computed(() => {
-    console.log("RESOURCE")
-    const { value } = resources;
-    if (!value) return [];
-    const data = value.data;
-    if (!data) return []
-    return data.map(r => {
-        return {
-            type: 'item',
-            label: r.name ?? "Unknow",
-            value: r.id ?? 0,
-        } as SelectMenuItem
-    })
-})
-const resourceValues = ref<{
-    label: string;
-    value: string;
-    icon: string;
-}[]>([])
 
 // Watch for variable changes and emit callback
 watch([query, resourceValues, capacity], () => {
+    const keys = resourceValues.value.map(valor => {
+        return [...props.resources.entries()].find(([k, v]) => v === valor)?.[0] as number;
+    })
     emit('onQuery', {
         query: query.value,
-        resources: resourceValues.value.map((resource) => resource.value as "TELAO" | "COMPUTADORES" | "TUBOS_DE_ENSAIO"),
+        resources: keys,
         capacity: capacity.value
     })
 }, { deep: true })
@@ -81,8 +50,8 @@ watch([query, resourceValues, capacity], () => {
 
                 <!-- Resources Dropdown (Multi-select) -->
                 <div class="w-full md:w-auto">
-                    <USelectMenu v-model="resourceValues" :items="resourceItems" multiple placeholder="Recursos..."
-                        icon="i-lucide-filter" size="md" @update:search-term="handleFilterChange" value-attribute="value"
+                    <USelectMenu v-model="resourceValues" :items="props.resources.values().toArray()" multiple
+                        placeholder="Recursos..." icon="i-lucide-filter" size="md"
                         option-attribute="label" class="min-w-50 w-full md:max-w-50" :ui="{
                             base: 'rounded-md'
                         }" :search-input="{

@@ -14,7 +14,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Cria uma matéria
+         * Criar uma matéria
          * @description Cria uma matéria no sistema
          */
         post: operations["createSubject"];
@@ -34,7 +34,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Cria um novo espaço
+         * Criar um novo espaço
          * @description Cria um novo espaço no sistema
          */
         post: operations["postCreateSpace"];
@@ -54,7 +54,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Cria um recurso
+         * Criar um recurso
          * @description Cria um recurso no sistema
          */
         post: operations["postCreateResource"];
@@ -74,8 +74,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Cria uma nova reserva
-         * @description Cria uma reserva para um espaço específico na data e horários fornecidos
+         * Criar uma nova reserva
+         * @description Criar uma reserva para um espaço específico na data e horários fornecidos
          */
         post: operations["postCreateReserve"];
         delete?: never;
@@ -94,7 +94,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Registra um novo usuário
+         * Registrar um novo usuário
          * @description Registra um novo usuário no sistema
          */
         post: operations["postRegister"];
@@ -114,7 +114,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Logout
+         * Realizar logout
          * @description Realiza o logout do usuário
          */
         post: operations["PostLogout"];
@@ -134,7 +134,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Login
+         * Realizar login
          * @description Realiza o login do usuário
          */
         post: operations["postLogin"];
@@ -158,7 +158,7 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Edita uma matéria
+         * Editar uma matéria
          * @description Edita uma matéria no sistema
          */
         patch: operations["updateSubject"];
@@ -198,7 +198,7 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Edita um recurso
+         * Editar um recurso
          * @description Edita um recurso no sistema
          */
         patch: operations["updateResource"];
@@ -218,7 +218,7 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Atualiza as informações da reserva
+         * Atualizar as informações da reserva
          * @description Atualiza as informações da reserva
          */
         patch: operations["updateReserve"];
@@ -238,7 +238,7 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Atualiza as informações do usuario
+         * Atualizar as informações do usuario
          * @description Atualiza as informações do usuario no sistema
          */
         patch: operations["patchUpdate"];
@@ -252,10 +252,30 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Lista todas as matérias
+         * Listar todas as matérias
          * @description Lista todas as matérias cadastradas
          */
         get: operations["getSubjects"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/subjects/cache": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Listar todas as materias cacheadas
+         * @description Lista todas as matérias. Destinado ao autocomplete
+         */
+        get: operations["getCachedSubjects"];
         put?: never;
         post?: never;
         delete?: never;
@@ -272,7 +292,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Busca por laboratorios
+         * Buscar por laboratorios
          * @description Retorna uma lista de laboratorios
          */
         get: operations["getSpaces"];
@@ -292,10 +312,30 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Busca por recursos
-         * @description Retorna uma lista de recursos. Destinado ao autocomplete.
+         * Buscar por recursos
+         * @description Retorna uma lista de recursos.
          */
         get: operations["getResources"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/resources/cache": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Listar recursos cache
+         * @description Retorna uma lista de recursos. Destinado ao autocomplete.
+         */
+        get: operations["getResourcesCache"];
         put?: never;
         post?: never;
         delete?: never;
@@ -312,7 +352,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Busca reservas por espaço e data
+         * Buscar reservas por espaço e data
          * @description Retorna uma lista de reservas para um determinado espaço em uma data específica
          */
         get: operations["getReserves"];
@@ -332,7 +372,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Busca reservas por espaço e data
+         * Buscar reservas por espaço e data
          * @description Retorna uma lista de reservas para um determinado espaço em uma data específica
          */
         get: operations["getReservesFromSpace"];
@@ -352,8 +392,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Login
-         * @description Realiza o login do usuário
+         * Pesquisar por usuarios
+         * @description Filtra e retorna usuarios encontrados. OBS: A rota funciona apenas para admins
          */
         get: operations["getUsers"];
         put?: never;
@@ -364,7 +404,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/subjects/delete/{id}": {
+    "/subjects/delete": {
         parameters: {
             query?: never;
             header?: never;
@@ -375,7 +415,7 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * Deleta uma matéria
+         * Deletar uma matéria
          * @description Deleta uma matéria no sistema
          */
         delete: operations["deleteSubject"];
@@ -384,7 +424,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/spaces/delete/{id}": {
+    "/spaces/delete": {
         parameters: {
             query?: never;
             header?: never;
@@ -395,7 +435,7 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * Deleta um espaço
+         * Deletar um espaço
          * @description Deleta um espaço do sistema
          */
         delete: operations["deleteSpace"];
@@ -404,7 +444,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/resources/delete/{id}": {
+    "/resources/delete": {
         parameters: {
             query?: never;
             header?: never;
@@ -415,7 +455,7 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * Deleta um recurso
+         * Deletar um recurso
          * @description Deleta um recurso no sistema
          */
         delete: operations["deleteResource"];
@@ -435,7 +475,7 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * Deleta um conjunto de reservas
+         * Deletar um conjunto de reservas
          * @description Deleta/cancela um conjunto de reservas do sistema
          */
         delete: operations["deleteReserve"];
@@ -449,15 +489,15 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         ErroResponseDTO: {
-            message?: string;
+            message: string;
         };
         CreateSpaceRequestDTO: {
             name: string;
             description?: string;
             /** Format: int32 */
             capacity: number;
-            resources?: string[];
-            subjects?: string[];
+            resources?: number[];
+            subjects?: number[];
         };
         CreateReserveRequestDTO: {
             dates: string[];
@@ -482,7 +522,7 @@ export interface components {
             username: string;
             role: string;
             /** Format: int64 */
-            tokenExpireIn?: number;
+            tokenExpireIn: number;
         };
         Subject: {
             /** Format: int32 */
@@ -493,13 +533,13 @@ export interface components {
             name?: string;
             /** Format: int32 */
             capacity?: number;
-            resources?: string[];
-            subjects?: string[];
+            resources?: number[];
+            subjects?: number[];
         };
         Resource: {
             /** Format: int32 */
-            id?: number;
-            name?: string;
+            id: number;
+            name: string;
         };
         UpdateReserveRequestDTO: {
             /** Format: date */
@@ -546,8 +586,8 @@ export interface components {
             role?: "OWNER" | "ADMIN" | "USER";
             enabled?: boolean;
             authorities?: components["schemas"]["GrantedAuthority"][];
-            credentialsNonExpired?: boolean;
             accountNonExpired?: boolean;
+            credentialsNonExpired?: boolean;
             accountNonLocked?: boolean;
         };
         UserUpdateRequestDTO: {
@@ -577,17 +617,17 @@ export interface components {
             name: string;
             /** Format: int32 */
             capacity: number;
-            resources?: string[];
-            subjects?: string[];
+            resources?: number[];
+            subjects?: number[];
         };
         SpacesResponseDTO: {
-            spaces?: components["schemas"]["SpaceDTO"][];
+            spaces: components["schemas"]["SpaceDTO"][];
             /** Format: int32 */
-            offset?: number;
+            offset: number;
             /** Format: int32 */
-            limit?: number;
+            limit: number;
             /** Format: int32 */
-            total?: number;
+            total: number;
         };
         ReserveResponseDTO: {
             /** Format: date */
@@ -597,6 +637,7 @@ export interface components {
         UserRequestDTO: {
             registration?: string;
             username?: string;
+            /** Format: email */
             email?: string;
             /** @enum {string} */
             role?: "OWNER" | "ADMIN" | "USER";
@@ -604,6 +645,15 @@ export interface components {
             offset?: number;
             /** Format: int32 */
             limit?: number;
+        };
+        DeleteSubjectRequestDTO: {
+            subjectIds: number[];
+        };
+        DeleteSpaceDTO: {
+            spaceIds: number[];
+        };
+        DeleteResourceRequestDTO: {
+            resourceIds: number[];
         };
         DeleteReserveRequestDTO: {
             reserveIds: number[];
@@ -823,12 +873,14 @@ export interface operations {
                     "*/*": components["schemas"]["LoginResponseDTO"];
                 };
             };
-            /** @description Usuário ou senha incorretos */
-            401: {
+            /** @description Matricula ou senha incorretos, conta desabilitada ou conta trancada */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
             };
         };
     };
@@ -1054,6 +1106,26 @@ export interface operations {
             };
         };
     };
+    getCachedSubjects: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Matérias listadas com sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Subject"][];
+                };
+            };
+        };
+    };
     getSpaces: {
         parameters: {
             query?: {
@@ -1116,6 +1188,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    getResourcesCache: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Recursos encontrados */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Resource"][];
+                };
             };
         };
     };
@@ -1186,8 +1278,13 @@ export interface operations {
     };
     getUsers: {
         parameters: {
-            query: {
-                params: components["schemas"]["UserRequestDTO"];
+            query?: {
+                registration?: string;
+                username?: string;
+                email?: string;
+                role?: "OWNER" | "ADMIN" | "USER";
+                offset?: number;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -1195,7 +1292,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Login realizado com sucesso */
+            /** @description Retorna lista de usuarios encontrados */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1217,12 +1314,14 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                id: number;
-            };
+            path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["DeleteSubjectRequestDTO"];
+            };
+        };
         responses: {
             /** @description Matéria deletada com sucesso */
             204: {
@@ -1246,12 +1345,14 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                id: number;
-            };
+            path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteSpaceDTO"];
+            };
+        };
         responses: {
             /** @description Espaço deletado com sucesso */
             204: {
@@ -1273,12 +1374,14 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                id: number;
-            };
+            path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["DeleteResourceRequestDTO"];
+            };
+        };
         responses: {
             /** @description Recurso deletado com sucesso */
             204: {
