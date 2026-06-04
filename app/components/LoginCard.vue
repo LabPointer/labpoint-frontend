@@ -37,7 +37,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         if (status !== 200 || !res.data) {
             toast.error({
                 title: 'Erro',
-                message: 'Matricula ou senha invalidos!',
+                message: `Falha ao realizar login: ${res.error ? res.error.message : ""}`,
                 color: 'red',
                 position: 'bottomCenter',
                 timeout: 3000,

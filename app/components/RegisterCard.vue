@@ -7,12 +7,12 @@ const route = useRoute()
 const api = useApi()
 
 const schema = z.object({
-    username: z.string().min(4, 'Nome de usuario deve ter pelo menos 4 caracteres'),
-    email: z.email('Email invalido'),
-    registration: z.string().min(6, 'Matricula deve ter pelo menos 6 caracteres'),
-    password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
-    passwordConfirm: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
-    role: z.enum(['OWNER', 'ADMIN', 'USER'])
+    username: z.string().min(5, 'Nome de usuario deve ter pelo menos 5 caracteres').max(32, "Nome de usuario nao pode ter mais de 32 caracteres"),
+    email: z.email('Email invalido').max(320, 'Email nao pode ser acima de 320 caracteres'),
+    registration: z.string().min(5, 'Matricula deve ter pelo menos 5 caracteres').max(16, "Matricula nao deve ter no maximo 16 caracteres"),
+    password: z.string().min(5, 'Senha deve ter pelo menos 5 caracteres').max(16, "Senha deve ter no maximo 16 caracteres"),
+    passwordConfirm: z.string().min(5, 'Senha deve ter pelo menos 5 caracteres'),
+    role: z.enum(['ADMIN', 'USER'])
 })
 
 type Schema = z.output<typeof schema>
@@ -42,6 +42,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         })
         return
     }
+
+    console.log(event.data)
     
     isLoading.value = true
     api.POST("/auth/register", {
@@ -77,7 +79,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                 navigateTo('/')
             }
         })
-    }).catch(error => {
+    }).catch((error) => {
         toast.error({
             title: 'Erro',
             message: `Falha ao tentar realizar login!\n${error}`,
@@ -125,7 +127,7 @@ function onReset() {
                 </UFormField>
 
                 <UFormField label="Cargo" name="role">
-                    <USelect v-model="state.role" :items="['OWNER', 'ADMIN', 'USER']" class="w-full"
+                    <USelect v-model="state.role" :items="['ADMIN', 'USER']" class="w-full"
                         :disabled="isLoading" />
                 </UFormField>
 

@@ -24,7 +24,7 @@ const queryParams = computed(() => {
   }
 })
 
-const { data: spaces, status, pending, error, refresh } = useAsyncData("spaces", async () => {
+const { data: spaces, status, pending, error, refresh } = useAsyncData("home-spaces", async () => {
   const api = useApi();
   const { data, error, response } = await api.GET("/spaces", {
     params: {
@@ -46,10 +46,31 @@ const { data: spaces, status, pending, error, refresh } = useAsyncData("spaces",
   server: false,
 })
 
+const { data: resources, status: resourceStatus } = useAsyncData("home-resources", async () => {
+  const api = useApi();
+  const { data, error, response } = await api.GET("/resources/cache");
+
+  return { data, error };
+}, {
+  immediate: true,
+  server: false,
+})
+
+const resourceOptions = computed(() => {
+  const resourceHash = new Map<number, string>();
+  if (resources.value?.data) {
+    resources.value.data.forEach((v) => {
+        resourceHash.set(v.id, v.name)
+    })
+  }
+
+  return resourceHash
+})
+
 const handleFilterChange = useDebounceFn((newFilters: SpaceQuery) => {
-  filters.value = newFilters;
-  refresh();
-}, 200);
+  filters.value = newFilters
+  refresh()
+}, 200)
 
 const getSpacesCount = computed(() => spaces.value?.data?.spaces?.length || 0);
 
@@ -74,7 +95,7 @@ const onReserveClosePopup = () => {
 
   <UMain class="min-h-[calc(100vh-161px)] flex flex-col gap-y-6 my-4 mb-8 w-full px-4">
     <!-- Barra de Pesquisa -->
-    <SpaceSearchBar @onQuery="handleFilterChange" />
+    <SpaceSearchBar :resources="resourceOptions" @onQuery="handleFilterChange" />
 
     <section class="max-w-5xl mx-auto w-full px-4 flex flex-col gap-6">
 
@@ -128,7 +149,7 @@ const onReserveClosePopup = () => {
       <div v-else-if="hasSpaces"
         class="w-full justify-items-center items-center grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         <SpaceCard v-for="space in getSpaces" :key="space.id" :id="space.id" :name="space.name as string"
-          :capacity="space.capacity" :resources="space.resources || []" @onReserve="onReserveOpenPopup" />
+          :capacity="space.capacity" :resources="space.resources?.map((id) => resourceOptions.get(id) as string) || []" @onReserve="onReserveOpenPopup" />
       </div>
 
     </section>
