@@ -33,7 +33,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'Labpoint',
       },
     ],
     links: [
@@ -50,7 +50,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const { theme } = Route.useRouteContext();
 
   return (
-    <html lang="en" className={ theme }>
+    <html lang="pt-BR" className={ theme }>
       <head>
         <HeadContent />
       </head>
