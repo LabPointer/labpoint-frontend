@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PrivateRouteRouteImport } from './routes/_private/route'
 import { Route as PublicRouteRouteImport } from './routes/_public/route'
+import { Route as PrivateHistoryRouteImport } from './routes/_private/history'
 import { Route as PrivateHomeRouteImport } from './routes/_private/home'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicForgetPasswordRouteImport } from './routes/_public/forget-password'
@@ -23,6 +24,11 @@ const PrivateRouteRoute = PrivateRouteRouteImport.update({
 const PublicRouteRoute = PublicRouteRouteImport.update({
   id: '/_public',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PrivateHistoryRoute = PrivateHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => PrivateRouteRoute,
 } as any)
 const PrivateHomeRoute = PrivateHomeRouteImport.update({
   id: '/home',
@@ -47,12 +53,14 @@ const PublicSignUpRoute = PublicSignUpRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
+  '/history': typeof PrivateHistoryRoute
   '/home': typeof PrivateHomeRoute
   '/forget-password': typeof PublicForgetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
+  '/history': typeof PrivateHistoryRoute
   '/home': typeof PrivateHomeRoute
   '/forget-password': typeof PublicForgetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
@@ -61,6 +69,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_private': typeof PrivateRouteRouteWithChildren
   '/_public': typeof PublicRouteRouteWithChildren
+  '/_private/history': typeof PrivateHistoryRoute
   '/_private/home': typeof PrivateHomeRoute
   '/_public/forget-password': typeof PublicForgetPasswordRoute
   '/_public/sign-up': typeof PublicSignUpRoute
@@ -68,13 +77,14 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/home' | '/forget-password' | '/sign-up'
+  fullPaths: '/' | '/history' | '/home' | '/forget-password' | '/sign-up'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/home' | '/forget-password' | '/sign-up'
+  to: '/' | '/history' | '/home' | '/forget-password' | '/sign-up'
   id:
     | '__root__'
     | '/_private'
     | '/_public'
+    | '/_private/history'
     | '/_private/home'
     | '/_public/forget-password'
     | '/_public/sign-up'
@@ -101,6 +111,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof PublicRouteRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_private/history': {
+      id: '/_private/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof PrivateHistoryRouteImport
+      parentRoute: typeof PrivateRouteRoute
     }
     '/_private/home': {
       id: '/_private/home'
@@ -134,10 +151,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface PrivateRouteRouteChildren {
+  PrivateHistoryRoute: typeof PrivateHistoryRoute
   PrivateHomeRoute: typeof PrivateHomeRoute
 }
 
 const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
+  PrivateHistoryRoute: PrivateHistoryRoute,
   PrivateHomeRoute: PrivateHomeRoute,
 }
 

@@ -17,11 +17,9 @@ interface MyRouterContext {
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
-  beforeLoad: async ({ context }) => {
+  beforeLoad: async () => {
     const theme = await getThemeServerFn() as z.infer<typeof setThemeValidator>;
-    context.theme = theme;
-
-    return theme;
+    return { theme };
   },
   head: () => ({
     meta: [
@@ -50,7 +48,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const { theme } = Route.useRouteContext();
 
   return (
-    <html lang="pt-BR" className={ theme }>
+    <html lang="pt-BR" className={theme === 'light' ? '' : 'dark'} suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

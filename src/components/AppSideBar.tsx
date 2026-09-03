@@ -1,5 +1,13 @@
 import { createLink } from "@tanstack/react-router";
-import { Building, Clipboard, FlaskConical, History, Home, Users } from "lucide-react";
+import {
+	Building,
+	Clipboard,
+	FlaskConical,
+	History,
+	Home,
+	LogOut,
+	Users,
+} from "lucide-react";
 import {
 	Sidebar,
 	SidebarContent,
@@ -11,7 +19,9 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "./ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 export function AppSidebar() {
 	const LinkButton = createLink(Button);
@@ -28,9 +38,7 @@ export function AppSidebar() {
 						/>
 					</div>
 					<div className="min-w-0">
-						<p className="truncate text-lg font-bold tracking-wide">
-							Labpoint
-						</p>
+						<p className="truncate text-lg font-bold tracking-wide">Labpoint</p>
 					</div>
 				</div>
 			</SidebarHeader>
@@ -48,7 +56,7 @@ export function AppSidebar() {
 											to="/home"
 											variant="ghost"
 											activeProps={{
-                                                variant: "default",
+												variant: "default",
 												className: "hover:bg-violet-600 hover:text-white",
 											}}
 											className="h-10 justify-start gap-3 rounded-xl px-3"
@@ -58,13 +66,13 @@ export function AppSidebar() {
 										</LinkButton>
 									}
 								/>
-                                <SidebarMenuButton
+								<SidebarMenuButton
 									render={
 										<LinkButton
 											to="/history"
 											variant="ghost"
 											activeProps={{
-                                                variant: "default",
+												variant: "default",
 												className: "hover:bg-violet-600 hover:text-white",
 											}}
 											className="h-10 justify-start gap-3 rounded-xl px-3"
@@ -78,7 +86,7 @@ export function AppSidebar() {
 						</SidebarMenu>
 					</SidebarGroupContent>
 				</SidebarGroup>
-                <SidebarGroup className="px-3 py-5">
+				<SidebarGroup className="px-3 py-5">
 					<p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">
 						Administração
 					</p>
@@ -91,7 +99,7 @@ export function AppSidebar() {
 											to="/manage-spaces"
 											variant="ghost"
 											activeProps={{
-                                                variant: "default",
+												variant: "default",
 												className: "hover:bg-violet-600 hover:text-white",
 											}}
 											className="h-10 justify-start gap-3 rounded-xl px-3"
@@ -101,13 +109,13 @@ export function AppSidebar() {
 										</LinkButton>
 									}
 								/>
-                                <SidebarMenuButton
+								<SidebarMenuButton
 									render={
 										<LinkButton
 											to="/manage-reservations"
 											variant="ghost"
 											activeProps={{
-                                                variant: "default",
+												variant: "default",
 												className: "hover:bg-violet-600 hover:text-white",
 											}}
 											className="h-10 justify-start gap-3 rounded-xl px-3"
@@ -117,13 +125,13 @@ export function AppSidebar() {
 										</LinkButton>
 									}
 								/>
-                                <SidebarMenuButton
+								<SidebarMenuButton
 									render={
 										<LinkButton
 											to="/manage-users"
 											variant="ghost"
 											activeProps={{
-                                                variant: "default",
+												variant: "default",
 												className: "hover:bg-violet-600 hover:text-white",
 											}}
 											className="h-10 justify-start gap-3 rounded-xl px-3"
@@ -139,7 +147,23 @@ export function AppSidebar() {
 				</SidebarGroup>
 			</SidebarContent>
 			<SidebarFooter className="border-t border-sidebar-border/70 px-5 py-4">
-				<p className="text-xs text-[color:var(--sea-ink-soft)]">Labpoint</p>
+				<div className="flex items-center gap-3">
+					<Avatar size="lg">
+						<AvatarImage src="https://github.com/shadcn.png" />
+						<AvatarFallback>LM</AvatarFallback>
+					</Avatar>
+
+					<div className="flex flex-col justify-center min-w-0">
+						<span className="truncate text-sm font-semibold">Labpoint</span>
+						<span className="truncate text-xs text-[color:var(--sea-ink-soft)]">
+							Admin
+						</span>
+					</div>
+
+					<LinkButton to="/" variant={"destructive"} size={"icon-lg"} className="ml-auto">
+						<LogOut className="size-4" />
+					</LinkButton>
+				</div>
 			</SidebarFooter>
 		</Sidebar>
 	);

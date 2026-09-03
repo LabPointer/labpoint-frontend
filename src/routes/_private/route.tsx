@@ -38,7 +38,7 @@ function RouteComponent() {
                         </div>
                         
 					</header>
-					<div className="p-4 md:p-8">
+					<div className="p-4 md:p-8 min-h-[calc(100vh-4rem)]">
 						<Outlet />
 					</div>
 				</main>

@@ -10,7 +10,10 @@
 
 @import "@fontsource-variable/oxanium";
 
-@custom-variant dark {
+@custom-variant dark (&:is(.dark *));
+
+/*
+@variant dark {
   &:is(.dark) {
     @slot;
   }
@@ -20,6 +23,7 @@
     }
   }
 }
+*/
 
 :root {
   --sea-ink: #173a40;
@@ -42,7 +46,7 @@
   --hero-a: rgba(79, 184, 178, 0.36);
   --hero-b: rgba(47, 106, 74, 0.2);
   --background-gradient-from: #ffffff;
-  --background-gradient-to: #e9d5ff;
+  --background-gradient-to: #f3e7ff;
 
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -328,7 +332,7 @@ a {
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/50 transition-colors transition-shadow duration-300;
   }
   body {
     background-color: var(--background);
@@ -346,4 +350,8 @@ a {
   html {
     @apply font-sans;
   }
+}
+
+.container {
+  @apply mx-auto max-w-5xl px-4 sm:px-6 lg:px-8;
 }

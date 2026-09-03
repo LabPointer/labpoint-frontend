@@ -4,9 +4,9 @@ import * as z from "zod";
 
 const storageKey = "app-theme";
 export const getThemeServerFn = createServerFn().handler(
-	() => getCookie(storageKey) ?? "auto",
+	() => getCookie(storageKey) ?? "light",
 );
-export const setThemeValidator = z.enum(["light", "dark", "auto"]);
+export const setThemeValidator = z.enum(["light", "dark"]);
 export const setThemeServerFn = createServerFn()
 	.validator(setThemeValidator)
 	.handler(({ data }) => setCookie(storageKey, data));
