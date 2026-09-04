@@ -16,6 +16,7 @@ import { Route as PrivateHomeRouteImport } from './routes/_private/home'
 import { Route as PrivateManageReservesRouteImport } from './routes/_private/manage-reserves'
 import { Route as PrivateManageSpacesRouteImport } from './routes/_private/manage-spaces'
 import { Route as PrivateManageUsersRouteImport } from './routes/_private/manage-users'
+import { Route as PrivateReportRouteImport } from './routes/_private/report'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicForgetPasswordRouteImport } from './routes/_public/forget-password'
 import { Route as PublicSignUpRouteImport } from './routes/_public/sign-up'
@@ -53,6 +54,11 @@ const PrivateManageUsersRoute = PrivateManageUsersRouteImport.update({
   path: '/manage-users',
   getParentRoute: () => PrivateRouteRoute,
 } as any)
+const PrivateReportRoute = PrivateReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
 const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/manage-reserves': typeof PrivateManageReservesRoute
   '/manage-spaces': typeof PrivateManageSpacesRoute
   '/manage-users': typeof PrivateManageUsersRoute
+  '/report': typeof PrivateReportRoute
   '/forget-password': typeof PublicForgetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
 }
@@ -86,6 +93,7 @@ export interface FileRoutesByTo {
   '/manage-reserves': typeof PrivateManageReservesRoute
   '/manage-spaces': typeof PrivateManageSpacesRoute
   '/manage-users': typeof PrivateManageUsersRoute
+  '/report': typeof PrivateReportRoute
   '/forget-password': typeof PublicForgetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
 }
@@ -98,6 +106,7 @@ export interface FileRoutesById {
   '/_private/manage-reserves': typeof PrivateManageReservesRoute
   '/_private/manage-spaces': typeof PrivateManageSpacesRoute
   '/_private/manage-users': typeof PrivateManageUsersRoute
+  '/_private/report': typeof PrivateReportRoute
   '/_public/forget-password': typeof PublicForgetPasswordRoute
   '/_public/sign-up': typeof PublicSignUpRoute
   '/_public/': typeof PublicIndexRoute
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
     | '/manage-reserves'
     | '/manage-spaces'
     | '/manage-users'
+    | '/report'
     | '/forget-password'
     | '/sign-up'
   fileRoutesByTo: FileRoutesByTo
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
     | '/manage-reserves'
     | '/manage-spaces'
     | '/manage-users'
+    | '/report'
     | '/forget-password'
     | '/sign-up'
   id:
@@ -132,6 +143,7 @@ export interface FileRouteTypes {
     | '/_private/manage-reserves'
     | '/_private/manage-spaces'
     | '/_private/manage-users'
+    | '/_private/report'
     | '/_public/forget-password'
     | '/_public/sign-up'
     | '/_public/'
@@ -193,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateManageUsersRouteImport
       parentRoute: typeof PrivateRouteRoute
     }
+    '/_private/report': {
+      id: '/_private/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof PrivateReportRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
     '/_public/': {
       id: '/_public/'
       path: '/'
@@ -223,6 +242,7 @@ interface PrivateRouteRouteChildren {
   PrivateManageReservesRoute: typeof PrivateManageReservesRoute
   PrivateManageSpacesRoute: typeof PrivateManageSpacesRoute
   PrivateManageUsersRoute: typeof PrivateManageUsersRoute
+  PrivateReportRoute: typeof PrivateReportRoute
 }
 
 const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
@@ -231,6 +251,7 @@ const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
   PrivateManageReservesRoute: PrivateManageReservesRoute,
   PrivateManageSpacesRoute: PrivateManageSpacesRoute,
   PrivateManageUsersRoute: PrivateManageUsersRoute,
+  PrivateReportRoute: PrivateReportRoute,
 }
 
 const PrivateRouteRouteWithChildren = PrivateRouteRoute._addFileChildren(

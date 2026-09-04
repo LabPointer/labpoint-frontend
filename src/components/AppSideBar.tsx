@@ -1,6 +1,7 @@
 import { createLink } from "@tanstack/react-router";
 import {
 	Building,
+	ChartBar,
 	Clipboard,
 	FlaskConical,
 	History,
@@ -88,7 +89,7 @@ export function AppSidebar() {
 				</SidebarGroup>
 				<SidebarGroup className="px-3 py-5">
 					<p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">
-						Administração
+						Coordenação
 					</p>
 					<SidebarGroupContent>
 						<SidebarMenu>
@@ -138,6 +139,33 @@ export function AppSidebar() {
 										>
 											<Users aria-hidden="true" className="size-4" />
 											<span>Gerenciar usuarios</span>
+										</LinkButton>
+									}
+								/>
+							</SidebarMenuItem>
+						</SidebarMenu>
+					</SidebarGroupContent>
+				</SidebarGroup>
+				<SidebarGroup className="px-3 py-5">
+					<p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">
+						Diretoria
+					</p>
+					<SidebarGroupContent>
+						<SidebarMenu>
+							<SidebarMenuItem>
+								<SidebarMenuButton
+									render={
+										<LinkButton
+											to="/report"
+											variant="ghost"
+											activeProps={{
+												variant: "default",
+												className: "hover:bg-violet-600 hover:text-white",
+											}}
+											className="h-10 justify-start gap-3 rounded-xl px-3"
+										>
+											<ChartBar aria-hidden="true" className="size-4" />
+											<span>Relatórios</span>
 										</LinkButton>
 									}
 								/>
