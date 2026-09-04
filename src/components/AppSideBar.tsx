@@ -112,7 +112,7 @@ export function AppSidebar() {
 								<SidebarMenuButton
 									render={
 										<LinkButton
-											to="/manage-reservations"
+											to="/manage-reserves"
 											variant="ghost"
 											activeProps={{
 												variant: "default",

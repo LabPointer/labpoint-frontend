@@ -1,6 +1,6 @@
 import { Calendar, Clock, MapPin, Pencil, Users, X } from "lucide-react";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 import {
 	Card,
 	CardAction,
@@ -8,7 +8,7 @@ import {
 	CardFooter,
 	CardHeader,
 	CardTitle,
-} from "./ui/card";
+} from "../ui/card";
 
 export interface HistoryCardProps {
 	title?: string;
@@ -34,7 +34,7 @@ export function HistoryCard({
 	onCancel,
 }: HistoryCardProps) {
 	return (
-		<Card className="rounded-2xl border bg-white dark:bg-neutral-900/50 dark:border-neutral-800 shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col gap-4">
+		<Card className="bg-white dark:bg-white/5 rounded-md border dark:border-violet-500/10 shadow-md hover:shadow-lg p-4 dark:shadow-violet-300/15">
 			<CardHeader className="p-0 border-0 flex flex-row items-start justify-between">
 				<div className="flex flex-col gap-1">
 					<CardTitle className="text-lg font-bold text-foreground">

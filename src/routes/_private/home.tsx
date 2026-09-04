@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { SpaceCard } from "#/components/SpaceCard";
-import { SpaceSearchBar } from "#/components/SpaceSearchBar";
+import { SpaceCard } from "#/components/home/SpaceCard";
+import { SpaceSearchBar } from "#/components/home/SpaceSearchBar";
 
 export const Route = createFileRoute("/_private/home")({
 	component: RouteComponent,
@@ -17,7 +17,7 @@ function RouteComponent() {
 					<h2 className="text-xl font-bold">Laboratórios</h2>
 					<span className="text-sm font-bold">Encontrados: 0</span>
 				</div>
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+				<div className="w-full grid grid-cols-[repeat(auto-fit,minmax(264px,1fr))] justify-center gap-6">
 					<SpaceCard />
 					<SpaceCard />
 					<SpaceCard />
