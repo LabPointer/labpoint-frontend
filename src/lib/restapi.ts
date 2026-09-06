@@ -25,8 +25,8 @@ const authMiddleware: Middleware = {
       } catch (err) {
         console.error("Error signing out in 401:", err);
       }
-      if (typeof window !== "undefined" && window.location.pathname !== "/sign-in") {
-        window.location.href = "/sign-in";
+      if (typeof window !== "undefined" && window.location.pathname !== "/") {
+        window.location.href = "/";
       }
     }
     return response;

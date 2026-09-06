@@ -60,7 +60,7 @@ export function ForgetPasswordForm() {
     });
 
     return (
-        <Card className="w-full sm:max-w-md bg-white/10 dark:bg-white/5 backdrop-blur-md">
+        <Card className="w-full sm:max-w-md bg-white shadow-md hover:shadow-lg dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15">
             <CardHeader className="pb-5 border-b">
                 <CardTitle className="font-bold">Recuperar senha</CardTitle>
                 <CardDescription>

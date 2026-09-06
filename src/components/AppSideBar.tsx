@@ -1,4 +1,4 @@
-import { createLink } from "@tanstack/react-router";
+import { createLink, useRouteContext, useRouter } from "@tanstack/react-router";
 import {
 	Building,
 	ChartBar,
@@ -23,9 +23,30 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { useApi } from "#/lib/restapi";
+import { setIsAuthenticated, setSessionServerFn } from "#/lib/session";
 
 export function AppSidebar() {
 	const LinkButton = createLink(Button);
+	const { sessionInfo } = useRouteContext({ from: "__root__" })
+	const api = useApi();
+	const router = useRouter();
+
+	async function handleLogout() {
+		const promises = [
+			await api.POST("/auth/sign-out"),
+			await setSessionServerFn({
+				data: {
+					username: undefined,
+					role: "USER",
+					expire_in: "",
+				}
+			}),
+			await setIsAuthenticated({ data: false }),
+			await router.invalidate()
+		]
+		await Promise.all(promises);
+	}
 
 	return (
 		<Sidebar className="border-sidebar-border/70">
@@ -178,19 +199,19 @@ export function AppSidebar() {
 				<div className="flex items-center gap-3">
 					<Avatar size="lg">
 						<AvatarImage src="https://github.com/shadcn.png" />
-						<AvatarFallback>LM</AvatarFallback>
+						<AvatarFallback>LP</AvatarFallback>
 					</Avatar>
 
 					<div className="flex flex-col justify-center min-w-0">
-						<span className="truncate text-sm font-semibold">Labpoint</span>
+						<span className="truncate text-sm font-semibold">{sessionInfo.username}</span>
 						<span className="truncate text-xs text-[color:var(--sea-ink-soft)]">
-							Admin
+							{sessionInfo.role}
 						</span>
 					</div>
 
-					<LinkButton to="/" variant={"destructive"} size={"icon-lg"} className="ml-auto">
+					<Button onClick={handleLogout} variant={"destructive"} size={"icon-lg"} className="ml-auto">
 						<LogOut className="size-4" />
-					</LinkButton>
+					</Button>
 				</div>
 			</SidebarFooter>
 		</Sidebar>

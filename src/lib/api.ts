@@ -526,8 +526,8 @@ export interface components {
         };
         Subject: {
             /** Format: int32 */
-            id?: number;
-            name?: string;
+            id: number;
+            name: string;
         };
         PatchSpaceRequestDTO: {
             name?: string;
@@ -574,6 +574,7 @@ export interface components {
             description?: string;
             /** Format: int32 */
             capacity?: number;
+            locked?: boolean;
         };
         User: {
             /** Format: uuid */
@@ -585,9 +586,10 @@ export interface components {
             /** @enum {string} */
             role?: "OWNER" | "ADMIN" | "USER";
             enabled?: boolean;
+            nickname?: string;
             authorities?: components["schemas"]["GrantedAuthority"][];
-            credentialsNonExpired?: boolean;
             accountNonExpired?: boolean;
+            credentialsNonExpired?: boolean;
             accountNonLocked?: boolean;
         };
         UserUpdateRequestDTO: {
@@ -617,8 +619,10 @@ export interface components {
             name: string;
             /** Format: int32 */
             capacity: number;
-            resources?: number[];
-            subjects?: number[];
+            description?: string;
+            resources?: components["schemas"]["Resource"][];
+            subjects?: components["schemas"]["Subject"][];
+            locked?: boolean;
         };
         SpacesResponseDTO: {
             spaces: components["schemas"]["SpaceDTO"][];
@@ -1135,6 +1139,7 @@ export interface operations {
                 subjects?: number[];
                 offset?: number;
                 limit?: number;
+                locked?: boolean;
             };
             header?: never;
             path?: never;
