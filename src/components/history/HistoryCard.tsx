@@ -15,21 +15,15 @@ export interface HistoryCardProps {
 	location?: string;
 	status?: string;
 	date?: string;
-	time?: string;
-	reservedBy?: string;
-	purpose?: string;
 	onEdit?: () => void;
 	onCancel?: () => void;
 }
 
 export function HistoryCard({
-	title = "Sala 101",
-	location = "Prédio principal",
-	status = "Confirmada",
-	date = "12 de maio de 2026",
-	time = "Matutino · 3h",
-	reservedBy = "João Silva",
-	purpose = "Workshop de Desenvolvimento Web",
+	title,
+	location,
+	status,
+	date,
 	onEdit,
 	onCancel,
 }: HistoryCardProps) {
@@ -62,6 +56,7 @@ export function HistoryCard({
 					<span>{date}</span>
 				</div>
 				<div className="flex items-center gap-2 text-foreground/90">
+					{/* TODO: Separe o horario por periodo(Matutino, Vespertino e Noturno) com a soma das horas aulas de cada periodo*/}
 					<Clock className="size-4 text-violet-500 dark:text-violet-400 shrink-0" />
 					<span>{time}</span>
 				</div>

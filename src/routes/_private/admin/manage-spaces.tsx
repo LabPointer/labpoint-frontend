@@ -2,7 +2,7 @@ import { ManageSpaceCard } from "#/components/manage-space/ManageSpaceCard"
 import { ManageSpaceSearchBar } from "#/components/manage-space/ManageSpaceSearchBar"
 import { createFileRoute } from "@tanstack/react-router"
 
-export const Route = createFileRoute('/_private/manage-spaces')({
+export const Route = createFileRoute('/_private/admin/manage-spaces')({
   component: RouteComponent,
 })
 

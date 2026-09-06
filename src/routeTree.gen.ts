@@ -11,15 +11,16 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PrivateRouteRouteImport } from './routes/_private/route'
 import { Route as PublicRouteRouteImport } from './routes/_public/route'
+import { Route as PrivateAdminRouteRouteImport } from './routes/_private/admin/route'
 import { Route as PrivateHistoryRouteImport } from './routes/_private/history'
 import { Route as PrivateHomeRouteImport } from './routes/_private/home'
-import { Route as PrivateManageReservesRouteImport } from './routes/_private/manage-reserves'
-import { Route as PrivateManageSpacesRouteImport } from './routes/_private/manage-spaces'
-import { Route as PrivateManageUsersRouteImport } from './routes/_private/manage-users'
-import { Route as PrivateReportRouteImport } from './routes/_private/report'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicForgetPasswordRouteImport } from './routes/_public/forget-password'
 import { Route as PublicSignUpRouteImport } from './routes/_public/sign-up'
+import { Route as PrivateAdminManageReservesRouteImport } from './routes/_private/admin/manage-reserves'
+import { Route as PrivateAdminManageSpacesRouteImport } from './routes/_private/admin/manage-spaces'
+import { Route as PrivateAdminManageUsersRouteImport } from './routes/_private/admin/manage-users'
+import { Route as PrivateAdminReportRouteImport } from './routes/_private/admin/report'
 
 const PrivateRouteRoute = PrivateRouteRouteImport.update({
   id: '/_private',
@@ -29,6 +30,11 @@ const PublicRouteRoute = PublicRouteRouteImport.update({
   id: '/_public',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivateAdminRouteRoute = PrivateAdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
 const PrivateHistoryRoute = PrivateHistoryRouteImport.update({
   id: '/history',
   path: '/history',
@@ -37,26 +43,6 @@ const PrivateHistoryRoute = PrivateHistoryRouteImport.update({
 const PrivateHomeRoute = PrivateHomeRouteImport.update({
   id: '/home',
   path: '/home',
-  getParentRoute: () => PrivateRouteRoute,
-} as any)
-const PrivateManageReservesRoute = PrivateManageReservesRouteImport.update({
-  id: '/manage-reserves',
-  path: '/manage-reserves',
-  getParentRoute: () => PrivateRouteRoute,
-} as any)
-const PrivateManageSpacesRoute = PrivateManageSpacesRouteImport.update({
-  id: '/manage-spaces',
-  path: '/manage-spaces',
-  getParentRoute: () => PrivateRouteRoute,
-} as any)
-const PrivateManageUsersRoute = PrivateManageUsersRouteImport.update({
-  id: '/manage-users',
-  path: '/manage-users',
-  getParentRoute: () => PrivateRouteRoute,
-} as any)
-const PrivateReportRoute = PrivateReportRouteImport.update({
-  id: '/report',
-  path: '/report',
   getParentRoute: () => PrivateRouteRoute,
 } as any)
 const PublicIndexRoute = PublicIndexRouteImport.update({
@@ -74,79 +60,107 @@ const PublicSignUpRoute = PublicSignUpRouteImport.update({
   path: '/sign-up',
   getParentRoute: () => PublicRouteRoute,
 } as any)
+const PrivateAdminManageReservesRoute =
+  PrivateAdminManageReservesRouteImport.update({
+    id: '/manage-reserves',
+    path: '/manage-reserves',
+    getParentRoute: () => PrivateAdminRouteRoute,
+  } as any)
+const PrivateAdminManageSpacesRoute =
+  PrivateAdminManageSpacesRouteImport.update({
+    id: '/manage-spaces',
+    path: '/manage-spaces',
+    getParentRoute: () => PrivateAdminRouteRoute,
+  } as any)
+const PrivateAdminManageUsersRoute = PrivateAdminManageUsersRouteImport.update({
+  id: '/manage-users',
+  path: '/manage-users',
+  getParentRoute: () => PrivateAdminRouteRoute,
+} as any)
+const PrivateAdminReportRoute = PrivateAdminReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => PrivateAdminRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
+  '/admin': typeof PrivateAdminRouteRouteWithChildren
   '/history': typeof PrivateHistoryRoute
   '/home': typeof PrivateHomeRoute
-  '/manage-reserves': typeof PrivateManageReservesRoute
-  '/manage-spaces': typeof PrivateManageSpacesRoute
-  '/manage-users': typeof PrivateManageUsersRoute
-  '/report': typeof PrivateReportRoute
   '/forget-password': typeof PublicForgetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
+  '/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
+  '/admin/manage-spaces': typeof PrivateAdminManageSpacesRoute
+  '/admin/manage-users': typeof PrivateAdminManageUsersRoute
+  '/admin/report': typeof PrivateAdminReportRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
+  '/admin': typeof PrivateAdminRouteRouteWithChildren
   '/history': typeof PrivateHistoryRoute
   '/home': typeof PrivateHomeRoute
-  '/manage-reserves': typeof PrivateManageReservesRoute
-  '/manage-spaces': typeof PrivateManageSpacesRoute
-  '/manage-users': typeof PrivateManageUsersRoute
-  '/report': typeof PrivateReportRoute
   '/forget-password': typeof PublicForgetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
+  '/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
+  '/admin/manage-spaces': typeof PrivateAdminManageSpacesRoute
+  '/admin/manage-users': typeof PrivateAdminManageUsersRoute
+  '/admin/report': typeof PrivateAdminReportRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_private': typeof PrivateRouteRouteWithChildren
   '/_public': typeof PublicRouteRouteWithChildren
+  '/_private/admin': typeof PrivateAdminRouteRouteWithChildren
   '/_private/history': typeof PrivateHistoryRoute
   '/_private/home': typeof PrivateHomeRoute
-  '/_private/manage-reserves': typeof PrivateManageReservesRoute
-  '/_private/manage-spaces': typeof PrivateManageSpacesRoute
-  '/_private/manage-users': typeof PrivateManageUsersRoute
-  '/_private/report': typeof PrivateReportRoute
   '/_public/forget-password': typeof PublicForgetPasswordRoute
   '/_public/sign-up': typeof PublicSignUpRoute
   '/_public/': typeof PublicIndexRoute
+  '/_private/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
+  '/_private/admin/manage-spaces': typeof PrivateAdminManageSpacesRoute
+  '/_private/admin/manage-users': typeof PrivateAdminManageUsersRoute
+  '/_private/admin/report': typeof PrivateAdminReportRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/history'
     | '/home'
-    | '/manage-reserves'
-    | '/manage-spaces'
-    | '/manage-users'
-    | '/report'
     | '/forget-password'
     | '/sign-up'
+    | '/admin/manage-reserves'
+    | '/admin/manage-spaces'
+    | '/admin/manage-users'
+    | '/admin/report'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/history'
     | '/home'
-    | '/manage-reserves'
-    | '/manage-spaces'
-    | '/manage-users'
-    | '/report'
     | '/forget-password'
     | '/sign-up'
+    | '/admin/manage-reserves'
+    | '/admin/manage-spaces'
+    | '/admin/manage-users'
+    | '/admin/report'
   id:
     | '__root__'
     | '/_private'
     | '/_public'
+    | '/_private/admin'
     | '/_private/history'
     | '/_private/home'
-    | '/_private/manage-reserves'
-    | '/_private/manage-spaces'
-    | '/_private/manage-users'
-    | '/_private/report'
     | '/_public/forget-password'
     | '/_public/sign-up'
     | '/_public/'
+    | '/_private/admin/manage-reserves'
+    | '/_private/admin/manage-spaces'
+    | '/_private/admin/manage-users'
+    | '/_private/admin/report'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -170,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_private/admin': {
+      id: '/_private/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof PrivateAdminRouteRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
     '/_private/history': {
       id: '/_private/history'
       path: '/history'
@@ -182,34 +203,6 @@ declare module '@tanstack/react-router' {
       path: '/home'
       fullPath: '/home'
       preLoaderRoute: typeof PrivateHomeRouteImport
-      parentRoute: typeof PrivateRouteRoute
-    }
-    '/_private/manage-reserves': {
-      id: '/_private/manage-reserves'
-      path: '/manage-reserves'
-      fullPath: '/manage-reserves'
-      preLoaderRoute: typeof PrivateManageReservesRouteImport
-      parentRoute: typeof PrivateRouteRoute
-    }
-    '/_private/manage-spaces': {
-      id: '/_private/manage-spaces'
-      path: '/manage-spaces'
-      fullPath: '/manage-spaces'
-      preLoaderRoute: typeof PrivateManageSpacesRouteImport
-      parentRoute: typeof PrivateRouteRoute
-    }
-    '/_private/manage-users': {
-      id: '/_private/manage-users'
-      path: '/manage-users'
-      fullPath: '/manage-users'
-      preLoaderRoute: typeof PrivateManageUsersRouteImport
-      parentRoute: typeof PrivateRouteRoute
-    }
-    '/_private/report': {
-      id: '/_private/report'
-      path: '/report'
-      fullPath: '/report'
-      preLoaderRoute: typeof PrivateReportRouteImport
       parentRoute: typeof PrivateRouteRoute
     }
     '/_public/': {
@@ -233,25 +226,64 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicSignUpRouteImport
       parentRoute: typeof PublicRouteRoute
     }
+    '/_private/admin/manage-reserves': {
+      id: '/_private/admin/manage-reserves'
+      path: '/manage-reserves'
+      fullPath: '/admin/manage-reserves'
+      preLoaderRoute: typeof PrivateAdminManageReservesRouteImport
+      parentRoute: typeof PrivateAdminRouteRoute
+    }
+    '/_private/admin/manage-spaces': {
+      id: '/_private/admin/manage-spaces'
+      path: '/manage-spaces'
+      fullPath: '/admin/manage-spaces'
+      preLoaderRoute: typeof PrivateAdminManageSpacesRouteImport
+      parentRoute: typeof PrivateAdminRouteRoute
+    }
+    '/_private/admin/manage-users': {
+      id: '/_private/admin/manage-users'
+      path: '/manage-users'
+      fullPath: '/admin/manage-users'
+      preLoaderRoute: typeof PrivateAdminManageUsersRouteImport
+      parentRoute: typeof PrivateAdminRouteRoute
+    }
+    '/_private/admin/report': {
+      id: '/_private/admin/report'
+      path: '/report'
+      fullPath: '/admin/report'
+      preLoaderRoute: typeof PrivateAdminReportRouteImport
+      parentRoute: typeof PrivateAdminRouteRoute
+    }
   }
 }
 
+interface PrivateAdminRouteRouteChildren {
+  PrivateAdminManageReservesRoute: typeof PrivateAdminManageReservesRoute
+  PrivateAdminManageSpacesRoute: typeof PrivateAdminManageSpacesRoute
+  PrivateAdminManageUsersRoute: typeof PrivateAdminManageUsersRoute
+  PrivateAdminReportRoute: typeof PrivateAdminReportRoute
+}
+
+const PrivateAdminRouteRouteChildren: PrivateAdminRouteRouteChildren = {
+  PrivateAdminManageReservesRoute: PrivateAdminManageReservesRoute,
+  PrivateAdminManageSpacesRoute: PrivateAdminManageSpacesRoute,
+  PrivateAdminManageUsersRoute: PrivateAdminManageUsersRoute,
+  PrivateAdminReportRoute: PrivateAdminReportRoute,
+}
+
+const PrivateAdminRouteRouteWithChildren =
+  PrivateAdminRouteRoute._addFileChildren(PrivateAdminRouteRouteChildren)
+
 interface PrivateRouteRouteChildren {
+  PrivateAdminRouteRoute: typeof PrivateAdminRouteRouteWithChildren
   PrivateHistoryRoute: typeof PrivateHistoryRoute
   PrivateHomeRoute: typeof PrivateHomeRoute
-  PrivateManageReservesRoute: typeof PrivateManageReservesRoute
-  PrivateManageSpacesRoute: typeof PrivateManageSpacesRoute
-  PrivateManageUsersRoute: typeof PrivateManageUsersRoute
-  PrivateReportRoute: typeof PrivateReportRoute
 }
 
 const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
+  PrivateAdminRouteRoute: PrivateAdminRouteRouteWithChildren,
   PrivateHistoryRoute: PrivateHistoryRoute,
   PrivateHomeRoute: PrivateHomeRoute,
-  PrivateManageReservesRoute: PrivateManageReservesRoute,
-  PrivateManageSpacesRoute: PrivateManageSpacesRoute,
-  PrivateManageUsersRoute: PrivateManageUsersRoute,
-  PrivateReportRoute: PrivateReportRoute,
 }
 
 const PrivateRouteRouteWithChildren = PrivateRouteRoute._addFileChildren(

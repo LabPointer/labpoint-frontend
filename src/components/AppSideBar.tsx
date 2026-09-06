@@ -118,7 +118,7 @@ export function AppSidebar() {
 								<SidebarMenuButton
 									render={
 										<LinkButton
-											to="/manage-spaces"
+											to="/admin/manage-spaces"
 											variant="ghost"
 											activeProps={{
 												variant: "default",
@@ -134,7 +134,7 @@ export function AppSidebar() {
 								<SidebarMenuButton
 									render={
 										<LinkButton
-											to="/manage-reserves"
+											to="/admin/manage-reserves"
 											variant="ghost"
 											activeProps={{
 												variant: "default",
@@ -150,7 +150,7 @@ export function AppSidebar() {
 								<SidebarMenuButton
 									render={
 										<LinkButton
-											to="/manage-users"
+											to="/admin/manage-users"
 											variant="ghost"
 											activeProps={{
 												variant: "default",
@@ -177,7 +177,7 @@ export function AppSidebar() {
 								<SidebarMenuButton
 									render={
 										<LinkButton
-											to="/report"
+											to="/admin/report"
 											variant="ghost"
 											activeProps={{
 												variant: "default",

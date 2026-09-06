@@ -64,7 +64,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/reserves/create/{spaceId}": {
+    "/reserve/create/{spaceId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -204,7 +204,7 @@ export interface paths {
         patch: operations["updateResource"];
         trace?: never;
     };
-    "/reserves/update/{reserveId}": {
+    "/reserve/update/{reserveId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -344,7 +344,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/reserves": {
+    "/reserve/hisotory": {
         parameters: {
             query?: never;
             header?: never;
@@ -352,10 +352,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Buscar reservas por espaço e data
-         * @description Retorna uma lista de reservas para um determinado espaço em uma data específica
+         * Buscar historico de reservas do mes
+         * @description Retorna uma lista de reservas(confirmada, concluida e cancelada) de um mes especifico
          */
-        get: operations["getReserves"];
+        get: operations["getHistory"];
         put?: never;
         post?: never;
         delete?: never;
@@ -364,7 +364,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/reserves/find/{spaceId}": {
+    "/reserve/find/{spaceId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -464,7 +464,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/reserves/delete": {
+    "/reserve/delete": {
         parameters: {
             query?: never;
             header?: never;
@@ -563,7 +563,8 @@ export interface components {
             reservedDate?: string;
             /** @enum {string} */
             schedule?: "M_AULA_1" | "M_AULA_2" | "M_AULA_3" | "M_AULA_4" | "M_AULA_5" | "V_AULA_1" | "V_AULA_2" | "V_AULA_3" | "V_AULA_4" | "V_AULA_5" | "N_AULA_1" | "N_AULA_2" | "N_AULA_3" | "N_AULA_4";
-            locked?: boolean;
+            /** @enum {string} */
+            status?: "CONFIRMED" | "PENDING" | "LOCKED" | "CANCELED";
             user?: components["schemas"]["User"];
             space?: components["schemas"]["Space"];
         };
@@ -586,10 +587,10 @@ export interface components {
             /** @enum {string} */
             role?: "OWNER" | "ADMIN" | "USER";
             enabled?: boolean;
-            nickname?: string;
             authorities?: components["schemas"]["GrantedAuthority"][];
-            accountNonExpired?: boolean;
+            nickname?: string;
             credentialsNonExpired?: boolean;
+            accountNonExpired?: boolean;
             accountNonLocked?: boolean;
         };
         UserUpdateRequestDTO: {
@@ -632,6 +633,22 @@ export interface components {
             limit: number;
             /** Format: int32 */
             total: number;
+        };
+        ReserveHistoryDTO: {
+            next?: components["schemas"]["ReserveScheduleDTO"][];
+            concluded?: components["schemas"]["ReserveScheduleDTO"][];
+            canceled?: components["schemas"]["ReserveScheduleDTO"][];
+        };
+        ReserveSchedule: {
+            /** Format: int32 */
+            id?: number;
+            /** @enum {string} */
+            schedule?: "M_AULA_1" | "M_AULA_2" | "M_AULA_3" | "M_AULA_4" | "M_AULA_5" | "V_AULA_1" | "V_AULA_2" | "V_AULA_3" | "V_AULA_4" | "V_AULA_5" | "N_AULA_1" | "N_AULA_2" | "N_AULA_3" | "N_AULA_4";
+            reserve?: components["schemas"]["Reserve"];
+        };
+        ReserveScheduleDTO: {
+            reserve: components["schemas"]["Reserve"];
+            schedules: components["schemas"]["ReserveSchedule"][];
         };
         ReserveResponseDTO: {
             /** Format: date */
@@ -1216,13 +1233,10 @@ export interface operations {
             };
         };
     };
-    getReserves: {
+    getHistory: {
         parameters: {
             query: {
                 yearMonth: string;
-                spaceName?: string;
-                username?: string;
-                registration?: string;
             };
             header?: never;
             path?: never;
@@ -1236,7 +1250,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["ReserveResponseDTO"][];
+                    "*/*": components["schemas"]["ReserveHistoryDTO"];
                 };
             };
             /** @description Nenhuma reserva encontrada */

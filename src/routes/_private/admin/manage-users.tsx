@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { ManageUserTableRow } from "#/components/manage-user/ManageUserTableRow";
 
-export const Route = createFileRoute('/_private/manage-users')({
+export const Route = createFileRoute('/_private/admin/manage-users')({
   component: RouteComponent,
 })
 

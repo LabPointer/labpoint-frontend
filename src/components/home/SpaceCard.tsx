@@ -65,7 +65,7 @@ export function SpaceCard(props: SpaceCardProps) {
       <CardContent className="flex flex-col gap-y-2.5 p-0 mt-3">
         <div className="flex items-center gap-2.5 text-sm text-neutral-700 dark:text-neutral-300">
           <Users className="size-4 shrink-0 text-violet-600 dark:text-violet-400" />
-          <span>
+          <span className="font-medium ttext-neutral-900 dark:text-white">
             Capacidade:{" "}
             <strong className="font-semibold text-neutral-900 dark:text-neutral-100">
               {capacity} lugares

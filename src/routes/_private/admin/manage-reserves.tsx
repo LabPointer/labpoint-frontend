@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { ManageReserveTableRow } from "#/components/manage-reserve/ManageReserveTableRow";
 
-export const Route = createFileRoute("/_private/manage-reserves")({
+export const Route = createFileRoute("/_private/admin/manage-reserves")({
 	component: RouteComponent,
 });
 
