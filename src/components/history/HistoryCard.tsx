@@ -11,32 +11,40 @@ import {
 } from "../ui/card";
 
 export interface HistoryCardProps {
-	title?: string;
-	location?: string;
-	status?: string;
-	date?: string;
+	id: string;
+	spaceName: string;
+	capacity: string;
+	status: string;
+	dateFrom: string;
+	dateTo: string;
+	schedules?: string;
+	purpose: string;
 	onEdit?: () => void;
 	onCancel?: () => void;
 }
 
 export function HistoryCard({
-	title,
-	location,
+	id,
+	spaceName,
+	capacity,
 	status,
-	date,
+	dateFrom,
+	dateTo,
+	schedules,
+	purpose,
 	onEdit,
 	onCancel,
 }: HistoryCardProps) {
 	return (
-		<Card className="bg-white dark:bg-white/5 rounded-md border dark:border-violet-500/10 shadow-md hover:shadow-lg p-4 dark:shadow-violet-300/15">
+		<Card className="max-w-sm bg-white dark:bg-white/5 rounded-md border dark:border-violet-500/10 shadow-md hover:shadow-lg p-4 dark:shadow-violet-300/15">
 			<CardHeader className="p-0 border-0 flex flex-row items-start justify-between">
 				<div className="flex flex-col gap-1">
 					<CardTitle className="text-lg font-bold text-foreground">
-						{title}
+						{spaceName}
 					</CardTitle>
 					<div className="flex items-center gap-1.5 text-muted-foreground text-xs">
 						<MapPin className="size-3.5" />
-						<span>{location}</span>
+						<span>{capacity} lugares</span>
 					</div>
 				</div>
 
@@ -53,20 +61,13 @@ export function HistoryCard({
 			<CardContent className="p-0 flex flex-col gap-2.5 text-sm">
 				<div className="flex items-center gap-2 text-foreground/90">
 					<Calendar className="size-4 text-violet-500 dark:text-violet-400 shrink-0" />
-					<span>{date}</span>
+					<span>{dateFrom === dateTo ? dateFrom : `${dateFrom} a ${dateTo}`}</span>
 				</div>
 				<div className="flex items-center gap-2 text-foreground/90">
 					{/* TODO: Separe o horario por periodo(Matutino, Vespertino e Noturno) com a soma das horas aulas de cada periodo*/}
 					<Clock className="size-4 text-violet-500 dark:text-violet-400 shrink-0" />
-					<span>{time}</span>
+					<span>{schedules}</span>
 				</div>
-				<div className="flex items-center gap-2 text-foreground/90">
-					<Users className="size-4 text-violet-500 dark:text-violet-400 shrink-0" />
-					<span>
-						Reservado por <span className="font-medium">{reservedBy}</span>
-					</span>
-				</div>
-
 				<div className="mt-1 text-sm">
 					<span className="text-muted-foreground">Propósito: </span>
 					<span className="font-semibold text-foreground">{purpose}</span>

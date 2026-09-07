@@ -1,13 +1,4 @@
-import {
-  Box,
-  Computer,
-  FileText,
-  FilterIcon,
-  MapPin,
-  Projector,
-  Tv,
-  Users,
-} from "lucide-react";
+import { Box, Computer, FileText, FilterIcon, MapPin, Projector, Tv, Users } from "lucide-react";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import {
@@ -34,10 +25,11 @@ export type SpaceCardProps = {
   subjects?: ListData[] | undefined;
   resources?: ListData[] | undefined;
   locked: boolean;
+  onReserve: () => void;
 };
 
 export function SpaceCard(props: SpaceCardProps) {
-  const { name, capacity, description, resources, subjects, locked } = props;
+  const { name, capacity, description, resources, subjects, locked, onReserve } = props;
 
   return (
     <Card className="min-w-72 max-w-72 min-h-72 bg-white dark:bg-white/5 rounded-md border dark:border-violet-500/10 shadow-md hover:shadow-lg p-4 dark:shadow-violet-300/15">
@@ -67,9 +59,7 @@ export function SpaceCard(props: SpaceCardProps) {
           <Users className="size-4 shrink-0 text-violet-600 dark:text-violet-400" />
           <span className="font-medium ttext-neutral-900 dark:text-white">
             Capacidade:{" "}
-            <strong className="font-semibold text-neutral-900 dark:text-neutral-100">
-              {capacity} lugares
-            </strong>
+            <strong className="font-semibold text-neutral-900 dark:text-neutral-100">{capacity} lugares</strong>
           </span>
         </div>
         {description && (
@@ -80,10 +70,8 @@ export function SpaceCard(props: SpaceCardProps) {
             </FieldLabel>
             <FieldContent>
               <div className="flex items-start border rounded-md p-2">
-                  <span className="font-medium line-clamp-4 text-wrap truncate">
-                    • {description}
-                  </span>
-                </div>
+                <span className="font-medium line-clamp-4 text-wrap truncate">• {description}</span>
+              </div>
             </FieldContent>
           </Field>
         )}
@@ -99,10 +87,7 @@ export function SpaceCard(props: SpaceCardProps) {
                   if (index < 3) {
                     return (
                       <span className="flex gap-x-1">
-                        •
-                        <strong className="font-medium text-neutral-900 dark:text-neutral-100">
-                          {val.name}
-                        </strong>
+                        •<strong className="font-medium text-neutral-900 dark:text-neutral-100">{val.name}</strong>
                       </span>
                     );
                   } else if (index === 3) {
@@ -117,7 +102,10 @@ export function SpaceCard(props: SpaceCardProps) {
       </CardContent>
 
       <CardFooter className="bg-transparent border-0 mt-auto">
-        <Button className="w-full h-10 rounded-xl bg-[#5925dc] hover:bg-[#4b1ec0] text-white font-medium shadow-sm transition-colors">
+        <Button
+          className="w-full h-10 rounded-xl bg-[#5925dc] hover:bg-[#4b1ec0] text-white font-medium shadow-sm transition-colors"
+          onClick={onReserve}
+        >
           Reservar
         </Button>
       </CardFooter>

@@ -1,18 +1,11 @@
-import {
-  createFileRoute,
-  useNavigate,
-  useRouteContext,
-  useRouter,
-} from "@tanstack/react-router";
-import { SpaceCard } from "#/components/home/SpaceCard";
-import {
-  SpaceSearchBar,
-  type SpaceSearchFilters,
-} from "#/components/home/SpaceSearchBar";
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useApi } from "#/lib/restapi";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { toast } from "sonner";
+import { SpaceCard } from "#/components/home/SpaceCard";
+import { type SpaceProps, SpaceReserveModal } from "#/components/home/SpaceReserveModal";
+import { SpaceSearchBar, type SpaceSearchFilters } from "#/components/home/SpaceSearchBar";
+import { useApi } from "#/lib/restapi";
 
 export const Route = createFileRoute("/_private/home")({
   component: RouteComponent,
@@ -20,7 +13,6 @@ export const Route = createFileRoute("/_private/home")({
 
 function RouteComponent() {
   const api = useApi();
-  const router = useRouter();
   const navigate = useNavigate();
 
   const [queryFilters, setQueryFilters] = useState<SpaceSearchFilters>({
@@ -29,6 +21,8 @@ function RouteComponent() {
     subjects: [],
     minimumCapacity: 20,
   });
+  const [selectedSpace, setSelectedSpace] = useState<SpaceProps | null>(null);
+  const [isReserveOpen, setIsReserveOpen] = useState(false);
 
   const {
     data: spaces,
@@ -51,21 +45,18 @@ function RouteComponent() {
       });
       if (res.response.status === 403) {
         await api.POST("/auth/sign-out");
-        toast.error(
-          "Sua sessão expirou, por favor faça login novamente.",
-          {
-            duration: 3000,
-            onAutoClose: () => {
-              navigate({ to: "/" });
-            },
-            position: "bottom-center",
-            style: {
-              color: "white",
-              backgroundColor: "red",
-              borderColor: "red",
-            },
+        toast.error("Sua sessão expirou, por favor faça login novamente.", {
+          duration: 3000,
+          onAutoClose: () => {
+            navigate({ to: "/" });
           },
-        );
+          position: "bottom-center",
+          style: {
+            color: "white",
+            backgroundColor: "red",
+            borderColor: "red",
+          },
+        });
         return;
       }
       if (!res.data && res.response.status === 404) {
@@ -82,23 +73,33 @@ function RouteComponent() {
     setQueryFilters(filters);
   }
 
+  function handleReserveSpace(spaceProps: SpaceProps) {
+    setSelectedSpace(spaceProps);
+    setIsReserveOpen(true);
+  }
+
   return (
     <>
       <section className="container mb-8">
         <SpaceSearchBar onSearch={(filters) => handleSearch(filters)} />
       </section>
+      <section className="container mb-8">
+        {selectedSpace && (
+          <SpaceReserveModal
+            {...selectedSpace}
+            open={isReserveOpen}
+            onOpenChange={setIsReserveOpen}
+          />
+        )}
+      </section>
       <section className="container">
         <div className="flex flex-wrap justify-between items-center mb-6">
           <h2 className="text-xl font-bold">Laboratórios</h2>
-          <span className="text-sm font-bold">
-            Encontrados: {spaces?.spaces.length || 0}
-          </span>
+          <span className="text-sm font-bold">Encontrados: {spaces?.spaces.length || 0}</span>
         </div>
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
-            <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
-              Carregando...
-            </span>
+            <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">Carregando...</span>
           </div>
         ) : isError ? (
           <div className="flex justify-center items-center h-64">
@@ -124,6 +125,7 @@ function RouteComponent() {
                   resources={space.resources}
                   subjects={space.subjects}
                   locked={space.locked ?? false}
+                  onReserve={() => handleReserveSpace({ id: space.id, name: space.name, capacity: space.capacity, subjects: space.subjects, locked: space.locked ?? false })}
                 />
               </div>
             ))}
