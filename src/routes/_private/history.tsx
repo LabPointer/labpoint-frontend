@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { currentMonthYear, type MonthYear } from "@/lib/month-year";
 import { useApi } from "@/lib/restapi";
 import { Schedules } from "@/lib/service";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_private/history")({
   component: RouteComponent,
@@ -20,10 +21,11 @@ function RouteComponent() {
     data: historyData,
     isLoading,
     isError,
+    refetch,
   } = useQuery({
     queryKey: ["history", monthYear.year, monthYear.month],
     queryFn: async () => {
-      const res = await api.GET("/reserve/hisotory", {
+      const res = await api.GET("/reserve", {
         params: {
           query: {
             yearMonth: `${monthYear.year}-${monthYear.month + 1}`,
@@ -43,8 +45,40 @@ function RouteComponent() {
     },
   });
 
-  {
-    /* TODO: Adicionar calback/função apenas para quando o botao editar e cancelar for clicado */
+  async function handleCancelReservation(reserveId: string) {
+    const res = await api.DELETE("/reserve/history/cancel/{id}", {
+      params: {
+        path: {
+          id: Number(reserveId),
+        },
+      },
+    });
+
+    if (res.response.status !== 204) {
+      toast.error(`${res.response.status} - ${res.response.statusText}`, {
+        duration: 3000,
+        position: "bottom-center",
+        style: {
+          color: "white",
+          backgroundColor: "red",
+          borderColor: "red",
+        },
+      });
+      return;
+    }
+
+    toast.success("Reserva cancelada com sucesso!", {
+      duration: 2000,
+      position: "bottom-center",
+      onAutoClose: () => {
+        refetch();
+      },
+      style: {
+        color: "white",
+        backgroundColor: "green",
+        borderColor: "green",
+      },
+    });
   }
 
   return (
@@ -59,7 +93,6 @@ function RouteComponent() {
           <TabsTrigger value="cancelled">Canceladas</TabsTrigger>
         </TabsList>
         <TabsContent value="next" className="w-full flex">
-          {/** TODO: Add next reservations */}
           {isLoading ? (
             <div className="w-full flex justify-center items-center h-64">
               <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">Carregando...</span>
@@ -79,23 +112,38 @@ function RouteComponent() {
           ) : (
             <div className="w-full grid grid-cols-[repeat(auto-fit,minmax(288px,1fr))] justify-center gap-6">
               {historyData?.next?.map((reservation) => (
-                <HistoryCard
-                  key={String(reservation.reserve.id)}
-				  id={String(reservation.reserve.id)}
-                  spaceName={reservation.reserve.spaceName}
-                  capacity={String(reservation.reserve.capacity)}
-                  status={reservation.reserve.status ?? "Status não informado"}
-                  dateFrom={reservation.reserve.reservedDateFrom ?? "Data não informada"}
-                  dateTo={reservation.reserve.reservedDateTo ?? "Data não informada"}
-                  schedules={(reservation.schedules ?? [])
-                    .map((schedule) => {
-                      const key = schedule;
-                      return key ? (Schedules.get(key) ?? key) : null;
-                    })
-                    .filter((schedule): schedule is string => schedule !== null)
-                    .join(", ")}
-				  purpose={reservation.reserve.purpose ?? "Propósito não informado"}
-                />
+                <div key={reservation.reserve.id} className="w-full flex justify-center p-2">
+                  <HistoryCard
+                    key={String(reservation.reserve.id)}
+                    id={String(reservation.reserve.id)}
+                    spaceName={reservation.reserve.spaceName}
+                    capacity={String(reservation.reserve.capacity)}
+                    status={reservation.reserve.status ?? "Status não informado"}
+                    dateFrom={reservation.reserve.reservedDateFrom ?? "Data não informada"}
+                    dateTo={reservation.reserve.reservedDateTo ?? "Data não informada"}
+                    schedules={
+                      reservation.schedules as (
+                        | "M_AULA_1"
+                        | "M_AULA_2"
+                        | "M_AULA_3"
+                        | "M_AULA_4"
+                        | "M_AULA_5"
+                        | "V_AULA_1"
+                        | "V_AULA_2"
+                        | "V_AULA_3"
+                        | "V_AULA_4"
+                        | "V_AULA_5"
+                        | "N_AULA_1"
+                        | "N_AULA_2"
+                        | "N_AULA_3"
+                        | "N_AULA_4"
+                      )[]
+                    }
+                    showCTA={true}
+                    purpose={reservation.reserve.purpose ?? "Propósito não informado"}
+                    onCancel={async () => await handleCancelReservation(String(reservation.reserve.id))}
+                  />
+                </div>
               ))}
             </div>
           )}
@@ -104,19 +152,119 @@ function RouteComponent() {
           value="completed"
           className="w-full grid grid-cols-[repeat(auto-fit,minmax(256px,1fr))] justify-center gap-6"
         >
-          {/** TODO: Add completed reservations */}
-          <HistoryCard />
-          <HistoryCard />
-          <HistoryCard />
+          {isLoading ? (
+            <div className="w-full flex justify-center items-center h-64">
+              <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">Carregando...</span>
+            </div>
+          ) : isError ? (
+            <div className="w-full flex justify-center items-center h-64">
+              <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+                Erro ao carregar historico.
+              </span>
+            </div>
+          ) : historyData?.concluded?.length === 0 ? (
+            <div className="w-full flex justify-center items-center h-64">
+              <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+                Nenhum histórico encontrado.
+              </span>
+            </div>
+          ) : (
+            <div className="w-full grid grid-cols-[repeat(auto-fit,minmax(288px,1fr))] justify-center gap-6">
+              {historyData?.concluded?.map((reservation) => (
+                <div key={reservation.reserve.id} className="w-full flex justify-center p-2">
+                  <HistoryCard
+                    key={String(reservation.reserve.id)}
+                    id={String(reservation.reserve.id)}
+                    spaceName={reservation.reserve.spaceName}
+                    capacity={String(reservation.reserve.capacity)}
+                    status={reservation.reserve.status ?? "Status não informado"}
+                    dateFrom={reservation.reserve.reservedDateFrom ?? "Data não informada"}
+                    dateTo={reservation.reserve.reservedDateTo ?? "Data não informada"}
+                    schedules={
+                      reservation.schedules as (
+                        | "M_AULA_1"
+                        | "M_AULA_2"
+                        | "M_AULA_3"
+                        | "M_AULA_4"
+                        | "M_AULA_5"
+                        | "V_AULA_1"
+                        | "V_AULA_2"
+                        | "V_AULA_3"
+                        | "V_AULA_4"
+                        | "V_AULA_5"
+                        | "N_AULA_1"
+                        | "N_AULA_2"
+                        | "N_AULA_3"
+                        | "N_AULA_4"
+                      )[]
+                    }
+                    showCTA={false}
+                    purpose={reservation.reserve.purpose ?? "Propósito não informado"}
+                    onCancel={async () => await handleCancelReservation(String(reservation.reserve.id))}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </TabsContent>
         <TabsContent
           value="cancelled"
           className="w-full grid grid-cols-[repeat(auto-fit,minmax(256px,1fr))] justify-center gap-6"
         >
-          {/** TODO: Add cancelled reservations */}
-          <HistoryCard />
-          <HistoryCard />
-          <HistoryCard />
+          {isLoading ? (
+            <div className="w-full flex justify-center items-center h-64">
+              <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">Carregando...</span>
+            </div>
+          ) : isError ? (
+            <div className="w-full flex justify-center items-center h-64">
+              <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+                Erro ao carregar historico.
+              </span>
+            </div>
+          ) : historyData?.canceled?.length === 0 ? (
+            <div className="w-full flex justify-center items-center h-64">
+              <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+                Nenhum histórico encontrado.
+              </span>
+            </div>
+          ) : (
+            <div className="w-full grid grid-cols-[repeat(auto-fit,minmax(288px,1fr))] justify-center gap-6">
+              {historyData?.canceled?.map((reservation) => (
+                <div key={reservation.reserve.id} className="w-full flex justify-center p-2">
+                  <HistoryCard
+                    key={String(reservation.reserve.id)}
+                    id={String(reservation.reserve.id)}
+                    spaceName={reservation.reserve.spaceName}
+                    capacity={String(reservation.reserve.capacity)}
+                    status={reservation.reserve.status ?? "Status não informado"}
+                    dateFrom={reservation.reserve.reservedDateFrom ?? "Data não informada"}
+                    dateTo={reservation.reserve.reservedDateTo ?? "Data não informada"}
+                    schedules={
+                      reservation.schedules as (
+                        | "M_AULA_1"
+                        | "M_AULA_2"
+                        | "M_AULA_3"
+                        | "M_AULA_4"
+                        | "M_AULA_5"
+                        | "V_AULA_1"
+                        | "V_AULA_2"
+                        | "V_AULA_3"
+                        | "V_AULA_4"
+                        | "V_AULA_5"
+                        | "N_AULA_1"
+                        | "N_AULA_2"
+                        | "N_AULA_3"
+                        | "N_AULA_4"
+                      )[]
+                    }
+                    showCTA={false}
+                    purpose={reservation.reserve.purpose ?? "Propósito não informado"}
+                    onCancel={async () => await handleCancelReservation(String(reservation.reserve.id))}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </section>

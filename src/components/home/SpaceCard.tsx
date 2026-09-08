@@ -71,7 +71,7 @@ export function SpaceCard(props: SpaceCardProps) {
             </FieldLabel>
             <FieldContent>
               <div className="flex items-start border rounded-md p-2">
-                <span className="font-medium line-clamp-4 text-wrap truncate">• {description}</span>
+                <span className="font-medium text-xs line-clamp-4 text-wrap truncate">• {description}</span>
               </div>
             </FieldContent>
           </Field>
@@ -83,16 +83,20 @@ export function SpaceCard(props: SpaceCardProps) {
           </FieldLabel>
           <FieldContent>
             {resources && resources.length > 0 ? (
-              <div className="flex flex-col items-start border rounded-md p-2">
+              <div className="flex flex-wrap gap-1 items-start border rounded-md p-2">
                 {resources.map((val, index) => {
                   if (index < 3) {
                     return (
-                      <span className="flex gap-x-1">
-                        •<strong className="font-medium text-neutral-900 dark:text-neutral-100">{val.name}</strong>
+                      <span className="flex text-xs font-semibold p-1 border border-neutral-200 dark:border-neutral-700 rounded-sm">
+                        {val.name}
                       </span>
                     );
                   } else if (index === 3) {
-                    return <span className="">...</span>;
+                    return (
+                      <span className="flex text-xs font-semibold p-1 border border-neutral-200 dark:border-neutral-700 rounded-sm">
+                        ...{resources.length - 3} outros
+                      </span>
+                    )
                   }
                   return null;
                 })}

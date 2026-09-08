@@ -324,27 +324,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/reserve/history/cancel/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Cancela uma reserva do historico do usuario pelo id
-         * @description Marca a reserva como cancelada
-         */
-        get: operations["getHistoryByYearMonth"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/reserve/hisotory": {
+    "/reserve": {
         parameters: {
             query?: never;
             header?: never;
@@ -459,6 +439,26 @@ export interface paths {
          * @description Deleta um recurso no sistema
          */
         delete: operations["deleteResource"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reserve/history/cancel/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Cancela uma reserva do historico do usuario pelo id
+         * @description Marca a reserva como cancelada
+         */
+        delete: operations["getHistoryByYearMonth"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1120,44 +1120,6 @@ export interface operations {
             };
         };
     };
-    getHistoryByYearMonth: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Reserva cancelada */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Provavelmente esta alterando reserva de outro usuario */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-            /** @description Usuario ou reserva encontrada */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
     getHistory: {
         parameters: {
             query: {
@@ -1349,6 +1311,44 @@ export interface operations {
                 content?: never;
             };
             /** @description Recurso não encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+        };
+    };
+    getHistoryByYearMonth: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Reserva cancelada */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Provavelmente esta alterando reserva de outro usuario */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+            /** @description Usuario ou reserva encontrada */
             404: {
                 headers: {
                     [name: string]: unknown;

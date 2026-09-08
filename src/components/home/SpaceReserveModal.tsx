@@ -70,6 +70,10 @@ export function SpaceReserveModal(props: SpaceProps) {
   const handleOpenChange = (nextOpen: boolean) => {
     setInternalOpen(nextOpen);
     onOpenChange?.(nextOpen);
+    if (!nextOpen) {
+      form.reset();
+      setDate(undefined);
+    }
   };
   const [date, setDate] = useState<DateRange | undefined>();
   const scheduleKeys = Array.from(Schedules.keys());
@@ -112,8 +116,6 @@ export function SpaceReserveModal(props: SpaceProps) {
         },
       });
 
-      console.log("Status: ", res.response.status)
-
       if (res.response.status === 201) {
         toast.success("Reserva criada com sucesso!", {
           duration: 3000,
@@ -124,6 +126,8 @@ export function SpaceReserveModal(props: SpaceProps) {
             borderColor: "green",
           },
         });
+        form.reset();
+        setDate(undefined);
         handleOpenChange(false);
         return;
       }
