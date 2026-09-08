@@ -1,22 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "ahooks";
 import {
-  CalendarIcon,
-  ChevronDownIcon,
   Filter,
-  FilterIcon,
   SearchIcon,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { useApi } from "#/lib/restapi";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Input } from "@/components/ui/input";
 import {
   InputGroup,
   InputGroupAddon,
@@ -29,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useApi } from "@/lib/restapi";
 import { Field, FieldLabel } from "../ui/field";
 
 const minCapacity = [20, 50, 100, 150] as const;

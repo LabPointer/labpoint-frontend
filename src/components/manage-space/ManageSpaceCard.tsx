@@ -5,8 +5,8 @@ import {
 	Trash2,
 	Users,
 } from "lucide-react";
-import { Badge } from "#/components/ui/badge";
-import { Button } from "#/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardAction,
@@ -15,7 +15,7 @@ import {
 	CardFooter,
 	CardHeader,
 	CardTitle,
-} from "#/components/ui/card";
+} from "@/components/ui/card";
 
 export function ManageSpaceCard() {
 	return (

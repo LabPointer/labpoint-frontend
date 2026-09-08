@@ -1,15 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ManageReserveSearchBar } from "#/components/manage-reserve/ManageReserveSearchBar";
+import { ManageReserveSearchBar } from "@/components/manage-reserve/ManageReserveSearchBar";
+import { ManageReserveTableRow } from "@/components/manage-reserve/ManageReserveTableRow";
 import {
 	Table,
 	TableBody,
 	TableCaption,
-	TableCell,
 	TableHead,
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { ManageReserveTableRow } from "#/components/manage-reserve/ManageReserveTableRow";
 
 export const Route = createFileRoute("/_private/admin/manage-reserves")({
 	component: RouteComponent,

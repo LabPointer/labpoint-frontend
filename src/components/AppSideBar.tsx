@@ -20,10 +20,10 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Button } from "./ui/button";
+import { useApi } from "@/lib/restapi";
+import { setIsAuthenticated, setSessionServerFn } from "@/lib/session";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { useApi } from "#/lib/restapi";
-import { setIsAuthenticated, setSessionServerFn } from "#/lib/session";
+import { Button } from "./ui/button";
 
 export function AppSidebar() {
     const LinkButton = createLink(Button);

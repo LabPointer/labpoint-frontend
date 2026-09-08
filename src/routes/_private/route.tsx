@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, redirect, useLocation } from "@tanstack/react-router";
-import { AppSidebar } from "#/components/AppSideBar";
-import { ThemeToggle } from "#/components/ThemeToggle";
-import { SidebarProvider, SidebarTrigger } from "#/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSideBar";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 export const Route = createFileRoute("/_private")({
     beforeLoad: async ({ context }) => {

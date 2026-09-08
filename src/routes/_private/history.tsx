@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { HistoryCard } from "#/components/history/HistoryCard";
-import { MonthYearPicker } from "#/components/history/MonthYearPicker";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
-import { currentMonthYear, type MonthYear } from "#/lib/month-year";
-import { useApi } from "#/lib/restapi";
-import { Schedules } from "#/lib/service";
+import { HistoryCard } from "@/components/history/HistoryCard";
+import { MonthYearPicker } from "@/components/history/MonthYearPicker";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { currentMonthYear, type MonthYear } from "@/lib/month-year";
+import { useApi } from "@/lib/restapi";
+import { Schedules } from "@/lib/service";
 
 export const Route = createFileRoute("/_private/history")({
   component: RouteComponent,

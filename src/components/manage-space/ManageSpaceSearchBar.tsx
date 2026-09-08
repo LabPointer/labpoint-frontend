@@ -1,6 +1,6 @@
 import { PlusIcon, SearchIcon } from "lucide-react"
 import { useState } from "react"
-import { Button } from "#/components/ui/button"
+import { Button } from "@/components/ui/button"
 import {
   Combobox,
   ComboboxContent,
@@ -9,13 +9,13 @@ import {
   ComboboxItem,
   ComboboxList,
   ComboboxValue,
-} from "#/components/ui/combobox"
-import { Field, FieldLabel } from "#/components/ui/field"
+} from "@/components/ui/combobox"
+import { Field, FieldLabel } from "@/components/ui/field"
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from "#/components/ui/input-group"
+} from "@/components/ui/input-group"
 
 export function ManageSpaceSearchBar() {
 	const statuses = ["Todos os status", "Ativo", "Inativo"]

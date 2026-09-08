@@ -1,6 +1,6 @@
-import { Box, Computer, FileText, FilterIcon, MapPin, Projector, Tv, Users } from "lucide-react";
-import { Badge } from "#/components/ui/badge";
-import { Button } from "#/components/ui/button";
+import { Box, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardAction,
@@ -9,8 +9,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "#/components/ui/card";
-import { Field, FieldContent, FieldLabel } from "#/components/ui/field";
+} from "@/components/ui/card";
+
+import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
 
 export type ListData = {
   id: number;

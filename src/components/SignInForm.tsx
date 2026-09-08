@@ -25,8 +25,8 @@ import {
     InputGroupButton,
     InputGroupInput,
 } from "@/components/ui/input-group";
-import { useApi } from "#/lib/restapi";
-import { sessionSchema, setIsAuthenticated, setSessionServerFn } from "#/lib/session";
+import { useApi } from "@/lib/restapi";
+import { type sessionSchema, setIsAuthenticated, setSessionServerFn } from "@/lib/session";
 
 const formSchema = z.object({
     registration: z

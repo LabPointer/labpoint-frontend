@@ -1,13 +1,13 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import { Button } from "#/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "#/components/ui/select";
-import { cn } from "#/lib/utils";
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { isSameMonthYear, MONTH_LABELS, type MonthYear } from "../../lib/month-year";
 
 type MonthYearGridProps = {

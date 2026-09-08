@@ -6,19 +6,19 @@ import {
     Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { Toaster } from "sonner";
 import type z from "zod";
+import {
+    type authSchema,
+    getIsAuthenticated,
+    getSessionServerFn,
+    type sessionSchema,
+    setIsAuthenticated,
+    setSessionServerFn,
+} from "@/lib/session";
 import { getThemeServerFn, type setThemeValidator } from "@/lib/theme";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import appCss from "../styles.css?url";
-import { Toaster } from "sonner";
-import {
-    getIsAuthenticated,
-    getSessionServerFn,
-    setIsAuthenticated,
-    setSessionServerFn,
-    type authSchema,
-    type sessionSchema,
-} from "#/lib/session";
 
 interface MyRouterContext {
     queryClient: QueryClient;

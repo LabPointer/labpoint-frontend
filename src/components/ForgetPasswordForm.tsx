@@ -1,6 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { createLink } from "@tanstack/react-router";
-import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -20,11 +20,6 @@ import {
     FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-    InputGroup,
-    InputGroupButton,
-    InputGroupInput,
-} from "@/components/ui/input-group";
 
 const formSchema = z.object({
     email: z.email("E-mail invalido"),

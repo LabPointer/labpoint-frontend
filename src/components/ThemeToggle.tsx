@@ -1,6 +1,6 @@
 import { useRouteContext, useRouter } from "@tanstack/react-router";
 import { Moon, Sun } from "lucide-react";
-import { setThemeServerFn } from "#/lib/theme";
+import { setThemeServerFn } from "@/lib/theme";
 import { Button } from "./ui/button";
 
 export function ThemeToggle() {

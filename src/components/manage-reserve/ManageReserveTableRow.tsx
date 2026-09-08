@@ -1,7 +1,7 @@
-import { TableCell, TableRow } from "#/components/ui/table";
 import { Calendar, Pencil, Trash, User } from "lucide-react";
-import { Badge } from "#/components/ui/badge";
-import { Button } from "#/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { TableCell, TableRow } from "@/components/ui/table";
 
 export function ManageReserveTableRow() {
 	return (

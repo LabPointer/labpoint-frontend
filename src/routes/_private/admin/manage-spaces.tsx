@@ -1,6 +1,6 @@
-import { ManageSpaceCard } from "#/components/manage-space/ManageSpaceCard"
-import { ManageSpaceSearchBar } from "#/components/manage-space/ManageSpaceSearchBar"
 import { createFileRoute } from "@tanstack/react-router"
+import { ManageSpaceCard } from "@/components/manage-space/ManageSpaceCard"
+import { ManageSpaceSearchBar } from "@/components/manage-space/ManageSpaceSearchBar"
 
 export const Route = createFileRoute('/_private/admin/manage-spaces')({
   component: RouteComponent,
