@@ -204,6 +204,26 @@ export interface paths {
         patch: operations["updateResource"];
         trace?: never;
     };
+    "/reserve/edit-date/{reserveId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Edita a data da reserva
+         * @description Edita a data da reserva
+         */
+        patch: operations["editReserve"];
+        trace?: never;
+    };
     "/auth/update": {
         parameters: {
             query?: never;
@@ -356,6 +376,26 @@ export interface paths {
          * @description Cria uma nova reserva para o espaço especificado, com base nas datas fornecidas e no usuário autenticado
          */
         get: operations["getExistingSchedules"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reserve/date-info/{reserveId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Obtem a data da reserva pelo id
+         * @description Retorna a data da reserva
+         */
+        get: operations["getDateInfo"];
         put?: never;
         post?: never;
         delete?: never;
@@ -524,6 +564,12 @@ export interface components {
             /** Format: int32 */
             id: number;
             name: string;
+        };
+        ReserveDateDTO: {
+            /** Format: date */
+            dateFrom: string;
+            /** Format: date */
+            dateTo: string;
         };
         UserUpdateRequestDTO: {
             /** Format: uuid */
@@ -948,6 +994,57 @@ export interface operations {
             };
         };
     };
+    editReserve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reserveId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReserveDateDTO"];
+            };
+        };
+        responses: {
+            /** @description Reserva editada com sucesso */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Reserva conflita com horarios ja reservados */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+            /** @description Nao pode editar reserva de outro usuario */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+            /** @description Reserva nao encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+        };
+    };
     patchUpdate: {
         parameters: {
             query?: never;
@@ -1065,7 +1162,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
             };
         };
     };
@@ -1184,6 +1283,37 @@ export interface operations {
                 };
             };
             /** @description Autenticação do usuario ou espaço não encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+        };
+    };
+    getDateInfo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reserveId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Data da reserve */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ReserveDateDTO"];
+                };
+            };
+            /** @description Reserva nao encontrada */
             404: {
                 headers: {
                     [name: string]: unknown;

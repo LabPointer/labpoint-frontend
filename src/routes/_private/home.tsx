@@ -43,13 +43,11 @@ function RouteComponent() {
           },
         },
       });
-      if (res.response.status === 403) {
-        await api.POST("/auth/sign-out");
-        toast.error("Sua sessão expirou, por favor faça login novamente.", {
+      const {response, data, error} = res;
+
+      if (!response.ok && error && response.status !== 404) {
+        toast.error(`Error ${response.status}: ${error.message}`, {
           duration: 3000,
-          onAutoClose: () => {
-            navigate({ to: "/" });
-          },
           position: "bottom-center",
           style: {
             color: "white",
@@ -59,13 +57,11 @@ function RouteComponent() {
         });
         return;
       }
-      if (!res.data && res.response.status === 404) {
+      if (response.status === 404) {
         return { spaces: [] };
       }
-      if (!res.data && res.response.status !== 404) {
-        throw new Error("Erro ao buscar laboratórios.");
-      }
-      return res.data;
+
+      return data;
     },
   });
 

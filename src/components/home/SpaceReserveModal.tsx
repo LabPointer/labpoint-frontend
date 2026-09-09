@@ -116,31 +116,31 @@ export function SpaceReserveModal(props: SpaceProps) {
         },
       });
 
-      if (res.response.status === 201) {
-        toast.success("Reserva criada com sucesso!", {
+      if (!res.response.ok && res.error) {
+        toast.error(`"Erro ao criar reserva: ${res.response.statusText ?? "Erro desconhecido."}`, {
           duration: 3000,
           position: "bottom-center",
           style: {
             color: "white",
-            backgroundColor: "green",
-            borderColor: "green",
+            backgroundColor: "red",
+            borderColor: "red",
           },
         });
-        form.reset();
-        setDate(undefined);
-        handleOpenChange(false);
         return;
       }
 
-      toast.error(`"Erro ao criar reserva: ${res.response.statusText ?? "Erro desconhecido."}`, {
+      toast.success("Reserva criada com sucesso!", {
         duration: 3000,
         position: "bottom-center",
         style: {
           color: "white",
-          backgroundColor: "red",
-          borderColor: "red",
+          backgroundColor: "green",
+          borderColor: "green",
         },
       });
+      form.reset();
+      setDate(undefined);
+      handleOpenChange(false);
     },
   });
 
@@ -161,6 +161,21 @@ export function SpaceReserveModal(props: SpaceProps) {
           },
         },
       });
+
+      const {response, data, error} = res;
+
+      if (!response.ok && error) {
+        toast.error(`Error ${response.status}: ${error.message}`, {
+          duration: 3000,
+          position: "bottom-center",
+          style: {
+            color: "white",
+            backgroundColor: "red",
+            borderColor: "red",
+          },
+        });
+        return;
+      }
 
       return res.data;
     },

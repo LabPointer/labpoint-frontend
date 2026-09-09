@@ -8,6 +8,7 @@ import { currentMonthYear, type MonthYear } from "@/lib/month-year";
 import { useApi } from "@/lib/restapi";
 import { Schedules } from "@/lib/service";
 import { toast } from "sonner";
+import { HistoryEditModal } from "#/components/history/HistoryEditModal";
 
 export const Route = createFileRoute("/_private/history")({
   component: RouteComponent,
@@ -15,6 +16,12 @@ export const Route = createFileRoute("/_private/history")({
 
 function RouteComponent() {
   const [monthYear, setMonthYear] = useState<MonthYear>(currentMonthYear);
+  const [selectedReservation, setSelectedReservation] = useState<{
+    id: number;
+    name: string;
+    description: string;
+  } | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const api = useApi();
 
   const {
@@ -33,15 +40,32 @@ function RouteComponent() {
         },
       });
 
-      const { response, data } = res;
-      if (response.status === 404)
+      const { response, data, error } = res;
+      if (!response.ok && error && response.status !== 404) {
+        toast.error(`Error ${response.status}: ${error.message}`, {
+          duration: 3000,
+          position: "bottom-center",
+          style: {
+            color: "white",
+            backgroundColor: "red",
+            borderColor: "red",
+          },
+        });
+        return;
+      }
+      if (response.status === 404) {
         return {
-          next: [],
-          completed: [],
-          cancelled: [],
+          next: [] as never[],
+          concluded: [] as never[],
+          canceled: [] as never[],
         };
+      }
 
-      return data;
+      return {
+          next: data?.next,
+          concluded: data?.concluded,
+          canceled: data?.canceled,
+        };
     },
   });
 
@@ -82,72 +106,96 @@ function RouteComponent() {
   }
 
   return (
-    <section className="container flex flex-col items-center gap-6">
-      <MonthYearPicker value={monthYear} onChange={setMonthYear} />
-      <Tabs defaultValue="next" className="w-full items-center gap-y-10">
-        <TabsList
-          className={"bg-white/10 border dark:border-violet-400/20 shadow-md hover:shadow-lg dark:shadow-violet-300/20"}
-        >
-          <TabsTrigger value="next">Próximas</TabsTrigger>
-          <TabsTrigger value="completed">Concluídas</TabsTrigger>
-          <TabsTrigger value="cancelled">Canceladas</TabsTrigger>
-        </TabsList>
-        <TabsContent value="next" className="w-full flex">
-          {isLoading ? (
-            <div className="w-full flex justify-center items-center h-64">
-              <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">Carregando...</span>
-            </div>
-          ) : isError ? (
-            <div className="w-full flex justify-center items-center h-64">
-              <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
-                Erro ao carregar historico.
-              </span>
-            </div>
-          ) : historyData?.next?.length === 0 ? (
-            <div className="w-full flex justify-center items-center h-64">
-              <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
-                Nenhum histórico encontrado.
-              </span>
-            </div>
-          ) : (
-            <div className="w-full grid grid-cols-[repeat(auto-fit,minmax(288px,1fr))] justify-center gap-6">
-              {historyData?.next?.map((reservation) => (
-                <div key={reservation.reserve.id} className="w-full flex justify-center p-2">
-                  <HistoryCard
-                    key={String(reservation.reserve.id)}
-                    id={String(reservation.reserve.id)}
-                    spaceName={reservation.reserve.spaceName}
-                    capacity={String(reservation.reserve.capacity)}
-                    status={reservation.reserve.status ?? "Status não informado"}
-                    dateFrom={reservation.reserve.reservedDateFrom ?? "Data não informada"}
-                    dateTo={reservation.reserve.reservedDateTo ?? "Data não informada"}
-                    schedules={
-                      reservation.schedules as (
-                        | "M_AULA_1"
-                        | "M_AULA_2"
-                        | "M_AULA_3"
-                        | "M_AULA_4"
-                        | "M_AULA_5"
-                        | "V_AULA_1"
-                        | "V_AULA_2"
-                        | "V_AULA_3"
-                        | "V_AULA_4"
-                        | "V_AULA_5"
-                        | "N_AULA_1"
-                        | "N_AULA_2"
-                        | "N_AULA_3"
-                        | "N_AULA_4"
-                      )[]
-                    }
-                    showCTA={true}
-                    purpose={reservation.reserve.purpose ?? "Propósito não informado"}
-                    onCancel={async () => await handleCancelReservation(String(reservation.reserve.id))}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </TabsContent>
+    <>
+      {selectedReservation && (
+        <HistoryEditModal
+          id={selectedReservation.id}
+          name={selectedReservation.name}
+          description={selectedReservation.description}
+          open={isEditModalOpen}
+          onOpenChange={(open) => {
+            setIsEditModalOpen(open);
+            if (!open) {
+              setSelectedReservation(null);
+              refetch();
+            }
+          }}
+        />
+      )}
+      <section className="container flex flex-col items-center gap-6">
+        <MonthYearPicker value={monthYear} onChange={setMonthYear} />
+        <Tabs defaultValue="next" className="w-full items-center gap-y-10">
+          <TabsList
+            className={"bg-white/10 border dark:border-violet-400/20 shadow-md hover:shadow-lg dark:shadow-violet-300/20"}
+          >
+            <TabsTrigger value="next">Próximas</TabsTrigger>
+            <TabsTrigger value="completed">Concluídas</TabsTrigger>
+            <TabsTrigger value="cancelled">Canceladas</TabsTrigger>
+          </TabsList>
+          <TabsContent value="next" className="w-full flex">
+            {isLoading ? (
+              <div className="w-full flex justify-center items-center h-64">
+                <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">Carregando...</span>
+              </div>
+            ) : isError ? (
+              <div className="w-full flex justify-center items-center h-64">
+                <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+                  Erro ao carregar historico.
+                </span>
+              </div>
+            ) : historyData?.next?.length === 0 ? (
+              <div className="w-full flex justify-center items-center h-64">
+                <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+                  Nenhum histórico encontrado.
+                </span>
+              </div>
+            ) : (
+              <div className="w-full grid grid-cols-[repeat(auto-fit,minmax(288px,1fr))] justify-center gap-6">
+                {historyData?.next?.map((reservation) => (
+                  <div key={reservation.reserve.id} className="w-full flex justify-center p-2">
+                    <HistoryCard
+                      key={String(reservation.reserve.id)}
+                      id={String(reservation.reserve.id)}
+                      spaceName={reservation.reserve.spaceName}
+                      capacity={String(reservation.reserve.capacity)}
+                      status={reservation.reserve.status ?? "Status não informado"}
+                      dateFrom={reservation.reserve.reservedDateFrom ?? "Data não informada"}
+                      dateTo={reservation.reserve.reservedDateTo ?? "Data não informada"}
+                      schedules={
+                        reservation.schedules as (
+                          | "M_AULA_1"
+                          | "M_AULA_2"
+                          | "M_AULA_3"
+                          | "M_AULA_4"
+                          | "M_AULA_5"
+                          | "V_AULA_1"
+                          | "V_AULA_2"
+                          | "V_AULA_3"
+                          | "V_AULA_4"
+                          | "V_AULA_5"
+                          | "N_AULA_1"
+                          | "N_AULA_2"
+                          | "N_AULA_3"
+                          | "N_AULA_4"
+                        )[]
+                      }
+                      showCTA={true}
+                      purpose={reservation.reserve.purpose ?? "Propósito não informado"}
+                      onCancel={async () => await handleCancelReservation(String(reservation.reserve.id))}
+                      onEdit={() => {
+                        setSelectedReservation({
+                          id: reservation.reserve.id,
+                          name: reservation.reserve.spaceName,
+                          description: reservation.reserve.purpose ?? "Propósito não informado",
+                        });
+                        setIsEditModalOpen(true);
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
         <TabsContent
           value="completed"
           className="w-full grid grid-cols-[repeat(auto-fit,minmax(256px,1fr))] justify-center gap-6"
@@ -268,5 +316,6 @@ function RouteComponent() {
         </TabsContent>
       </Tabs>
     </section>
+    </>
   );
 }
