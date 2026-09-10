@@ -1,0 +1,133 @@
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useApi } from "#/lib/utils/restapi";
+import { SpaceCard } from "@/components/home/SpaceCard";
+import { type SpaceProps, SpaceReserveModal } from "@/components/home/SpaceReserveModal";
+import { SpaceSearchBar, type SpaceSearchFilters } from "@/components/home/SpaceSearchBar";
+
+export const Route = createFileRoute("/_private/home")({
+  component: RouteComponent,
+});
+
+function RouteComponent() {
+  const api = useApi();
+  const navigate = useNavigate();
+
+  const [queryFilters, setQueryFilters] = useState<SpaceSearchFilters>({
+    searchQuery: "",
+    resources: [],
+    subjects: [],
+    minimumCapacity: 20,
+  });
+  const [selectedSpace, setSelectedSpace] = useState<SpaceProps | null>(null);
+  const [isReserveOpen, setIsReserveOpen] = useState(false);
+
+  const {
+    data: spaces,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["query-spaces", queryFilters],
+    queryFn: async () => {
+      const { searchQuery, resources, subjects, minimumCapacity } = queryFilters;
+      const res = await api.GET("/spaces", {
+        params: {
+          query: {
+            name: searchQuery,
+            capacity: minimumCapacity,
+            resources,
+            subjects,
+            locked: false,
+          },
+        },
+      });
+      const {response, data, error} = res;
+
+      if (!response.ok && error && response.status !== 404) {
+        toast.error(`Error ${response.status}: ${error.message}`, {
+          duration: 3000,
+          position: "bottom-center",
+          style: {
+            color: "white",
+            backgroundColor: "red",
+            borderColor: "red",
+          },
+        });
+        return;
+      }
+      if (response.status === 404) {
+        return { spaces: [] };
+      }
+
+      return data;
+    },
+  });
+
+  function handleSearch(filters: SpaceSearchFilters) {
+    setQueryFilters(filters);
+  }
+
+  function handleReserveSpace(spaceProps: SpaceProps) {
+    setSelectedSpace(spaceProps);
+    setIsReserveOpen(true);
+  }
+
+  return (
+    <>
+      <section className="container mb-8">
+        <SpaceSearchBar onSearch={(filters) => handleSearch(filters)} />
+      </section>
+      <section className="container mb-8">
+        {selectedSpace && (
+          <SpaceReserveModal
+            {...selectedSpace}
+            open={isReserveOpen}
+            onOpenChange={setIsReserveOpen}
+          />
+        )}
+      </section>
+      <section className="container">
+        <div className="flex flex-wrap justify-between items-center mb-6">
+          <h2 className="text-xl font-bold">Laboratórios</h2>
+          <span className="text-sm font-bold">Encontrados: {spaces?.spaces.length || 0}</span>
+        </div>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">Carregando...</span>
+          </div>
+        ) : isError ? (
+          <div className="flex justify-center items-center h-64">
+            <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+              Erro ao carregar os laboratórios.
+            </span>
+          </div>
+        ) : spaces?.spaces.length === 0 ? (
+          <div className="flex justify-center items-center h-64">
+            <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+              Nenhum laboratório encontrado.
+            </span>
+          </div>
+        ) : (
+          <div className="w-full grid grid-cols-[repeat(auto-fit,minmax(288px,1fr))] justify-center gap-6">
+            {spaces?.spaces.map((space) => (
+              <div key={space.id} className="w-full flex justify-center p-2">
+                <SpaceCard
+                  id={space.id}
+                  name={space.name}
+                  capacity={space.capacity}
+                  description={space.description}
+                  resources={space.resources}
+                  subjects={space.subjects}
+                  locked={space.locked ?? false}
+                  onReserve={() => handleReserveSpace({ id: space.id, name: space.name, capacity: space.capacity, subjects: space.subjects, locked: space.locked ?? false })}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+    </>
+  );
+}
