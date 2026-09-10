@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
 import z from "zod";
+import { useApi } from "#/lib/utils/restapi";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -18,15 +19,9 @@ import {
 } from "@/components/ui/dialog";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useApi } from "@/lib/restapi";
-import { ApiExceptionError } from "#/lib/error";
 
-type RequestData = {
-  dateFrom: string;
-  dateTo: string;
-};
 
-// ─── Props ───────────────────────────────────────────────────────────────────
+// Props
 
 export type HistoryEditModalProps = {
   /** ID da reserva a ser editada */
@@ -41,7 +36,7 @@ export type HistoryEditModalProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-// ─── Validação ────────────────────────────────────────────────────────────────
+// Validação
 
 const tomorrow = startOfDay(addDays(new Date(), 1));
 
@@ -50,13 +45,13 @@ const formSchema = z.object({
   dateTo: z.date("Selecione a data de término."),
 });
 
-// ─── Componente ───────────────────────────────────────────────────────────────
+// Componentes
 
 export function HistoryEditModal({ id, name, description, open, onOpenChange }: HistoryEditModalProps) {
   const api = useApi();
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
-  // ── Busca as datas atuais da reserva ao abrir o modal ──────────────────────
+  // Busca as datas atuais da reserva ao abrir o modal
   const { data, isLoading: isLoadingDates } = useQuery({
     queryKey: ["reserve-date-info", id],
     queryFn: async () => {
@@ -94,7 +89,7 @@ export function HistoryEditModal({ id, name, description, open, onOpenChange }: 
     }
   }, [isLoadingDates, data]);
 
-  // ── Formulário ─────────────────────────────────────────────────────────────
+  // Formulário
   const form = useForm({
     defaultValues: {
       dateFrom: new Date(),
@@ -132,7 +127,7 @@ export function HistoryEditModal({ id, name, description, open, onOpenChange }: 
     },
   });
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
+  // Handlers 
 
   function handleClose() {
     form.reset();
@@ -146,7 +141,7 @@ export function HistoryEditModal({ id, name, description, open, onOpenChange }: 
     if (range?.to) form.setFieldValue("dateTo", range.to);
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  // Render
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && handleClose()}>
@@ -168,7 +163,7 @@ export function HistoryEditModal({ id, name, description, open, onOpenChange }: 
           </DialogDescription>
         </DialogHeader>
 
-        {/* ── Formulário ── */}
+        {/* Formulário*/}
         <form
           id="history-edit-form"
           name="history-edit-form"
@@ -234,7 +229,7 @@ export function HistoryEditModal({ id, name, description, open, onOpenChange }: 
           </FieldGroup>
         </form>
 
-        {/* ── Rodapé com ações ── */}
+        {/* Rodapé com CTA */}
         <DialogFooter className="flex bg-transparent border-t pt-2">
           <Button type="button" variant="outline" onClick={handleClose}>
             Cancelar

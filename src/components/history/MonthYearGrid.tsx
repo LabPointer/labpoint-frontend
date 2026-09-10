@@ -8,7 +8,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { isSameMonthYear, MONTH_LABELS, type MonthYear } from "../../lib/month-year";
+import { isSameMonthYear, MONTH_LABELS, type MonthYear } from "../../lib/utils/month-year";
 
 type MonthYearGridProps = {
 	viewYear: number;

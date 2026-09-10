@@ -2,10 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useApi } from "#/lib/utils/restapi";
 import { SpaceCard } from "@/components/home/SpaceCard";
 import { type SpaceProps, SpaceReserveModal } from "@/components/home/SpaceReserveModal";
 import { SpaceSearchBar, type SpaceSearchFilters } from "@/components/home/SpaceSearchBar";
-import { useApi } from "@/lib/restapi";
 
 export const Route = createFileRoute("/_private/home")({
   component: RouteComponent,

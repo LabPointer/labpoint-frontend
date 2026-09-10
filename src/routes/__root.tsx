@@ -15,8 +15,8 @@ import {
     type sessionSchema,
     setIsAuthenticated,
     setSessionServerFn,
-} from "@/lib/session";
-import { getThemeServerFn, type setThemeValidator } from "@/lib/theme";
+} from "#/lib/server/sign-in.server.";
+import { getThemeServerFn, type setThemeValidator } from "#/lib/server/theme";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import appCss from "../styles.css?url";
 

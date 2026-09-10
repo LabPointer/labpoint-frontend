@@ -2,14 +2,26 @@
 
 Labpoint é um sistema de agendamento de laboratórios, criado em primeiro momento para a instituição do SENAI com o intuito de organizar melhor a disposição das aulas na unidade e ajudar os professores a organizar e planejar os dias de acordo com a necessidade da disciplina. O frontend concentra recursos para o desenvolvimento funcional do sistema.
 
-# Getting Started
+## Baixar e instalar
 
-To run this application:
+
+> [!WARNING]
+> Versão recomendada do [NodeJs](https://nodejs.org/en/download) é 24 LTS ou superior
+>
+> Também é necessario rodar o [labpoint-backend](https://github.com/LabPointer/labpoint-backend) para que a aplicação funcione normalmente para testes.
+
+## Comandos
+
+Rodar a aplicação:
 
 ```bash
-npm install
-npm run dev
+npm install   # Instala as dependencias
+npm run dev   # Roda a aplicação na porta 3000
+npm run generate:types   # Atualiza a tipagem das rotas do backend para facilitar a requisição
 ```
+
+> [!WARNING]
+> Para mais comandos consulte o package.json
 
 # Building For Production
 

@@ -1,5 +1,12 @@
 import { CalendarIcon } from "lucide-react";
 import { useMemo, useState } from "react";
+import {
+	currentMonthYear,
+	formatMonthYear,
+	type MonthYear,
+	type MonthYearRange,
+	normalizeRange,
+} from "#/lib/utils/month-year";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import {
@@ -7,13 +14,6 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-	currentMonthYear,
-	formatMonthYear,
-	type MonthYear,
-	type MonthYearRange,
-	normalizeRange,
-} from "@/lib/month-year";
 import { cn } from "@/lib/utils";
 import { MonthYearGrid } from "./MonthYearGrid";
 

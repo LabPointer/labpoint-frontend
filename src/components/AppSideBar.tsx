@@ -1,5 +1,7 @@
 import { createLink, useRouteContext, useRouter } from "@tanstack/react-router";
 import { Building, ChartBar, Clipboard, FlaskConical, History, Home, LogOut, Users } from "lucide-react";
+import { setIsAuthenticated, setSessionServerFn } from "#/lib/server/sign-in.server.";
+import { useApi } from "#/lib/utils/restapi";
 import {
   Sidebar,
   SidebarContent,
@@ -11,8 +13,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useApi } from "@/lib/restapi";
-import { setIsAuthenticated, setSessionServerFn } from "@/lib/session";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 
