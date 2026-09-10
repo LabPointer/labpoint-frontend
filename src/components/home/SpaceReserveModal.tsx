@@ -144,7 +144,7 @@ export function SpaceReserveModal(props: SpaceProps) {
     },
   });
 
-  const { data: existingSchedules = [], isLoading } = useQuery({
+  const { data: existingSchedules = [], isLoading, isError } = useQuery({
     queryKey: [
       "space-existing-schedules",
       id,
@@ -177,7 +177,7 @@ export function SpaceReserveModal(props: SpaceProps) {
         return;
       }
 
-      return res.data;
+      return data;
     },
     enabled: Boolean(date?.from && date?.to),
   });
@@ -288,7 +288,7 @@ export function SpaceReserveModal(props: SpaceProps) {
                       <Field orientation="horizontal">
                         <Checkbox
                           className=""
-                          disabled={availableScheduleKeys.length === 0 || isLoading || date?.to === undefined}
+                          disabled={availableScheduleKeys.length === 0 || isLoading || date?.to === undefined || isError}
                           checked={
                             availableScheduleKeys.length > 0 &&
                             field.state.value.length === availableScheduleKeys.length
@@ -391,7 +391,7 @@ export function SpaceReserveModal(props: SpaceProps) {
             >
               Limpar
             </Button>
-            <Button type="submit" form="space-reserve-form" className="ml-2" disabled={isLoading}>
+            <Button type="submit" form="space-reserve-form" className="ml-2" disabled={isLoading || isError}>
               Reservar
             </Button>
           </Field>

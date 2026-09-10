@@ -52,7 +52,7 @@ export function HistoryEditModal({ id, name, description, open, onOpenChange }: 
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   // Busca as datas atuais da reserva ao abrir o modal
-  const { data, isLoading: isLoadingDates } = useQuery({
+  const { data, isLoading: isLoadingDates, isError } = useQuery({
     queryKey: ["reserve-date-info", id],
     queryFn: async () => {
       const res = await api.GET("/reserve/date-info/{reserveId}", {
@@ -80,6 +80,17 @@ export function HistoryEditModal({ id, name, description, open, onOpenChange }: 
   });
 
   useEffect(() => {
+    if (isError) {
+      toast.error("Erro ao carregar informações da reserva.", {
+        duration: 3000,
+        position: "bottom-center",
+        style: {
+          color: "white",
+          backgroundColor: "red",
+          borderColor: "red",
+        },
+      });
+    }
     if (!isLoadingDates && data) {
       const from = parseISO(data.dateFrom);
       const to = parseISO(data.dateTo);
@@ -190,11 +201,13 @@ export function HistoryEditModal({ id, name, description, open, onOpenChange }: 
                             variant="outline"
                             id="history-date-picker-range"
                             className="justify-start px-2.5 font-normal w-full"
-                            disabled={isLoadingDates}
+                            disabled={isLoadingDates || isError}
                           >
                             <CalendarIcon data-icon="inline-start" />
                             {isLoadingDates ? (
                               <span className="text-muted-foreground">Carregando datas...</span>
+                            ) : isError ? (
+                              <span className="text-muted-foreground">Erro ao carregar datas</span>
                             ) : dateRange?.from ? (
                               dateRange.to ? (
                                 <>
@@ -239,7 +252,7 @@ export function HistoryEditModal({ id, name, description, open, onOpenChange }: 
           <form.Subscribe
             selector={(state) => [state.isSubmitting]}
             children={([isSubmitting]) => (
-              <Button type="submit" form="history-edit-form" disabled={isLoadingDates || isSubmitting}>
+              <Button type="submit" form="history-edit-form" disabled={isLoadingDates || isSubmitting || isError}>
                 Salvar
               </Button>
             )}
