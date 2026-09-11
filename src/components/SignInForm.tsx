@@ -55,19 +55,19 @@ export function SignInForm() {
             onSubmit: formSchema,
         },
         onSubmit: async ({ value }) => {
-            const response = await api.POST("/auth/sign-in", {
+            const res = await api.POST("/auth/sign-in", {
                 body: {
                     registration: value.registration,
                     password: value.password,
                 },
             });
 
-            const { data } = response;
-            const { ok, status, statusText } = response.response;
+            const { response, error } = res;
+            const { ok, status } = response;
 
-            if (!ok || !data) {
+            if (!ok && error) {
                 toast.error(
-                    `Erro ${status}: ${status === 403 ? "Matrícula ou senha incorretos" : statusText}`,
+                    `Erro ${status}: ${error.message}}`,
                     {
                         duration: 2000,
                         onAutoClose: () => {
@@ -84,17 +84,6 @@ export function SignInForm() {
 
                 return;
             }
-
-            const sessionData = {
-                expire_in: data.tokenExpireIn.toString(),
-                role: data.role as ("OWNER" | "ADMIN" | "USER"),
-                username: data.username as string,
-            } satisfies z.infer<typeof sessionSchema>;
-
-            await Promise.all([
-                setSessionServerFn({ data: sessionData }),
-                setIsAuthenticated({ data: true }),
-            ]);
 
             await router.invalidate();
 

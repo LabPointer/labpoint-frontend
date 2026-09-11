@@ -6,20 +6,21 @@ import { UserRole } from "@/lib/service";
 const sessionStorageKey = "session-info";
 
 export const sessionSchema = z.object({
-    expire_in: z.string(),
+	username: z.string().optional(),
     role: UserRole,
-    username: z.string().optional(),
 });
 
 export const getSessionServerFn = createServerFn().handler(() => {
-	const session = getCookie(sessionStorageKey);
+	const base64Session = getCookie(sessionStorageKey);
+	const session = base64Session ? atob(base64Session) : undefined;
+	
 	const result = sessionSchema.safeParse(JSON.parse(session || "{}"));
 	return result.success ? result.data : undefined;
 })
 
 export const setSessionServerFn = createServerFn().validator(sessionSchema)
 	.handler(({ data }) => {
-		setCookie(sessionStorageKey, JSON.stringify(data));
+		setCookie(sessionStorageKey, btoa(JSON.stringify(data)));
 	});
 
 const authStorageKey = "is-authenticated";

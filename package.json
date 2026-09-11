@@ -14,10 +14,11 @@
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",
-    "generate:types": "openapi-typescript http://localhost:3001/v3/api-docs -o src/lib/api.ts"
+    "generate:types": "openapi-typescript http://localhost:3001/v3/api-docs -o src/lib/utils/api.ts"
   },
   "dependencies": {
     "@base-ui/react": "latest",
+    "@date-fns/tz": "latest",
     "@faker-js/faker": "latest",
     "@fontsource-variable/oxanium": "latest",
     "@shadcn/react": "latest",
@@ -44,10 +45,10 @@
     "next-themes": "latest",
     "openapi-fetch": "latest",
     "react": "latest",
-    "react-day-picker": "^10.0.1",
+    "react-day-picker": "latest",
     "react-dom": "latest",
     "react-resizable-panels": "latest",
-    "recharts": "^3.8.0",
+    "recharts": "latest",
     "shadcn": "latest",
     "sonner": "latest",
     "tailwind-merge": "latest",
