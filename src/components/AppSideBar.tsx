@@ -23,19 +23,8 @@ export function AppSidebar() {
   const router = useRouter();
 
   async function handleLogout() {
-    const promises = [
-      await api.POST("/auth/sign-out"),
-      await setSessionServerFn({
-        data: {
-          username: undefined,
-          role: "USER",
-          expire_in: "",
-        },
-      }),
-      await setIsAuthenticated({ data: false }),
-      await router.invalidate(),
-    ];
-    await Promise.all(promises);
+    await api.POST("/auth/sign-out");
+    await router.invalidate();
   }
 
   return (

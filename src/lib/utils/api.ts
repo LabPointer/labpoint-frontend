@@ -144,6 +144,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/request-update-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enviar email para redefinição de email
+         * @description Envia um email para o usuário redefinir o email da conta
+         */
+        post: operations["postRequestUpdateEmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Atualiza os cookies do token de acesso e informações da sessão
+         * @description Atualiza os cookies do token de acesso e informações da sessão do usuário
+         */
+        post: operations["getRefresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/forgot-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enviar email para redefinição de senha
+         * @description Envia um email para o usuário redefinir sua senha
+         */
+        post: operations["postForgotPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/manage/update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Atualizar as informações do usuario
+         * @description Atualiza as informações do usuario no sistema
+         */
+        patch: operations["patchUpdate"];
+        trace?: never;
+    };
     "/subjects/update/{id}": {
         parameters: {
             query?: never;
@@ -224,7 +304,7 @@ export interface paths {
         patch: operations["editReserve"];
         trace?: never;
     };
-    "/auth/update": {
+    "/auth/update-password/{token}": {
         parameters: {
             query?: never;
             header?: never;
@@ -238,10 +318,50 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Atualizar as informações do usuario
-         * @description Atualiza as informações do usuario no sistema
+         * Atualizar senha do usuário
+         * @description Substitui a senha antiga pela nova utilizando o token de validação recebido por e-mail
          */
-        patch: operations["patchUpdate"];
+        patch: operations["postUpdatePassword"];
+        trace?: never;
+    };
+    "/auth/update-email/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Atualizar email do usuário
+         * @description Substitui o email antigo pelo novo utilizando o token de validação recebido por e-mail
+         */
+        patch: operations["postUpdatePassword_1"];
+        trace?: never;
+    };
+    "/user/manage/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pesquisar por usuarios
+         * @description Filtra e retorna usuarios encontrados. OBS: A rota funciona apenas para admins
+         */
+        get: operations["getUsers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/subjects": {
@@ -404,26 +524,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/users": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Pesquisar por usuarios
-         * @description Filtra e retorna usuarios encontrados. OBS: A rota funciona apenas para admins
-         */
-        get: operations["getUsers"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/subjects/delete": {
         parameters: {
             query?: never;
@@ -510,6 +610,7 @@ export interface components {
     schemas: {
         ErroResponseDTO: {
             message: string;
+            logout?: boolean;
         };
         CreateSpaceRequestDTO: {
             name: string;
@@ -528,7 +629,7 @@ export interface components {
             purpose: string;
             lock?: boolean;
         };
-        RegisterRequestDTO: {
+        SignUpRequestDTO: {
             username: string;
             /** Format: email */
             email: string;
@@ -538,15 +639,22 @@ export interface components {
             role: "OWNER" | "ADMIN" | "USER";
             enabled?: boolean;
         };
-        LoginRequestDTO: {
+        SignInRequestDTO: {
             registration: string;
             password: string;
         };
-        LoginResponseDTO: {
-            username: string;
-            role: string;
-            /** Format: int64 */
-            tokenExpireIn: number;
+        ForgotPasswordRequestDTO: {
+            /** Format: email */
+            email: string;
+        };
+        ManageUserUpdateRequestDTO: {
+            registration?: string;
+            username?: string;
+            email?: string;
+            password?: string;
+            /** @enum {string} */
+            role?: "OWNER" | "ADMIN" | "USER";
+            enabled?: boolean;
         };
         Subject: {
             /** Format: int32 */
@@ -560,10 +668,78 @@ export interface components {
             resources?: number[];
             subjects?: number[];
         };
+        GrantedAuthority: {
+            authority?: string;
+        };
+        Reserve: {
+            /** Format: int32 */
+            id?: number;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date */
+            reservedDateFrom?: string;
+            /** Format: date */
+            reservedDateTo?: string;
+            /** @enum {string} */
+            status?: "CONFIRMED" | "PENDING" | "LOCKED" | "CANCELED";
+            purpose?: string;
+            user?: components["schemas"]["User"];
+            space?: unknown;
+            schedules?: components["schemas"]["ReserveSchedule"][];
+        };
+        ReserveSchedule: {
+            /** Format: int32 */
+            id?: number;
+            /** @enum {string} */
+            schedule?: "M_AULA_1" | "M_AULA_2" | "M_AULA_3" | "M_AULA_4" | "M_AULA_5" | "V_AULA_1" | "V_AULA_2" | "V_AULA_3" | "V_AULA_4" | "V_AULA_5" | "N_AULA_1" | "N_AULA_2" | "N_AULA_3" | "N_AULA_4";
+            reserve?: components["schemas"]["Reserve"];
+        };
         Resource: {
             /** Format: int32 */
             id: number;
             name: string;
+            spaces?: components["schemas"]["SpaceResource"][];
+        };
+        Space: {
+            /** Format: int32 */
+            id?: number;
+            name?: string;
+            description?: string;
+            /** Format: int32 */
+            capacity?: number;
+            locked?: boolean;
+            resources?: components["schemas"]["SpaceResource"][];
+            subjects?: components["schemas"]["SpaceSubject"][];
+            reserves?: components["schemas"]["Reserve"][];
+        };
+        SpaceResource: {
+            /** Format: int32 */
+            id?: number;
+            space?: components["schemas"]["Space"];
+            resource?: components["schemas"]["Resource"];
+        };
+        SpaceSubject: {
+            /** Format: int32 */
+            id?: number;
+            space?: components["schemas"]["Space"];
+            subject?: components["schemas"]["Subject"];
+        };
+        User: {
+            /** Format: uuid */
+            id?: string;
+            username?: string;
+            email?: string;
+            registration?: string;
+            password?: string;
+            /** @enum {string} */
+            role?: "OWNER" | "ADMIN" | "USER";
+            enabled?: boolean;
+            reserves?: components["schemas"]["Reserve"][];
+            nickname?: string;
+            authorities?: components["schemas"]["GrantedAuthority"][];
+            accountNonExpired?: boolean;
+            credentialsNonExpired?: boolean;
+            accountNonLocked?: boolean;
         };
         ReserveDateDTO: {
             /** Format: date */
@@ -571,26 +747,29 @@ export interface components {
             /** Format: date */
             dateTo: string;
         };
-        UserUpdateRequestDTO: {
-            /** Format: uuid */
-            uuid?: string;
+        UpdatePasswordRequestDTO: {
+            password: string;
+        };
+        EmailUpdateRequestDTO: {
+            /** Format: email */
+            email?: string;
+        };
+        ManageUserRequestDTO: {
             registration?: string;
             username?: string;
+            /** Format: email */
             email?: string;
-            password?: string;
             /** @enum {string} */
             role?: "OWNER" | "ADMIN" | "USER";
-            enabled?: boolean;
+            /** Format: int32 */
+            offset?: number;
+            /** Format: int32 */
+            limit?: number;
         };
-        UserUpdateResponseDTO: {
-            /** Format: uuid */
-            id?: string;
-            registration: string;
-            username: string;
-            email: string;
-            /** @enum {string} */
-            role: "OWNER" | "ADMIN" | "USER";
-            enabled?: boolean;
+        ResourceDTO: {
+            /** Format: int32 */
+            id: number;
+            name: string;
         };
         SpaceDTO: {
             /** Format: int32 */
@@ -599,8 +778,8 @@ export interface components {
             /** Format: int32 */
             capacity: number;
             description?: string;
-            resources?: components["schemas"]["Resource"][];
-            subjects?: components["schemas"]["Subject"][];
+            resources?: components["schemas"]["ResourceDTO"][];
+            subjects?: components["schemas"]["SubjectDTO"][];
             locked?: boolean;
         };
         SpacesResponseDTO: {
@@ -609,8 +788,11 @@ export interface components {
             offset: number;
             /** Format: int32 */
             limit: number;
+        };
+        SubjectDTO: {
             /** Format: int32 */
-            total: number;
+            id: number;
+            name: string;
         };
         ReserveHistoryDTO: {
             next?: components["schemas"]["ReserveScheduleDTO"][];
@@ -634,18 +816,6 @@ export interface components {
             /** @enum {string} */
             status: "CONFIRMED" | "PENDING" | "LOCKED" | "CANCELED";
             purpose: string;
-        };
-        UserRequestDTO: {
-            registration?: string;
-            username?: string;
-            /** Format: email */
-            email?: string;
-            /** @enum {string} */
-            role?: "OWNER" | "ADMIN" | "USER";
-            /** Format: int32 */
-            offset?: number;
-            /** Format: int32 */
-            limit?: number;
         };
         DeleteSubjectRequestDTO: {
             subjectIds: number[];
@@ -809,7 +979,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RegisterRequestDTO"];
+                "application/json": components["schemas"]["SignUpRequestDTO"];
             };
         };
         responses: {
@@ -858,7 +1028,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["LoginRequestDTO"];
+                "application/json": components["schemas"]["SignInRequestDTO"];
             };
         };
         responses: {
@@ -867,12 +1037,130 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "*/*": components["schemas"]["LoginResponseDTO"];
-                };
+                content?: never;
             };
             /** @description Matricula ou senha incorretos, conta desabilitada ou conta trancada */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+        };
+    };
+    postRequestUpdateEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ForgotPasswordRequestDTO"];
+            };
+        };
+        responses: {
+            /** @description Email de redefinição enviado com sucesso */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description E-mail inválido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+        };
+    };
+    getRefresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Login realizado com sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Matricula ou senha incorretos, conta desabilitada ou conta trancada */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+        };
+    };
+    postForgotPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ForgotPasswordRequestDTO"];
+            };
+        };
+        responses: {
+            /** @description Email de redefinição de senha enviado com sucesso */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description E-mail inválido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+        };
+    };
+    patchUpdate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ManageUserUpdateRequestDTO"];
+            };
+        };
+        responses: {
+            /** @description Usuário atualizado com sucesso */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Usuário não encontrado */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1045,7 +1333,40 @@ export interface operations {
             };
         };
     };
-    patchUpdate: {
+    postUpdatePassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePasswordRequestDTO"];
+            };
+        };
+        responses: {
+            /** @description Senha atualizada com sucesso */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Token inválido ou expirado ou senha inválida */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+        };
+    };
+    postUpdatePassword_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -1054,21 +1375,55 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UserUpdateRequestDTO"];
+                "application/json": components["schemas"]["EmailUpdateRequestDTO"];
             };
         };
         responses: {
-            /** @description Usuário registrado com sucesso */
+            /** @description Email atualizado com sucesso */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Token inválido ou expirado ou email inválido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ErroResponseDTO"];
+                };
+            };
+        };
+    };
+    getUsers: {
+        parameters: {
+            query?: {
+                registration?: string;
+                username?: string;
+                email?: string;
+                role?: "OWNER" | "ADMIN" | "USER";
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Retorna lista de usuarios encontrados */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["UserUpdateResponseDTO"];
+                    "*/*": components["schemas"]["ManageUserRequestDTO"][];
                 };
             };
-            /** @description Usuário já registrado */
-            400: {
+            /** @description Usuário nao encontrado */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1314,42 +1669,6 @@ export interface operations {
                 };
             };
             /** @description Reserva nao encontrada */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    getUsers: {
-        parameters: {
-            query?: {
-                registration?: string;
-                username?: string;
-                email?: string;
-                role?: "OWNER" | "ADMIN" | "USER";
-                offset?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Retorna lista de usuarios encontrados */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["UserRequestDTO"][];
-                };
-            };
-            /** @description Usuário nao encontrado */
             404: {
                 headers: {
                     [name: string]: unknown;

@@ -10,7 +10,7 @@ export function ManageReserveTableRow() {
 			<TableCell>
 				<div className="flex items-center gap-x-2">
 					<User className="size-4" />
-					<span className="">João Silva</span>
+					<span className="">Chuiza Moura</span>
 				</div>
 			</TableCell>
 			<TableCell>

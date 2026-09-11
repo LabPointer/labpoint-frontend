@@ -6,9 +6,9 @@ import { TableCell, TableRow } from "@/components/ui/table";
 export function ManageUserTableRow() {
 	return (
 		<TableRow>
-			<TableCell className="font-bold w-50">João Silva</TableCell>
+			<TableCell className="font-bold w-50">Chuiza Moura</TableCell>
 			<TableCell>20261234567</TableCell>
-			<TableCell>joao.contato@gmailcom</TableCell>
+			<TableCell>chuiza@gmail.com</TableCell>
 			<TableCell className="text-right">
 				<Badge
 					variant="outline"

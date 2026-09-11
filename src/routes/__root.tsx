@@ -28,7 +28,6 @@ interface MyRouterContext {
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
-    staleTime: 1000 * 60,
     beforeLoad: async () => {
         const theme = (await getThemeServerFn()) as z.infer<
             typeof setThemeValidator
