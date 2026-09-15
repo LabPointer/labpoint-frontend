@@ -158,7 +158,7 @@ function RouteComponent() {
                       id={String(reservation.reserve.id)}
                       spaceName={reservation.reserve.spaceName}
                       capacity={String(reservation.reserve.capacity)}
-                      status={reservation.reserve.status ?? "Status não informado"}
+                      status={reservation.reserve.status || "PENDING"}
                       dateFrom={reservation.reserve.reservedDateFrom ?? "Data não informada"}
                       dateTo={reservation.reserve.reservedDateTo ?? "Data não informada"}
                       schedules={
@@ -225,7 +225,7 @@ function RouteComponent() {
                     id={String(reservation.reserve.id)}
                     spaceName={reservation.reserve.spaceName}
                     capacity={String(reservation.reserve.capacity)}
-                    status={reservation.reserve.status ?? "Status não informado"}
+                    status={reservation.reserve.status || "PENDING"}
                     dateFrom={reservation.reserve.reservedDateFrom ?? "Data não informada"}
                     dateTo={reservation.reserve.reservedDateTo ?? "Data não informada"}
                     schedules={
@@ -284,7 +284,7 @@ function RouteComponent() {
                     id={String(reservation.reserve.id)}
                     spaceName={reservation.reserve.spaceName}
                     capacity={String(reservation.reserve.capacity)}
-                    status={reservation.reserve.status ?? "Status não informado"}
+                    status={reservation.reserve.status || "PENDING"}
                     dateFrom={reservation.reserve.reservedDateFrom ?? "Data não informada"}
                     dateTo={reservation.reserve.reservedDateTo ?? "Data não informada"}
                     schedules={

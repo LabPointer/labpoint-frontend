@@ -17,9 +17,9 @@ const routeTitles: Record<string, string> = {
     "/home": "Início",
     "/calendar": "Calendário",
     "/history": "Histórico",
-    "/manage-spaces": "Gerenciar salas",
-    "/manage-reserves": "Gerenciar reservas",
-    "/manage-users": "Gerenciar usuários",
+    "/admin/manage-spaces": "Gerenciar salas",
+    "/admin/manage-reserves": "Gerenciar reservas",
+    "/admin/manage-users": "Gerenciar usuários",
 };
 
 function RouteComponent() {

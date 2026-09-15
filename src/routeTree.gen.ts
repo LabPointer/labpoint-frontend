@@ -17,6 +17,7 @@ import { Route as PrivateHistoryRouteImport } from './routes/_private/history'
 import { Route as PrivateHomeRouteImport } from './routes/_private/home'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicForgetPasswordRouteImport } from './routes/_public/forget-password'
+import { Route as PublicResetPasswordRouteImport } from './routes/_public/reset-password'
 import { Route as PublicSignUpRouteImport } from './routes/_public/sign-up'
 import { Route as PrivateAdminManageReservesRouteImport } from './routes/_private/admin/manage-reserves'
 import { Route as PrivateAdminManageSpacesRouteImport } from './routes/_private/admin/manage-spaces'
@@ -61,6 +62,11 @@ const PublicForgetPasswordRoute = PublicForgetPasswordRouteImport.update({
   path: '/forget-password',
   getParentRoute: () => PublicRouteRoute,
 } as any)
+const PublicResetPasswordRoute = PublicResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
 const PublicSignUpRoute = PublicSignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/history': typeof PrivateHistoryRoute
   '/home': typeof PrivateHomeRoute
   '/forget-password': typeof PublicForgetPasswordRoute
+  '/reset-password': typeof PublicResetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
   '/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
   '/admin/manage-spaces': typeof PrivateAdminManageSpacesRoute
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/history': typeof PrivateHistoryRoute
   '/home': typeof PrivateHomeRoute
   '/forget-password': typeof PublicForgetPasswordRoute
+  '/reset-password': typeof PublicResetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
   '/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
   '/admin/manage-spaces': typeof PrivateAdminManageSpacesRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/_private/history': typeof PrivateHistoryRoute
   '/_private/home': typeof PrivateHomeRoute
   '/_public/forget-password': typeof PublicForgetPasswordRoute
+  '/_public/reset-password': typeof PublicResetPasswordRoute
   '/_public/sign-up': typeof PublicSignUpRoute
   '/_public/': typeof PublicIndexRoute
   '/_private/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/home'
     | '/forget-password'
+    | '/reset-password'
     | '/sign-up'
     | '/admin/manage-reserves'
     | '/admin/manage-spaces'
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/home'
     | '/forget-password'
+    | '/reset-password'
     | '/sign-up'
     | '/admin/manage-reserves'
     | '/admin/manage-spaces'
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
     | '/_private/history'
     | '/_private/home'
     | '/_public/forget-password'
+    | '/_public/reset-password'
     | '/_public/sign-up'
     | '/_public/'
     | '/_private/admin/manage-reserves'
@@ -236,6 +248,13 @@ declare module '@tanstack/react-router' {
       path: '/forget-password'
       fullPath: '/forget-password'
       preLoaderRoute: typeof PublicForgetPasswordRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/reset-password': {
+      id: '/_public/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof PublicResetPasswordRouteImport
       parentRoute: typeof PublicRouteRoute
     }
     '/_public/sign-up': {
@@ -313,12 +332,14 @@ const PrivateRouteRouteWithChildren = PrivateRouteRoute._addFileChildren(
 
 interface PublicRouteRouteChildren {
   PublicForgetPasswordRoute: typeof PublicForgetPasswordRoute
+  PublicResetPasswordRoute: typeof PublicResetPasswordRoute
   PublicSignUpRoute: typeof PublicSignUpRoute
   PublicIndexRoute: typeof PublicIndexRoute
 }
 
 const PublicRouteRouteChildren: PublicRouteRouteChildren = {
   PublicForgetPasswordRoute: PublicForgetPasswordRoute,
+  PublicResetPasswordRoute: PublicResetPasswordRoute,
   PublicSignUpRoute: PublicSignUpRoute,
   PublicIndexRoute: PublicIndexRoute,
 }
