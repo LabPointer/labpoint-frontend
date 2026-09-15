@@ -1,6 +1,5 @@
 import { createLink, useRouteContext, useRouter } from "@tanstack/react-router";
-import { Building, ChartBar, Clipboard, FlaskConical, History, Home, LogOut, Users } from "lucide-react";
-import { setIsAuthenticated, setSessionServerFn } from "#/lib/server/sign-in";
+import { Building, Calendar, ChartBar, Clipboard, FlaskConical, History, Home, LogOut, Users } from "lucide-react";
 import { useApi } from "#/lib/utils/restapi";
 import {
   Sidebar,
@@ -64,6 +63,22 @@ export function AppSidebar() {
                 <SidebarMenuButton
                   render={
                     <LinkButton
+                      to="/calendar"
+                      variant="ghost"
+                      activeProps={{
+                        variant: "default",
+                        className: "hover:bg-violet-600 hover:text-white",
+                      }}
+                      className="h-10 justify-start gap-3 rounded-xl px-3"
+                    >
+                      <Calendar aria-hidden="true" className="size-4" />
+                      <span>Calendario</span>
+                    </LinkButton>
+                  }
+                />
+                <SidebarMenuButton
+                  render={
+                    <LinkButton
                       to="/history"
                       variant="ghost"
                       activeProps={{
@@ -81,94 +96,96 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        {sessionInfo.role === "ADMIN" ||
-          (sessionInfo.role === "OWNER" && (
-            <SidebarGroup className="px-3 py-5">
-              <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Coordenação</p>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      render={
-                        <LinkButton
-                          to="/admin/manage-spaces"
-                          variant="ghost"
-                          activeProps={{
-                            variant: "default",
-                            className: "hover:bg-violet-600 hover:text-white",
-                          }}
-                          className="h-10 justify-start gap-3 rounded-xl px-3"
-                        >
-                          <Building aria-hidden="true" className="size-4" />
-                          <span>Gerenciar salas</span>
-                        </LinkButton>
-                      }
-                    />
-                    <SidebarMenuButton
-                      render={
-                        <LinkButton
-                          to="/admin/manage-reserves"
-                          variant="ghost"
-                          activeProps={{
-                            variant: "default",
-                            className: "hover:bg-violet-600 hover:text-white",
-                          }}
-                          className="h-10 justify-start gap-3 rounded-xl px-3"
-                        >
-                          <Clipboard aria-hidden="true" className="size-4" />
-                          <span>Gerenciar reservas</span>
-                        </LinkButton>
-                      }
-                    />
-                    <SidebarMenuButton
-                      render={
-                        <LinkButton
-                          to="/admin/manage-users"
-                          variant="ghost"
-                          activeProps={{
-                            variant: "default",
-                            className: "hover:bg-violet-600 hover:text-white",
-                          }}
-                          className="h-10 justify-start gap-3 rounded-xl px-3"
-                        >
-                          <Users aria-hidden="true" className="size-4" />
-                          <span>Gerenciar usuarios</span>
-                        </LinkButton>
-                      }
-                    />
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          ))}
-        {sessionInfo.role === "ADMIN" ||
-          (sessionInfo.role === "OWNER" && (
-            <SidebarGroup className="px-3 py-5">
-              <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Diretoria</p>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      render={
-                        <LinkButton
-                          to="/admin/report"
-                          variant="ghost"
-                          activeProps={{
-                            variant: "default",
-                            className: "hover:bg-violet-600 hover:text-white",
-                          }}
-                          className="h-10 justify-start gap-3 rounded-xl px-3"
-                        >
-                          <ChartBar aria-hidden="true" className="size-4" />
-                          <span>Relatórios</span>
-                        </LinkButton>
-                      }
-                    />
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          ))}
+        {sessionInfo &&
+          (sessionInfo.role === "ADMIN" ||
+            (sessionInfo.role === "OWNER" && (
+              <SidebarGroup className="px-3 py-5">
+                <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Coordenação</p>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        render={
+                          <LinkButton
+                            to="/admin/manage-spaces"
+                            variant="ghost"
+                            activeProps={{
+                              variant: "default",
+                              className: "hover:bg-violet-600 hover:text-white",
+                            }}
+                            className="h-10 justify-start gap-3 rounded-xl px-3"
+                          >
+                            <Building aria-hidden="true" className="size-4" />
+                            <span>Gerenciar salas</span>
+                          </LinkButton>
+                        }
+                      />
+                      <SidebarMenuButton
+                        render={
+                          <LinkButton
+                            to="/admin/manage-reserves"
+                            variant="ghost"
+                            activeProps={{
+                              variant: "default",
+                              className: "hover:bg-violet-600 hover:text-white",
+                            }}
+                            className="h-10 justify-start gap-3 rounded-xl px-3"
+                          >
+                            <Clipboard aria-hidden="true" className="size-4" />
+                            <span>Gerenciar reservas</span>
+                          </LinkButton>
+                        }
+                      />
+                      <SidebarMenuButton
+                        render={
+                          <LinkButton
+                            to="/admin/manage-users"
+                            variant="ghost"
+                            activeProps={{
+                              variant: "default",
+                              className: "hover:bg-violet-600 hover:text-white",
+                            }}
+                            className="h-10 justify-start gap-3 rounded-xl px-3"
+                          >
+                            <Users aria-hidden="true" className="size-4" />
+                            <span>Gerenciar usuarios</span>
+                          </LinkButton>
+                        }
+                      />
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )))}
+        {sessionInfo &&
+          (sessionInfo.role === "ADMIN" ||
+            (sessionInfo.role === "OWNER" && (
+              <SidebarGroup className="px-3 py-5">
+                <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Diretoria</p>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        render={
+                          <LinkButton
+                            to="/admin/report"
+                            variant="ghost"
+                            activeProps={{
+                              variant: "default",
+                              className: "hover:bg-violet-600 hover:text-white",
+                            }}
+                            className="h-10 justify-start gap-3 rounded-xl px-3"
+                          >
+                            <ChartBar aria-hidden="true" className="size-4" />
+                            <span>Relatórios</span>
+                          </LinkButton>
+                        }
+                      />
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )))}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border/70 px-5 py-4">
@@ -179,8 +196,10 @@ export function AppSidebar() {
           </Avatar>
 
           <div className="flex flex-col justify-center min-w-0">
-            <span className="truncate text-sm font-semibold">{sessionInfo.username}</span>
-            <span className="truncate text-xs text-[color:var(--sea-ink-soft)]">{sessionInfo.role}</span>
+            <span className="truncate text-sm font-semibold">{sessionInfo?.username || "Nao definido"}</span>
+            <span className="truncate text-xs text-[color:var(--sea-ink-soft)]">
+              {sessionInfo?.role || "Nao definido"}
+            </span>
           </div>
 
           <Button onClick={handleLogout} variant={"destructive"} size={"icon-lg"} className="ml-auto">

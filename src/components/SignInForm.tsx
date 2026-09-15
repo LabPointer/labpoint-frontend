@@ -25,7 +25,6 @@ import {
     InputGroupButton,
     InputGroupInput,
 } from "@/components/ui/input-group";
-import { type sessionSchema, setIsAuthenticated, setSessionServerFn } from "@/lib/server/sign-in";
 import { useApi } from "@/lib/utils/restapi";
 
 const formSchema = z.object({
@@ -67,7 +66,7 @@ export function SignInForm() {
 
             if (!ok && error) {
                 toast.error(
-                    `Erro ${status}: ${error.message}}`,
+                    `Erro ${status}: ${error.message}`,
                     {
                         duration: 2000,
                         onAutoClose: () => {

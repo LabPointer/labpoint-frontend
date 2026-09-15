@@ -8,7 +8,7 @@ export interface HistoryCardProps {
   id: string;
   spaceName: string;
   capacity: string;
-  status: "CONFIRMED" | "PENDING" | "LOCKED" | "CANCELED";
+  status: "CONFIRMED" | "PENDING" | "ABSENT" | "LOCKED" | "CANCELED";
   dateFrom: string;
   dateTo: string;
   schedules: (

@@ -12,10 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PrivateRouteRouteImport } from './routes/_private/route'
 import { Route as PublicRouteRouteImport } from './routes/_public/route'
 import { Route as PrivateAdminRouteRouteImport } from './routes/_private/admin/route'
+import { Route as PrivateCalendarRouteImport } from './routes/_private/calendar'
 import { Route as PrivateHistoryRouteImport } from './routes/_private/history'
 import { Route as PrivateHomeRouteImport } from './routes/_private/home'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicForgetPasswordRouteImport } from './routes/_public/forget-password'
+import { Route as PublicResetPasswordRouteImport } from './routes/_public/reset-password'
 import { Route as PublicSignUpRouteImport } from './routes/_public/sign-up'
 import { Route as PrivateAdminManageReservesRouteImport } from './routes/_private/admin/manage-reserves'
 import { Route as PrivateAdminManageSpacesRouteImport } from './routes/_private/admin/manage-spaces'
@@ -33,6 +35,11 @@ const PublicRouteRoute = PublicRouteRouteImport.update({
 const PrivateAdminRouteRoute = PrivateAdminRouteRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
+const PrivateCalendarRoute = PrivateCalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
   getParentRoute: () => PrivateRouteRoute,
 } as any)
 const PrivateHistoryRoute = PrivateHistoryRouteImport.update({
@@ -53,6 +60,11 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
 const PublicForgetPasswordRoute = PublicForgetPasswordRouteImport.update({
   id: '/forget-password',
   path: '/forget-password',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicResetPasswordRoute = PublicResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => PublicRouteRoute,
 } as any)
 const PublicSignUpRoute = PublicSignUpRouteImport.update({
@@ -86,9 +98,11 @@ const PrivateAdminReportRoute = PrivateAdminReportRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
   '/admin': typeof PrivateAdminRouteRouteWithChildren
+  '/calendar': typeof PrivateCalendarRoute
   '/history': typeof PrivateHistoryRoute
   '/home': typeof PrivateHomeRoute
   '/forget-password': typeof PublicForgetPasswordRoute
+  '/reset-password': typeof PublicResetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
   '/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
   '/admin/manage-spaces': typeof PrivateAdminManageSpacesRoute
@@ -98,9 +112,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
   '/admin': typeof PrivateAdminRouteRouteWithChildren
+  '/calendar': typeof PrivateCalendarRoute
   '/history': typeof PrivateHistoryRoute
   '/home': typeof PrivateHomeRoute
   '/forget-password': typeof PublicForgetPasswordRoute
+  '/reset-password': typeof PublicResetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
   '/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
   '/admin/manage-spaces': typeof PrivateAdminManageSpacesRoute
@@ -112,9 +128,11 @@ export interface FileRoutesById {
   '/_private': typeof PrivateRouteRouteWithChildren
   '/_public': typeof PublicRouteRouteWithChildren
   '/_private/admin': typeof PrivateAdminRouteRouteWithChildren
+  '/_private/calendar': typeof PrivateCalendarRoute
   '/_private/history': typeof PrivateHistoryRoute
   '/_private/home': typeof PrivateHomeRoute
   '/_public/forget-password': typeof PublicForgetPasswordRoute
+  '/_public/reset-password': typeof PublicResetPasswordRoute
   '/_public/sign-up': typeof PublicSignUpRoute
   '/_public/': typeof PublicIndexRoute
   '/_private/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
@@ -127,9 +145,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/calendar'
     | '/history'
     | '/home'
     | '/forget-password'
+    | '/reset-password'
     | '/sign-up'
     | '/admin/manage-reserves'
     | '/admin/manage-spaces'
@@ -139,9 +159,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/calendar'
     | '/history'
     | '/home'
     | '/forget-password'
+    | '/reset-password'
     | '/sign-up'
     | '/admin/manage-reserves'
     | '/admin/manage-spaces'
@@ -152,9 +174,11 @@ export interface FileRouteTypes {
     | '/_private'
     | '/_public'
     | '/_private/admin'
+    | '/_private/calendar'
     | '/_private/history'
     | '/_private/home'
     | '/_public/forget-password'
+    | '/_public/reset-password'
     | '/_public/sign-up'
     | '/_public/'
     | '/_private/admin/manage-reserves'
@@ -191,6 +215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateAdminRouteRouteImport
       parentRoute: typeof PrivateRouteRoute
     }
+    '/_private/calendar': {
+      id: '/_private/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof PrivateCalendarRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
     '/_private/history': {
       id: '/_private/history'
       path: '/history'
@@ -217,6 +248,13 @@ declare module '@tanstack/react-router' {
       path: '/forget-password'
       fullPath: '/forget-password'
       preLoaderRoute: typeof PublicForgetPasswordRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/reset-password': {
+      id: '/_public/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof PublicResetPasswordRouteImport
       parentRoute: typeof PublicRouteRoute
     }
     '/_public/sign-up': {
@@ -276,12 +314,14 @@ const PrivateAdminRouteRouteWithChildren =
 
 interface PrivateRouteRouteChildren {
   PrivateAdminRouteRoute: typeof PrivateAdminRouteRouteWithChildren
+  PrivateCalendarRoute: typeof PrivateCalendarRoute
   PrivateHistoryRoute: typeof PrivateHistoryRoute
   PrivateHomeRoute: typeof PrivateHomeRoute
 }
 
 const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
   PrivateAdminRouteRoute: PrivateAdminRouteRouteWithChildren,
+  PrivateCalendarRoute: PrivateCalendarRoute,
   PrivateHistoryRoute: PrivateHistoryRoute,
   PrivateHomeRoute: PrivateHomeRoute,
 }
@@ -292,12 +332,14 @@ const PrivateRouteRouteWithChildren = PrivateRouteRoute._addFileChildren(
 
 interface PublicRouteRouteChildren {
   PublicForgetPasswordRoute: typeof PublicForgetPasswordRoute
+  PublicResetPasswordRoute: typeof PublicResetPasswordRoute
   PublicSignUpRoute: typeof PublicSignUpRoute
   PublicIndexRoute: typeof PublicIndexRoute
 }
 
 const PublicRouteRouteChildren: PublicRouteRouteChildren = {
   PublicForgetPasswordRoute: PublicForgetPasswordRoute,
+  PublicResetPasswordRoute: PublicResetPasswordRoute,
   PublicSignUpRoute: PublicSignUpRoute,
   PublicIndexRoute: PublicIndexRoute,
 }

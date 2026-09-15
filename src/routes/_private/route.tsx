@@ -5,8 +5,8 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 export const Route = createFileRoute("/_private")({
     beforeLoad: async ({ context }) => {
-        const { isAuthenticated } = context;
-        if (!isAuthenticated) {
+        const { sessionInfo } = context;
+        if (!sessionInfo) {
             throw redirect({ to: "/" });
         }
     },
@@ -15,10 +15,11 @@ export const Route = createFileRoute("/_private")({
 
 const routeTitles: Record<string, string> = {
     "/home": "Início",
+    "/calendar": "Calendário",
     "/history": "Histórico",
-    "/manage-spaces": "Gerenciar salas",
-    "/manage-reserves": "Gerenciar reservas",
-    "/manage-users": "Gerenciar usuários",
+    "/admin/manage-spaces": "Gerenciar salas",
+    "/admin/manage-reserves": "Gerenciar reservas",
+    "/admin/manage-users": "Gerenciar usuários",
 };
 
 function RouteComponent() {

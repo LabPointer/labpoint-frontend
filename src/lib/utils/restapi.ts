@@ -3,9 +3,9 @@ import type { components, paths } from "./api";
 
 const getBaseUrl = () => {
   if (typeof window !== "undefined") {
-    return `${window.location.protocol}//${window.location.hostname}:3001`;
+    return `${window.location.protocol}//${window.location.hostname}:8080`;
   }
-  return "http://localhost:3001";
+  return "http://localhost:8080";
 };
 
 const client = createClient<paths>({ 
@@ -34,7 +34,7 @@ const authMiddleware: Middleware = {
     if (shouldLogout && !isAuthRequest) {
       try {
         await client.POST("/auth/sign-out");
-        console.log("User logged out due to unauthorized access.");
+        console.error("User logged out due to unauthorized access.");
       } catch (err) {
         console.error("Error signing out:", err);
       }
