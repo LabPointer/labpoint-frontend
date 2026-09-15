@@ -7,7 +7,7 @@ const sessionStorageKey = "session-info";
 
 export const sessionSchema = z.object({
 	username: z.string().optional(),
-    role: UserRole,
+    role: z.union([UserRole, z.literal("")]),
 });
 
 export const getSessionServerFn = createServerFn().handler(() => {
@@ -21,19 +21,4 @@ export const getSessionServerFn = createServerFn().handler(() => {
 export const setSessionServerFn = createServerFn().validator(sessionSchema)
 	.handler(({ data }) => {
 		setCookie(sessionStorageKey, btoa(JSON.stringify(data)));
-	});
-
-const authStorageKey = "is-authenticated";
-
-export const authSchema = z.boolean().default(false);
-
-export const getIsAuthenticated = createServerFn().handler(() => {
-	const isAuth = getCookie(authStorageKey);
-	const result = authSchema.safeParse(isAuth ? isAuth.toString().toLowerCase() === "true" : false);
-	return result.success ? result.data : false;
-})
-
-export const setIsAuthenticated = createServerFn().validator(authSchema)
-	.handler(({ data }) => {
-		setCookie(authStorageKey, data.toString());
 	});

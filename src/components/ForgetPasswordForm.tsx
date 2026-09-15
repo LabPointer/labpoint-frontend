@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { createLink } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import * as React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ const formSchema = z.object({
 
 export function ForgetPasswordForm() {
     const LinkButton = createLink(Button);
-    const [isPasswordVisible, setIsPasswordVisible] = React.useState(false);
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
     const form = useForm({
         defaultValues: {

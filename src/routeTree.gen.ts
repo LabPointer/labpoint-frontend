@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PrivateRouteRouteImport } from './routes/_private/route'
 import { Route as PublicRouteRouteImport } from './routes/_public/route'
 import { Route as PrivateAdminRouteRouteImport } from './routes/_private/admin/route'
+import { Route as PrivateCalendarRouteImport } from './routes/_private/calendar'
 import { Route as PrivateHistoryRouteImport } from './routes/_private/history'
 import { Route as PrivateHomeRouteImport } from './routes/_private/home'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
@@ -33,6 +34,11 @@ const PublicRouteRoute = PublicRouteRouteImport.update({
 const PrivateAdminRouteRoute = PrivateAdminRouteRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
+const PrivateCalendarRoute = PrivateCalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
   getParentRoute: () => PrivateRouteRoute,
 } as any)
 const PrivateHistoryRoute = PrivateHistoryRouteImport.update({
@@ -86,6 +92,7 @@ const PrivateAdminReportRoute = PrivateAdminReportRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
   '/admin': typeof PrivateAdminRouteRouteWithChildren
+  '/calendar': typeof PrivateCalendarRoute
   '/history': typeof PrivateHistoryRoute
   '/home': typeof PrivateHomeRoute
   '/forget-password': typeof PublicForgetPasswordRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
   '/admin': typeof PrivateAdminRouteRouteWithChildren
+  '/calendar': typeof PrivateCalendarRoute
   '/history': typeof PrivateHistoryRoute
   '/home': typeof PrivateHomeRoute
   '/forget-password': typeof PublicForgetPasswordRoute
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/_private': typeof PrivateRouteRouteWithChildren
   '/_public': typeof PublicRouteRouteWithChildren
   '/_private/admin': typeof PrivateAdminRouteRouteWithChildren
+  '/_private/calendar': typeof PrivateCalendarRoute
   '/_private/history': typeof PrivateHistoryRoute
   '/_private/home': typeof PrivateHomeRoute
   '/_public/forget-password': typeof PublicForgetPasswordRoute
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/calendar'
     | '/history'
     | '/home'
     | '/forget-password'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/calendar'
     | '/history'
     | '/home'
     | '/forget-password'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/_private'
     | '/_public'
     | '/_private/admin'
+    | '/_private/calendar'
     | '/_private/history'
     | '/_private/home'
     | '/_public/forget-password'
@@ -189,6 +201,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof PrivateAdminRouteRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
+    '/_private/calendar': {
+      id: '/_private/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof PrivateCalendarRouteImport
       parentRoute: typeof PrivateRouteRoute
     }
     '/_private/history': {
@@ -276,12 +295,14 @@ const PrivateAdminRouteRouteWithChildren =
 
 interface PrivateRouteRouteChildren {
   PrivateAdminRouteRoute: typeof PrivateAdminRouteRouteWithChildren
+  PrivateCalendarRoute: typeof PrivateCalendarRoute
   PrivateHistoryRoute: typeof PrivateHistoryRoute
   PrivateHomeRoute: typeof PrivateHomeRoute
 }
 
 const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
   PrivateAdminRouteRoute: PrivateAdminRouteRouteWithChildren,
+  PrivateCalendarRoute: PrivateCalendarRoute,
   PrivateHistoryRoute: PrivateHistoryRoute,
   PrivateHomeRoute: PrivateHomeRoute,
 }

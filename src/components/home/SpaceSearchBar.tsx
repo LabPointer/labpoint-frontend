@@ -48,17 +48,17 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
     queryKey: ["global-data"],
     queryFn: async () => {
       const [resourcesRes, subjectsRes] = await Promise.all([
-        api.GET("/resources/cache"),
-        api.GET("/subjects/cache"),
+        api.GET("/resources"),
+        api.GET("/subjects"),
       ]);
 
       const resourcesMap = new Map<number, string>();
       resourcesMap.set(-1, "Todos os recursos");
-      resourcesRes.data?.map((item) => resourcesMap.set(item.id, item.name));
+      resourcesRes.data?.map((item) => resourcesMap.set(item.id || 0, item.name || "unknown"));
 
       const subjectsMap = new Map<number, string>();
       subjectsMap.set(-1, "Todas as disciplinas");
-      subjectsRes.data?.map((item) => subjectsMap.set(item.id, item.name));
+      subjectsRes.data?.map((item) => subjectsMap.set(item.id || 0, item.name || "unknown"));
 
       return {
         resources: resourcesMap,
