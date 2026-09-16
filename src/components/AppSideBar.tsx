@@ -96,9 +96,7 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        {sessionInfo &&
-          (sessionInfo.role === "ADMIN" ||
-            (sessionInfo.role === "OWNER" && (
+        {sessionInfo && (sessionInfo.role === "ADMIN" ||sessionInfo.role === "OWNER") && (
               <SidebarGroup className="px-3 py-5">
                 <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Coordenação</p>
                 <SidebarGroupContent>
@@ -156,10 +154,8 @@ export function AppSidebar() {
                   </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>
-            )))}
-        {sessionInfo &&
-          (sessionInfo.role === "ADMIN" ||
-            (sessionInfo.role === "OWNER" && (
+            )}
+        {sessionInfo && (sessionInfo.role === "ADMIN" ||sessionInfo.role === "OWNER") && (
               <SidebarGroup className="px-3 py-5">
                 <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Diretoria</p>
                 <SidebarGroupContent>
@@ -185,7 +181,7 @@ export function AppSidebar() {
                   </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>
-            )))}
+            )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border/70 px-5 py-4">
