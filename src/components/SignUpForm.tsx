@@ -239,7 +239,7 @@ export function SignUpForm() {
                                         </FieldLabel>
                                         <Combobox
                                             items={UserRole.options}
-                                            defaultValue={UserRole.options[1]}
+                                            defaultValue={UserRole.options[UserRole.options.indexOf(field.state.value as z.infer<typeof UserRole>)]}
                                             onValueChange={(value) =>
                                                 field.handleChange(
                                                     value ? value : "",
