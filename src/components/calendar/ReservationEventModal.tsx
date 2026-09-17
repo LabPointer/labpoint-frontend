@@ -1,22 +1,13 @@
-import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "#/components/ui/dialog.tsx";
-import { Button } from "#/components/ui/button.tsx";
-import { Badge } from "#/components/ui/badge.tsx";
-import { Separator } from "#/components/ui/separator.tsx";
-import { AlertCircle, CalendarDays, Clock, BookOpen } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { ReservationEventData } from "#/components/calendar/reservation-types";
-import {
-  scheduleKeyToLabel,
-  statusLabel,
-  statusVariantClass,
-} from "#/components/calendar/reservation-utils";
+import { AlertCircle, BookOpen, CalendarDays, Clock } from "lucide-react";
+import { useState } from "react";
+import { Badge } from "#/components/ui/badge.tsx";
+import { Button } from "#/components/ui/button.tsx";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "#/components/ui/dialog.tsx";
+import { Separator } from "#/components/ui/separator.tsx";
+import type { ReservationEventData } from "#/lib/types/reservation-types";
+import { scheduleKeyToLabel, statusLabel, statusVariantClass } from "#/lib/utils/reservation-utils";
 import { cn } from "#/lib/utils.ts";
 
 interface ReservationEventModalProps {
@@ -57,10 +48,7 @@ export function ReservationEventModal({ data }: ReservationEventModalProps) {
 
           <div className="flex flex-col gap-4 pt-1">
             {/* Status */}
-            <Badge
-              variant="outline"
-              className={cn("w-fit text-xs font-medium", statusVariantClass(data.status))}
-            >
+            <Badge variant="outline" className={cn("w-fit text-xs font-medium", statusVariantClass(data.status))}>
               {statusLabel(data.status)}
             </Badge>
 
@@ -72,9 +60,7 @@ export function ReservationEventModal({ data }: ReservationEventModalProps) {
               <div className="flex flex-col gap-0.5">
                 <p className="text-xs font-medium text-muted-foreground">Período</p>
                 {isSameDay ? (
-                  <p className="text-sm">
-                    {format(dateFrom, "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                  </p>
+                  <p className="text-sm">{format(dateFrom, "d 'de' MMMM 'de' yyyy", { locale: ptBR })}</p>
                 ) : (
                   <p className="text-sm">
                     {format(dateFrom, "d 'de' MMM", { locale: ptBR })}

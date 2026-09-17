@@ -1,9 +1,6 @@
-import type { ReservationEventData } from "#/components/calendar/reservation-types";
 import { ReservationEventPopup } from "#/components/calendar/ReservationEventPopup";
-import {
-  statusLabel,
-  statusVariantClass,
-} from "#/components/calendar/reservation-utils";
+import type { ReservationEventData } from "#/lib/types/reservation-types";
+import { statusLabel, statusVariantClass } from "#/lib/utils/reservation-utils";
 import { cn } from "#/lib/utils.ts";
 
 interface MonthEventChipProps {
@@ -21,24 +18,17 @@ interface MonthEventChipProps {
  */
 export function MonthEventChip({ data }: MonthEventChipProps) {
   const trigger = (
-    // Wrapper flex que ocupa toda a largura do chip e é clicável
-    <span
-      className="flex w-full min-w-0 cursor-pointer items-center gap-1.5"
-      // Impede propagação ao calendário para não deselecionar outros eventos
-      onClick={(e) => e.stopPropagation()}
-    >
+    // Wrapper flex que ocupa toda a largura do chip
+    <span className="flex w-full min-w-0 cursor-pointer items-center gap-1.5">
       {/* Dot colorido com a cor do status (flui de --ec-event-color) */}
-      <span
-        aria-hidden
-        className="-me-0.5 size-1.5 shrink-0 rounded-full bg-(--ec-event-color)"
-      />
+      <span aria-hidden className="-me-0.5 size-1.5 shrink-0 rounded-full bg-(--ec-event-color)" />
       {/* Nome da sala */}
       <span className="truncate font-medium text-xs">{data.spaceName}</span>
       {/* Badge de status */}
       <span
         className={cn(
           "ms-auto shrink-0 rounded border px-1 text-[10px] font-semibold",
-          statusVariantClass(data.status)
+          statusVariantClass(data.status),
         )}
       >
         {statusLabel(data.status)}

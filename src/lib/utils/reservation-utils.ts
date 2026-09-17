@@ -1,13 +1,13 @@
 import { parseISO, addDays } from "date-fns";
-import { Schedules } from "#/lib/service";
 import type { CalendarEvent } from "#/components/reui/event-calendar/event-calendar-types.tsx";
+import { Schedules } from "#/lib/service";
 import type {
   ReservationEventData,
   ReservationStatus,
   ReserveHistoryDTO,
   ReserveScheduleDTO,
   ScheduleKey,
-} from "#/components/calendar/reservation-types";
+} from "#/lib/types/reservation-types";
 
 // ---------------------------------------------------------------------------
 // Status → Cor (CSS var do Tailwind)
@@ -47,13 +47,21 @@ export function statusLabel(status: ReservationStatus): string {
 
 export function statusVariantClass(status: ReservationStatus): string {
   const map: Record<ReservationStatus, string> = {
-    CONFIRMED: "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
-    PENDING: "bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30",
-    ABSENT: "bg-orange-500/20 text-orange-600 dark:text-orange-400 border-orange-500/30",
-    LOCKED: "bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30",
-    CANCELED: "bg-rose-500/20 text-rose-600 dark:text-rose-400 border-rose-500/30",
+    CONFIRMED:
+      "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+    PENDING:
+      "bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30",
+    ABSENT:
+      "bg-orange-500/20 text-orange-600 dark:text-orange-400 border-orange-500/30",
+    LOCKED:
+      "bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30",
+    CANCELED:
+      "bg-rose-500/20 text-rose-600 dark:text-rose-400 border-rose-500/30",
   };
-  return map[status] ?? "bg-slate-500/20 text-slate-600 dark:text-slate-400 border-slate-500/30";
+  return (
+    map[status] ??
+    "bg-slate-500/20 text-slate-600 dark:text-slate-400 border-slate-500/30"
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -69,7 +77,7 @@ export function scheduleKeyToLabel(key: ScheduleKey): string {
 // ---------------------------------------------------------------------------
 
 function dtoToEvent(
-  dto: ReserveScheduleDTO
+  dto: ReserveScheduleDTO,
 ): CalendarEvent<ReservationEventData> {
   const { reserve, schedules } = dto;
   const startDate = parseISO(reserve.reservedDateFrom);
@@ -104,7 +112,7 @@ function dtoToEvent(
 // ---------------------------------------------------------------------------
 
 export function apiToCalendarEvents(
-  dto: ReserveHistoryDTO
+  dto: ReserveHistoryDTO,
 ): CalendarEvent<ReservationEventData>[] {
   const allDtos: ReserveScheduleDTO[] = [
     ...(dto.next ?? []),
