@@ -224,7 +224,7 @@ export function HistoryCalendar() {
 
   return (
     <div className="w-full p-4">
-      <Card className="w-full py-0">
+      <Card className="w-full py-0 bg-white/70 dark:bg-black/70 backdrop-blur-xl rounded-md border dark:border-violet-500/10 shadow-md hover:shadow-lg p-4 dark:shadow-violet-300/15">
         <CardContent className="p-0">
           <EventCalendar<ReservationEventData>
             events={events}
@@ -243,7 +243,7 @@ export function HistoryCalendar() {
             onViewChange={handleViewChange}
             renderEvent={renderMonthEvent}
             renderAgendaEvent={renderAgendaEvent}
-            className="h-[640px] w-full"
+            className="h-160 w-full"
           >
             {/* Barra de navegação — sem botões de Settings e New Event */}
             <div className="flex flex-wrap items-center gap-2 pe-2">

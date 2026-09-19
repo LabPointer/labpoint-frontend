@@ -14,7 +14,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Criar uma matéria
+         * Admin: criar uma matéria
          * @description Cria uma matéria no sistema
          */
         post: operations["createSubject"];
@@ -34,7 +34,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Criar um novo espaço
+         * Admin: criar espaço
          * @description Cria um novo espaço no sistema
          */
         post: operations["postCreateSpace"];
@@ -54,8 +54,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Criar um recurso
-         * @description Cria um recurso no sistema
+         * Admin: criar recurso
+         * @description Cadastra um recurso no sistema
          */
         post: operations["postCreateResource"];
         delete?: never;
@@ -74,7 +74,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Cria uma nova reserva
+         * Criar reserva
          * @description Cria uma nova reserva para o espaço especificado, com base nas datas fornecidas e no usuário autenticado
          */
         post: operations["createReserve"];
@@ -94,8 +94,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Registrar um novo usuário
-         * @description Registra um novo usuário no sistema
+         * Registrar
+         * @description Registra um novo usuário no sistema. Administrador pode usar este endpoint para criar novos usuários.
          */
         post: operations["postSignUp"];
         delete?: never;
@@ -114,7 +114,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Realizar logout
+         * Sair
          * @description Realiza o logout do usuário
          */
         post: operations["postSignOut"];
@@ -134,30 +134,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Realizar login
+         * Entrar
          * @description Realiza o login do usuário
          */
         post: operations["postSignIn"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/request-update-email": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Enviar email para redefinição de email
-         * @description Envia um email para o usuário redefinir o email da conta
-         */
-        post: operations["postRequestUpdateEmail"];
         delete?: never;
         options?: never;
         head?: never;
@@ -174,8 +154,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Atualiza os cookies do token de acesso e informações da sessão
-         * @description Atualiza os cookies do token de acesso e informações da sessão do usuário
+         * Atualizar sessão
+         * @description Atualiza os cookies contendo o token de acesso e informações da sessão do usuário
          */
         post: operations["getRefresh"];
         delete?: never;
@@ -194,8 +174,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Enviar email para redefinição de senha
-         * @description Envia um email para o usuário redefinir sua senha
+         * Solicitar redefinição de senha
+         * @description Envia um email para o usuário com um link para redefinir sua senha
          */
         post: operations["postForgotPassword"];
         delete?: never;
@@ -218,7 +198,7 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Editar uma matéria
+         * Admin: editar uma matéria
          * @description Edita uma matéria no sistema
          */
         patch: operations["updateSubject"];
@@ -238,7 +218,7 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Editar espaço
+         * Admin: editar espaço
          * @description Edita um espaço existente
          */
         patch: operations["patchSpace"];
@@ -258,7 +238,7 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Editar um recurso
+         * Admin: editar recurso
          * @description Edita um recurso no sistema
          */
         patch: operations["updateResource"];
@@ -278,30 +258,10 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Edita a data da reserva
+         * Editar a data
          * @description Edita a data da reserva
          */
         patch: operations["editReserve"];
-        trace?: never;
-    };
-    "/auth/update-email/{token}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Atualizar email do usuário
-         * @description Substitui o email antigo pelo novo utilizando o token de validação recebido por e-mail
-         */
-        patch: operations["postUpdatePassword"];
         trace?: never;
     };
     "/auth/reset-password/{token}": {
@@ -318,10 +278,10 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Atualizar senha do usuário
+         * Atualizar senha
          * @description Substitui a senha antiga pela nova utilizando o token de validação recebido por e-mail
          */
-        patch: operations["postResetPassword"];
+        patch: operations["patchResetPassword"];
         trace?: never;
     };
     "/account/manage/update": {
@@ -338,7 +298,7 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Atualizar as informações do usuario
+         * Admin: atualizar informações do usuario
          * @description Atualiza as informações do usuario no sistema
          */
         patch: operations["patchUpdate"];
@@ -372,8 +332,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Buscar por laboratorios
-         * @description Retorna uma lista de laboratorios
+         * Buscar espaços
+         * @description Retorna uma lista de espaços
          */
         get: operations["getSpaces"];
         put?: never;
@@ -392,7 +352,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Buscar por recursos
+         * Buscar recursos
          * @description Retorna uma lista de recursos.
          */
         get: operations["getResources"];
@@ -412,7 +372,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Buscar historico de reservas do mes
+         * Buscar historico
          * @description Retorna uma lista de reservas(confirmada, concluida e cancelada) de um mes especifico
          */
         get: operations["getHistory"];
@@ -432,8 +392,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Cria uma nova reserva
-         * @description Cria uma nova reserva para o espaço especificado, com base nas datas fornecidas e no usuário autenticado
+         * Pegar horarios
+         * @description Retorna uma lista de horarios ja reservados para um espaco especifico de acordo com data range fornecido
          */
         get: operations["getExistingSchedules"];
         put?: never;
@@ -452,8 +412,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Obtem a data da reserva pelo id
-         * @description Retorna a data da reserva
+         * Obter data
+         * @description Retorna a data da reserva pelo id.
          */
         get: operations["getDateInfo"];
         put?: never;
@@ -472,8 +432,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Pesquisar por usuarios
-         * @description Filtra e retorna usuarios encontrados. OBS: A rota funciona apenas para admins
+         * Admin: pesquisar por usuarios
+         * @description Filtra e retorna usuarios encontrados.
          */
         get: operations["getUsers"];
         put?: never;
@@ -495,7 +455,7 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * Deletar uma matéria
+         * Admin: deletar uma matéria
          * @description Deleta uma matéria no sistema
          */
         delete: operations["deleteSubject"];
@@ -515,7 +475,7 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * Deletar um espaço
+         * Admin: deletar espaço
          * @description Deleta um espaço do sistema
          */
         delete: operations["deleteSpace"];
@@ -535,7 +495,7 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * Deletar um recurso
+         * Admin: deletar recurso
          * @description Deleta um recurso no sistema
          */
         delete: operations["deleteResource"];
@@ -555,8 +515,8 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * Cancela uma reserva do historico do usuario pelo id
-         * @description Marca a reserva como cancelada
+         * Cancelar reserva
+         * @description Altera o status da reserva para cancelada, desde que a reserva pertença ao usuário autenticado e esteja em um estado que permita o cancelamento.
          */
         delete: operations["getHistoryByYearMonth"];
         options?: never;
@@ -666,7 +626,7 @@ export interface components {
             status?: "CONFIRMED" | "PENDING" | "ABSENT" | "LOCKED" | "CANCELED";
             purpose?: string;
             account?: components["schemas"]["Account"];
-            space?: unknown;
+            space?: components["schemas"]["Space"];
             schedules?: components["schemas"]["ReserveSchedule"][];
         };
         ReserveSchedule: {
@@ -712,18 +672,12 @@ export interface components {
             /** Format: date */
             dateTo: string;
         };
-        EmailUpdateRequestDTO: {
-            /** Format: email */
-            email?: string;
-        };
         UpdatePasswordRequestDTO: {
             password: string;
         };
         ManageUserUpdateRequestDTO: {
             registration?: string;
             username?: string;
-            email?: string;
-            password?: string;
             /** @enum {string} */
             role?: "OWNER" | "ADMIN" | "USER";
             enabled?: boolean;
@@ -1024,37 +978,6 @@ export interface operations {
             };
         };
     };
-    postRequestUpdateEmail: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ForgotPasswordRequestDTO"];
-            };
-        };
-        responses: {
-            /** @description Email de redefinição enviado com sucesso */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description E-mail inválido */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
     getRefresh: {
         parameters: {
             query?: never;
@@ -1276,38 +1199,7 @@ export interface operations {
             };
         };
     };
-    postUpdatePassword: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EmailUpdateRequestDTO"];
-            };
-        };
-        responses: {
-            /** @description Email atualizado com sucesso */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Token inválido ou expirado ou email inválido */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    postResetPassword: {
+    patchResetPassword: {
         parameters: {
             query?: never;
             header?: never;
@@ -1421,7 +1313,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Laboratorios encontrados */
+            /** @description Espaços encontrados */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1430,7 +1322,7 @@ export interface operations {
                     "*/*": components["schemas"]["SpacesResponseDTO"];
                 };
             };
-            /** @description Nenhum laboratorio encontrado */
+            /** @description Nenhum espaço encontrado */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -1517,8 +1409,8 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Reserva criada com sucesso */
-            201: {
+            /** @description Horarios encontrados */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1526,16 +1418,7 @@ export interface operations {
                     "*/*": ("M_AULA_1" | "M_AULA_2" | "M_AULA_3" | "M_AULA_4" | "M_AULA_5" | "V_AULA_1" | "V_AULA_2" | "V_AULA_3" | "V_AULA_4" | "V_AULA_5" | "N_AULA_1" | "N_AULA_2" | "N_AULA_3" | "N_AULA_4")[];
                 };
             };
-            /** @description Dados da reserva inválidos ou conflitantes */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-            /** @description Autenticação do usuario ou espaço não encontrada */
+            /** @description Horarios nao encontrados */
             404: {
                 headers: {
                     [name: string]: unknown;
