@@ -14,7 +14,7 @@
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",
-    "generate:types": "openapi-typescript http://localhost:8080/v3/api-docs -o src/lib/utils/api.ts"
+    "generate:types": "openapi-typescript http://localhost:8080/v1/api-schema -o src/lib/utils/api.ts"
   },
   "dependencies": {
     "@base-ui/react": "latest",

@@ -1,20 +1,12 @@
-import type { ReactNode } from "react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "#/components/ui/popover.tsx";
-import { Badge } from "#/components/ui/badge.tsx";
-import { Separator } from "#/components/ui/separator.tsx";
-import { CalendarDays, Clock, BookOpen } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { ReservationEventData } from "#/components/calendar/reservation-types";
-import {
-  scheduleKeyToLabel,
-  statusLabel,
-  statusVariantClass,
-} from "#/components/calendar/reservation-utils";
+import { BookOpen, CalendarDays, Clock } from "lucide-react";
+import type { ReactNode } from "react";
+import { Badge } from "#/components/ui/badge.tsx";
+import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover.tsx";
+import { Separator } from "#/components/ui/separator.tsx";
+import type { ReservationEventData } from "#/lib/types/reservation-types";
+import { scheduleKeyToLabel, statusLabel, statusVariantClass } from "#/lib/utils/reservation-utils";
 import { cn } from "#/lib/utils.ts";
 
 interface ReservationEventPopupProps {
@@ -27,17 +19,14 @@ interface ReservationEventPopupProps {
  * Popup de detalhes de reserva para a visualização de mês.
  * Abre ao clicar no chip do evento no grid mensal.
  */
-export function ReservationEventPopup({
-  data,
-  trigger,
-}: ReservationEventPopupProps) {
+export function ReservationEventPopup({ data, trigger }: ReservationEventPopupProps) {
   const dateFrom = parseISO(data.reservedDateFrom);
   const dateTo = parseISO(data.reservedDateTo);
   const isSameDay = data.reservedDateFrom === data.reservedDateTo;
 
   return (
     <Popover>
-      <PopoverTrigger >{trigger}</PopoverTrigger>
+      <PopoverTrigger>{trigger}</PopoverTrigger>
       <PopoverContent
         className="w-72 p-0 shadow-lg"
         align="start"
@@ -52,10 +41,7 @@ export function ReservationEventPopup({
           style={{ backgroundColor: `color-mix(in srgb, ${getStatusBgColor(data.status)} 15%, transparent)` }}
         >
           <p className="text-sm font-semibold leading-tight">{data.spaceName}</p>
-          <Badge
-            variant="outline"
-            className={cn("mt-1 text-xs font-medium", statusVariantClass(data.status))}
-          >
+          <Badge variant="outline" className={cn("mt-1 text-xs font-medium", statusVariantClass(data.status))}>
             {statusLabel(data.status)}
           </Badge>
         </div>
