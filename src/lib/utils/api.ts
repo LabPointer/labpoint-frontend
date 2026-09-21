@@ -298,7 +298,7 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Admin: atualizar informações do usuario
+         * Admin: atualizar usuario
          * @description Atualiza as informações do usuario no sistema
          */
         patch: operations["patchUpdate"];
@@ -432,7 +432,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Admin: pesquisar por usuarios
+         * Admin: pesquisar usuarios
          * @description Filtra e retorna usuarios encontrados.
          */
         get: operations["getUsers"];
@@ -606,8 +606,8 @@ export interface components {
             reserves?: components["schemas"]["Reserve"][];
             nickname?: string;
             authorities?: components["schemas"]["GrantedAuthority"][];
-            accountNonExpired?: boolean;
             credentialsNonExpired?: boolean;
+            accountNonExpired?: boolean;
             accountNonLocked?: boolean;
         };
         GrantedAuthority: {
