@@ -62,7 +62,7 @@
     "@tailwindcss/typography": "latest",
     "@tanstack/devtools-vite": "latest",
     "@tanstack/router-cli": "latest",
-    "@types/node": "latest",
+    "@types/node": "^26.6.2",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@vitejs/plugin-react": "latest",
