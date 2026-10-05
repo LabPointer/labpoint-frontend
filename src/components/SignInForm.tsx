@@ -58,6 +58,7 @@ export function SignInForm() {
                 body: {
                     registration: value.registration,
                     password: value.password,
+                    rememberMe: true,
                 },
             });
 
@@ -66,7 +67,7 @@ export function SignInForm() {
 
             if (!ok && error) {
                 toast.error(
-                    `Erro ${status}: ${error.message}`,
+                    `Erro ${status}: ${error.title}`,
                     {
                         duration: 2000,
                         onAutoClose: () => {
@@ -91,7 +92,7 @@ export function SignInForm() {
                 {
                     duration: 3000,
                     onAutoClose: () => {
-                        navigate({ to: "/" });
+                        navigate({ to: "/home" });
                     },
                     position: "bottom-center",
                     style: {

@@ -4,27 +4,59 @@
  */
 
 export interface paths {
-    "/subjects/manage/create": {
+    "/account/@me": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
         /**
-         * Admin: criar uma matéria
-         * @description Cria uma matéria no sistema
+         * Informação da conta
+         * @description Retorna informações do usuário autenticado, incluindo ID, matrícula, nome de usuário, e-mail e cargo.
          */
-        post: operations["createSubject"];
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["AccountResponseDTO"];
+                        "application/json": components["schemas"]["AccountResponseDTO"];
+                        "text/json": components["schemas"]["AccountResponseDTO"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/spaces/manage/create": {
+    "/account/edit": {
         parameters: {
             query?: never;
             header?: never;
@@ -33,18 +65,131 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
         /**
-         * Admin: criar espaço
-         * @description Cria um novo espaço no sistema
+         * Editar conta
+         * @description Edita as informações da conta do usuário autenticado, incluindo nome de usuário.
          */
-        post: operations["postCreateSpace"];
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AccountEditRequestDTO"];
+                    "text/json": components["schemas"]["AccountEditRequestDTO"];
+                    "application/*+json": components["schemas"]["AccountEditRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/account/admin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Admin: listar usuarios
+         * @description Lista todos os usuários cadastrados no sistema.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    SearchQuery?: string;
+                    Role?: components["schemas"]["EAccountRole"];
+                    Limit?: number | string;
+                    Page?: number | string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["AccountResponseDTO"][];
+                        "application/json": components["schemas"]["AccountResponseDTO"][];
+                        "text/json": components["schemas"]["AccountResponseDTO"][];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/resources/manage/create": {
+    "/account/admin/edit/{accountId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -53,35 +198,62 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Admin: criar recurso
-         * @description Cadastra um recurso no sistema
-         */
-        post: operations["postCreateResource"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/reserve/create/{spaceId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+        /**
+         * Admin: listar usuarios
+         * @description Lista todos os usuários cadastrados no sistema.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    accountId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminAccountEditRequestDTO"];
+                    "text/json": components["schemas"]["AdminAccountEditRequestDTO"];
+                    "application/*+json": components["schemas"]["AdminAccountEditRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
         };
-        get?: never;
-        put?: never;
-        /**
-         * Criar reserva
-         * @description Cria uma nova reserva para o espaço especificado, com base nas datas fornecidas e no usuário autenticado
-         */
-        post: operations["createReserve"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
         trace?: never;
     };
     "/auth/sign-up": {
@@ -95,16 +267,71 @@ export interface paths {
         put?: never;
         /**
          * Registrar
-         * @description Registra um novo usuário no sistema. Administrador pode usar este endpoint para criar novos usuários.
+         * @description Registra um novo usuário com a role "User" e envia um e-mail de confirmação.
+         *     Apenas um Admin/Owner autenticado pode definir outra role através do campo "role".
          */
-        post: operations["postSignUp"];
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SignUpRequestDTO"];
+                    "text/json": components["schemas"]["SignUpRequestDTO"];
+                    "application/*+json": components["schemas"]["SignUpRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["IdentityError"][];
+                        "application/json": components["schemas"]["IdentityError"][];
+                        "text/json": components["schemas"]["IdentityError"][];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/auth/sign-out": {
+    "/auth/confirm-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Confirmar e-mail
+         * @description Rota aberta pelo link enviado por e-mail após o cadastro.
+         */
+        get: operations["ConfirmEmail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/resend-confirmation": {
         parameters: {
             query?: never;
             header?: never;
@@ -114,10 +341,33 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Sair
-         * @description Realiza o logout do usuário
+         * Reenviar confirmação de e-mail
+         * @description Responde sempre 202, exista a conta ou não, para não revelar quais e-mails estão cadastrados.
          */
-        post: operations["postSignOut"];
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["EmailRequestDTO"];
+                    "text/json": components["schemas"]["EmailRequestDTO"];
+                    "application/*+json": components["schemas"]["EmailRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description Accepted */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -135,16 +385,61 @@ export interface paths {
         put?: never;
         /**
          * Entrar
-         * @description Realiza o login do usuário
+         * @description Autentica por matrícula e senha e grava o cookie de sessão.
          */
-        post: operations["postSignIn"];
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SignInRequestDTO"];
+                    "text/json": components["schemas"]["SignInRequestDTO"];
+                    "application/*+json": components["schemas"]["SignInRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/auth/refresh": {
+    "/auth/sign-out": {
         parameters: {
             query?: never;
             header?: never;
@@ -154,10 +449,27 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Atualizar sessão
-         * @description Atualiza os cookies contendo o token de acesso e informações da sessão do usuário
+         * Sair
+         * @description Remove o cookie de sessão.
          */
-        post: operations["getRefresh"];
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -175,16 +487,39 @@ export interface paths {
         put?: never;
         /**
          * Solicitar redefinição de senha
-         * @description Envia um email para o usuário com um link para redefinir sua senha
+         * @description Envia um e-mail com o link para o front-end. Responde sempre 202, exista a conta ou não.
          */
-        post: operations["postForgotPassword"];
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["EmailRequestDTO"];
+                    "text/json": components["schemas"]["EmailRequestDTO"];
+                    "application/*+json": components["schemas"]["EmailRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description Accepted */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/subjects/manage/update/{id}": {
+    "/auth/reset-password": {
         parameters: {
             query?: never;
             header?: never;
@@ -193,138 +528,52 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
         /**
-         * Admin: editar uma matéria
-         * @description Edita uma matéria no sistema
+         * Redefinir senha
+         * @description Troca a senha usando o token recebido por e-mail.
          */
-        patch: operations["updateSubject"];
-        trace?: never;
-    };
-    "/spaces/manage/update/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ResetPasswordRequestDTO"];
+                    "text/json": components["schemas"]["ResetPasswordRequestDTO"];
+                    "application/*+json": components["schemas"]["ResetPasswordRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["IdentityError"][];
+                        "application/json": components["schemas"]["IdentityError"][];
+                        "text/json": components["schemas"]["IdentityError"][];
+                    };
+                };
+            };
         };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Admin: editar espaço
-         * @description Edita um espaço existente
-         */
-        patch: operations["patchSpace"];
-        trace?: never;
-    };
-    "/resources/manage/update/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Admin: editar recurso
-         * @description Edita um recurso no sistema
-         */
-        patch: operations["updateResource"];
-        trace?: never;
-    };
-    "/reserve/edit-date/{reserveId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Editar a data
-         * @description Edita a data da reserva
-         */
-        patch: operations["editReserve"];
-        trace?: never;
-    };
-    "/auth/reset-password/{token}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Atualizar senha
-         * @description Substitui a senha antiga pela nova utilizando o token de validação recebido por e-mail
-         */
-        patch: operations["patchResetPassword"];
-        trace?: never;
-    };
-    "/account/manage/update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Admin: atualizar usuario
-         * @description Atualiza as informações do usuario no sistema
-         */
-        patch: operations["patchUpdate"];
-        trace?: never;
-    };
-    "/subjects": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Listar todas as matérias
-         * @description Lista todas as matérias cadastradas
-         */
-        get: operations["getSubjects"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/spaces": {
+    "/resource": {
         parameters: {
             query?: never;
             header?: never;
@@ -332,10 +581,59 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Buscar espaços
-         * @description Retorna uma lista de espaços
+         * Listar todos os recursos
+         * @description Lista todas os recursos cadastradas
          */
-        get: operations["getSpaces"];
+        get: {
+            parameters: {
+                query?: {
+                    SearchQuery?: string;
+                    CanReserve?: boolean;
+                    Enabled?: boolean;
+                    Limit?: number | string;
+                    Offset?: number | string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ResourceResponseDTO"][];
+                        "application/json": components["schemas"]["ResourceResponseDTO"][];
+                        "text/json": components["schemas"]["ResourceResponseDTO"][];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
         put?: never;
         post?: never;
         delete?: never;
@@ -344,7 +642,126 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/resources": {
+    "/resource/admin/create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Criar recurso
+         * @description Cria um novo recurso. Apenas usuários com permissões adequadas podem criar recursos.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ResourceCreateRequestDTO"];
+                    "text/json": components["schemas"]["ResourceCreateRequestDTO"];
+                    "application/*+json": components["schemas"]["ResourceCreateRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/resource/admin/edit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Editar recurso
+         * @description Edita um recurso existente. Apenas usuários com permissões adequadas podem editar recursos.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ResourceEditRequestDTO"];
+                    "text/json": components["schemas"]["ResourceEditRequestDTO"];
+                    "application/*+json": components["schemas"]["ResourceEditRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/resource-reserve": {
         parameters: {
             query?: never;
             header?: never;
@@ -352,10 +769,58 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Buscar recursos
-         * @description Retorna uma lista de recursos.
+         * Listar reservas
+         * @description Lista todas as reservas de recursos cadastradas de acordo com os filtros fornecidos
          */
-        get: operations["getResources"];
+        get: {
+            parameters: {
+                query?: {
+                    SearchQuery?: string;
+                    SpaceIds?: (number | string)[];
+                    Limit?: number | string;
+                    Offset?: number | string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ResourceReserveResponseDTO"][];
+                        "application/json": components["schemas"]["ResourceReserveResponseDTO"][];
+                        "text/json": components["schemas"]["ResourceReserveResponseDTO"][];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
         put?: never;
         post?: never;
         delete?: never;
@@ -364,7 +829,169 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/reserve": {
+    "/resource-reserve/create/{spaceReserveId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Criar reserva
+         * @description Cria uma nova reserva para o recurso especificado para um espaço especifico
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    spaceReserveId: number | string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ResourceReserveCreateRequestDTO"];
+                    "text/json": components["schemas"]["ResourceReserveCreateRequestDTO"];
+                    "application/*+json": components["schemas"]["ResourceReserveCreateRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/resource-reserve/edit/{resourceReserveId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Editar reserva
+         * @description Edita uma reserva existente para o recurso especificado para um espaço especifico
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    resourceReserveId: number | string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ResourceReserveEditRequestDTO"];
+                    "text/json": components["schemas"]["ResourceReserveEditRequestDTO"];
+                    "application/*+json": components["schemas"]["ResourceReserveEditRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/resource-reserve/cancel/{resourceReserveId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Calcelar reserva
+         * @description Cancela uma reserva existente para o recurso especificado para um espaço especifico
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    resourceReserveId: number | string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/space": {
         parameters: {
             query?: never;
             header?: never;
@@ -372,10 +999,64 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Buscar historico
-         * @description Retorna uma lista de reservas(confirmada, concluida e cancelada) de um mes especifico
+         * Listar todos os espaços
+         * @description Lista todos os espaços cadastrados
          */
-        get: operations["getHistory"];
+        get: {
+            parameters: {
+                query?: {
+                    SearchQuery?: string;
+                    Capacity?: number | string;
+                    Resources?: (number | string)[];
+                    Subjects?: (number | string)[];
+                    StartAt?: string;
+                    EndAt?: string;
+                    Schedules?: (number | string)[];
+                    Locked?: boolean;
+                    Limit?: number | string;
+                    Offset?: number | string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["SpaceResponseDTO"][];
+                        "application/json": components["schemas"]["SpaceResponseDTO"][];
+                        "text/json": components["schemas"]["SpaceResponseDTO"][];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
         put?: never;
         post?: never;
         delete?: never;
@@ -384,7 +1065,194 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/reserve/existing-schedules/{spaceId}": {
+    "/space/admin/create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Criar espaço
+         * @description Cria um novo espaço com base nos parâmetros fornecidos. Apenas usuários com permissões adequadas podem criar espaços.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SpaceCreateRequestDTO"];
+                    "text/json": components["schemas"]["SpaceCreateRequestDTO"];
+                    "application/*+json": components["schemas"]["SpaceCreateRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/space/admin/edit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Editar espaço
+         * @description Edita os dados de um espaço existente. Apenas usuários com permissões adequadas podem editar espaços.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SpaceEditRequestDTO"];
+                    "text/json": components["schemas"]["SpaceEditRequestDTO"];
+                    "application/*+json": components["schemas"]["SpaceEditRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/space-reserve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Listar reservas
+         * @description Lista todas as reservas de espaços cadastradas de acordo com os filtros fornecidos
+         */
+        get: {
+            parameters: {
+                query?: {
+                    StartAt?: string;
+                    EndAt?: string;
+                    SpaceIds?: (number | string)[];
+                    Status?: components["schemas"]["EReserveStatus"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["SpaceResponseDTO"][];
+                        "application/json": components["schemas"]["SpaceResponseDTO"][];
+                        "text/json": components["schemas"]["SpaceResponseDTO"][];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/space-reserve/existing-schedules/{spaceId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -395,7 +1263,55 @@ export interface paths {
          * Pegar horarios
          * @description Retorna uma lista de horarios ja reservados para um espaco especifico de acordo com data range fornecido
          */
-        get: operations["getExistingSchedules"];
+        get: {
+            parameters: {
+                query?: {
+                    StartAt?: string;
+                    EndAt?: string;
+                };
+                header?: never;
+                path: {
+                    spaceId: number | string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ScheduleResponseDTO"][];
+                        "application/json": components["schemas"]["ScheduleResponseDTO"][];
+                        "text/json": components["schemas"]["ScheduleResponseDTO"][];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
         put?: never;
         post?: never;
         delete?: never;
@@ -404,47 +1320,85 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/reserve/date-info/{reserveId}": {
+    "/space-reserve/create/{spaceId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * Obter data
-         * @description Retorna a data da reserva pelo id.
-         */
-        get: operations["getDateInfo"];
+        get?: never;
         put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/account/manage/search": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+        /**
+         * Criar reserva
+         * @description Cria uma nova reserva para o espaço especificado, com base nas datas fornecidas e no usuário autenticado
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    spaceId: number | string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SpaceReserveCreateRequestDTO"];
+                    "text/json": components["schemas"]["SpaceReserveCreateRequestDTO"];
+                    "application/*+json": components["schemas"]["SpaceReserveCreateRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
         };
-        /**
-         * Admin: pesquisar usuarios
-         * @description Filtra e retorna usuarios encontrados.
-         */
-        get: operations["getUsers"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/subjects/manage/delete": {
+    "/space-reserve/edit/{reserveId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -454,57 +1408,64 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /**
-         * Admin: deletar uma matéria
-         * @description Deleta uma matéria no sistema
-         */
-        delete: operations["deleteSubject"];
+        delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/spaces/manage/delete": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+        /**
+         * Editar reserva
+         * @description Edita a data e horário de uma reserva de espaço existente.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    reserveId: number | string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SpaceReserveEditRequestDTO"];
+                    "text/json": components["schemas"]["SpaceReserveEditRequestDTO"];
+                    "application/*+json": components["schemas"]["SpaceReserveEditRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
         };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Admin: deletar espaço
-         * @description Deleta um espaço do sistema
-         */
-        delete: operations["deleteSpace"];
-        options?: never;
-        head?: never;
-        patch?: never;
         trace?: never;
     };
-    "/resources/manage/delete": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Admin: deletar recurso
-         * @description Deleta um recurso no sistema
-         */
-        delete: operations["deleteResource"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/reserve/history/cancel/{id}": {
+    "/space-reserve/cancel/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -516,243 +1477,576 @@ export interface paths {
         post?: never;
         /**
          * Cancelar reserva
-         * @description Altera o status da reserva para cancelada, desde que a reserva pertença ao usuário autenticado e esteja em um estado que permita o cancelamento.
+         * @description Cancela uma reserva de espaço existente.
          */
-        delete: operations["getHistoryByYearMonth"];
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number | string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/space-reserve/admin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Admin: listar reservas
+         * @description Lista todos os espaços cadastrados
+         */
+        get: {
+            parameters: {
+                query?: {
+                    StartAt?: string;
+                    EndAt?: string;
+                    SpaceIds?: (number | string)[];
+                    ScheduleIds?: (number | string)[];
+                    Status?: components["schemas"]["EReserveStatus"];
+                    AccountIds?: string[];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["SpaceResponseDTO"][];
+                        "application/json": components["schemas"]["SpaceResponseDTO"][];
+                        "text/json": components["schemas"]["SpaceResponseDTO"][];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/space-reserve/admin/edit/{reserveId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Admin: editar reserva
+         * @description Edita status de uma reserva de espaço existente.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    reserveId: number | string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminSpaceReserveEditRequestDTO"];
+                    "text/json": components["schemas"]["AdminSpaceReserveEditRequestDTO"];
+                    "application/*+json": components["schemas"]["AdminSpaceReserveEditRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/subject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Listar todas as matérias
+         * @description Lista todas as matérias cadastradas
+         */
+        get: {
+            parameters: {
+                query?: {
+                    Name?: string;
+                    IsActive?: boolean;
+                    Limit?: number | string;
+                    Offset?: number | string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["SubjectResponseDTO"][];
+                        "application/json": components["schemas"]["SubjectResponseDTO"][];
+                        "text/json": components["schemas"]["SubjectResponseDTO"][];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/subject/admin/create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Criar matéria
+         * @description Cria uma nova matéria. Apenas usuários com permissões adequadas podem criar matérias.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SubjectCreateRequestDTO"];
+                    "text/json": components["schemas"]["SubjectCreateRequestDTO"];
+                    "application/*+json": components["schemas"]["SubjectCreateRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/subject/admin/edit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Editar matéria
+         * @description Edita os dados de uma matéria. Apenas usuários com permissões adequadas podem editar matérias.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SubjectEditRequestDTO"];
+                    "text/json": components["schemas"]["SubjectEditRequestDTO"];
+                    "application/*+json": components["schemas"]["SubjectEditRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
         trace?: never;
     };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        SubjectCreateRequestDTO: {
-            name: string;
+        AccountEditRequestDTO: {
+            username: string;
         };
+        AccountResponseDTO: {
+            id: string;
+            registration: string;
+            username: string;
+            email: string;
+            role: components["schemas"]["EAccountRole"];
+        };
+        AdminAccountEditRequestDTO: {
+            registration: null | string;
+            username: null | string;
+            role: null | components["schemas"]["EAccountRole"];
+            lockAccount: null | boolean;
+        };
+        AdminSpaceReserveEditRequestDTO: {
+            status: components["schemas"]["EReserveStatus"];
+        };
+        EAccountRole: number;
+        EmailRequestDTO: {
+            email: string;
+        };
+        EReserveStatus: number;
         ErroResponseDTO: {
             message: string;
-            logout?: boolean;
-        };
-        CreateSpaceRequestDTO: {
-            name: string;
-            description?: string;
             /** Format: int32 */
-            capacity: number;
-            resources?: number[];
-            subjects?: number[];
+            statusCode: number | string;
+            /** @default false */
+            logout: boolean;
+        };
+        EShift: number;
+        IdentityError: {
+            code?: string;
+            description?: string;
+        };
+        ProblemDetails: {
+            type?: null | string;
+            title?: null | string;
+            /** Format: int32 */
+            status?: null | number | string;
+            detail?: null | string;
+            instance?: null | string;
+        };
+        ResetPasswordRequestDTO: {
+            email: string;
+            token: string;
+            newPassword: string;
         };
         ResourceCreateRequestDTO: {
             name: string;
+            description: string;
+            /** @default false */
+            canReserve: boolean;
+            /** @default true */
+            enabled: boolean;
         };
-        CreateReserveRequestDTO: {
-            /** Format: date */
-            dateFrom: string;
-            /** Format: date */
-            dateTo: string;
-            schedules: ("M_AULA_1" | "M_AULA_2" | "M_AULA_3" | "M_AULA_4" | "M_AULA_5" | "V_AULA_1" | "V_AULA_2" | "V_AULA_3" | "V_AULA_4" | "V_AULA_5" | "N_AULA_1" | "N_AULA_2" | "N_AULA_3" | "N_AULA_4")[];
+        ResourceEditRequestDTO: {
+            /** Format: int64 */
+            id: number | string;
+            name: null | string;
+            description: null | string;
+            canReserve: null | boolean;
+            enabled: null | boolean;
+        };
+        ResourceReserveCreateRequestDTO: {
+            /** Format: int64 */
+            resourceId: number | string;
             purpose: string;
-            lock?: boolean;
         };
-        SignUpRequestDTO: {
-            username: string;
-            /** Format: email */
-            email: string;
-            registration: string;
-            password: string;
-            /** @enum {string} */
-            role: "OWNER" | "ADMIN" | "USER";
-            enabled?: boolean;
+        ResourceReserveEditRequestDTO: {
+            /** Format: int64 */
+            spaceReserveId: number | string;
+            purpose: null | string;
+        };
+        ResourceReserveResponseDTO: {
+            /** Format: int64 */
+            id: number | string;
+            name: string;
+            description: string;
+            spaceReserve: components["schemas"]["SpaceReserveResponseDTO"];
+        };
+        ResourceResponseDTO: {
+            /** Format: int64 */
+            id: number | string;
+            name: string;
+            description: string;
+            canReserve: boolean;
+            enabled: boolean;
+        };
+        ScheduleResponseDTO: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: time */
+            startAt: string;
+            /** Format: time */
+            endAt: string;
+            shift: components["schemas"]["EShift"];
         };
         SignInRequestDTO: {
             registration: string;
             password: string;
+            /** @default false */
+            rememberMe: boolean;
         };
-        ForgotPasswordRequestDTO: {
-            /** Format: email */
+        SignUpRequestDTO: {
+            username: string;
+            registration: string;
+            role: components["schemas"]["EAccountRole"];
             email: string;
+            password: string;
         };
-        SubjectUpdateRequestDTO: {
+        SpaceCreateRequestDTO: {
             name: string;
-        };
-        Subject: {
-            /** Format: int64 */
-            id?: number;
-            name?: string;
-        };
-        PatchSpaceRequestDTO: {
-            name?: string;
+            description: string;
             /** Format: int32 */
-            capacity?: number;
-            resources?: number[];
-            subjects?: number[];
+            capacity: number | string;
+            locked: boolean;
+            subjects: (number | string)[];
+            resources: (number | string)[];
         };
-        ResourceUpdateRequestDTO: {
+        SpaceEditRequestDTO: {
+            /** Format: int64 */
+            id: number | string;
+            name: null | string;
+            description: null | string;
+            /** Format: int32 */
+            capacity: null | number | string;
+            locked: null | boolean;
+            subjects: null | (number | string)[];
+            resources: null | (number | string)[];
+        };
+        SpaceHashDataDTO: {
+            /** Format: int64 */
+            id: number | string;
             name: string;
         };
-        Account: {
-            /** Format: int64 */
-            id?: number;
-            username?: string;
-            email?: string;
-            registration?: string;
-            password?: string;
-            /** @enum {string} */
-            role?: "OWNER" | "ADMIN" | "USER";
-            enabled?: boolean;
+        SpaceReserveCreateRequestDTO: {
             /** Format: date */
-            createdAt?: string;
-            reserves?: components["schemas"]["Reserve"][];
-            nickname?: string;
-            authorities?: components["schemas"]["GrantedAuthority"][];
-            credentialsNonExpired?: boolean;
-            accountNonExpired?: boolean;
-            accountNonLocked?: boolean;
+            startAt: string;
+            /** Format: date */
+            endAt: string;
+            scheduleIds: (number | string)[];
+            purpose: string;
         };
-        GrantedAuthority: {
-            authority?: string;
+        SpaceReserveEditRequestDTO: {
+            /** Format: date */
+            startAt: null | string;
+            /** Format: date */
+            endAt: null | string;
+            scheduleIds: null | (number | string)[];
         };
-        Reserve: {
+        SpaceReserveResponseDTO: {
             /** Format: int64 */
-            id?: number;
+            id: number | string;
             /** Format: date-time */
-            createdAt?: string;
-            /** Format: date */
-            reservedDateFrom?: string;
-            /** Format: date */
-            reservedDateTo?: string;
-            /** @enum {string} */
-            status?: "CONFIRMED" | "PENDING" | "ABSENT" | "LOCKED" | "CANCELED";
-            purpose?: string;
-            account?: components["schemas"]["Account"];
-            space?: components["schemas"]["Space"];
-            schedules?: components["schemas"]["ReserveSchedule"][];
-        };
-        ReserveSchedule: {
-            /** Format: int64 */
-            id?: number;
-            /** @enum {string} */
-            schedule?: "M_AULA_1" | "M_AULA_2" | "M_AULA_3" | "M_AULA_4" | "M_AULA_5" | "V_AULA_1" | "V_AULA_2" | "V_AULA_3" | "V_AULA_4" | "V_AULA_5" | "N_AULA_1" | "N_AULA_2" | "N_AULA_3" | "N_AULA_4";
-            reserve?: components["schemas"]["Reserve"];
-        };
-        Resource: {
-            /** Format: int64 */
-            id?: number;
-            name?: string;
-            spaces?: components["schemas"]["SpaceResource"][];
-        };
-        Space: {
-            /** Format: int64 */
-            id?: number;
-            name?: string;
-            description?: string;
-            /** Format: int32 */
-            capacity?: number;
-            locked?: boolean;
-            resources?: components["schemas"]["SpaceResource"][];
-            subjects?: components["schemas"]["SpaceSubject"][];
-            reserves?: components["schemas"]["Reserve"][];
-        };
-        SpaceResource: {
-            /** Format: int32 */
-            id?: number;
-            space?: components["schemas"]["Space"];
-            resource?: components["schemas"]["Resource"];
-        };
-        SpaceSubject: {
-            /** Format: int64 */
-            id?: number;
-            space?: components["schemas"]["Space"];
-            subject?: components["schemas"]["Subject"];
-        };
-        ReserveDateDTO: {
+            createdAt: string;
             /** Format: date */
             dateFrom: string;
             /** Format: date */
             dateTo: string;
-        };
-        UpdatePasswordRequestDTO: {
-            password: string;
-        };
-        ManageUserUpdateRequestDTO: {
-            registration?: string;
-            username?: string;
-            /** @enum {string} */
-            role?: "OWNER" | "ADMIN" | "USER";
-            enabled?: boolean;
-        };
-        ResourceDTO: {
-            /** Format: int64 */
-            id: number;
-            name: string;
-        };
-        SpaceDTO: {
-            /** Format: int64 */
-            id: number;
-            name: string;
-            /** Format: int32 */
-            capacity: number;
-            description?: string;
-            resources?: components["schemas"]["ResourceDTO"][];
-            subjects?: components["schemas"]["SubjectDTO"][];
-            locked?: boolean;
-        };
-        SpacesResponseDTO: {
-            spaces: components["schemas"]["SpaceDTO"][];
-            /** Format: int32 */
-            offset: number;
-            /** Format: int32 */
-            limit: number;
-        };
-        SubjectDTO: {
-            /** Format: int64 */
-            id: number;
-            name: string;
-        };
-        ReserveHistoryDTO: {
-            next?: components["schemas"]["ReserveScheduleDTO"][];
-            concluded?: components["schemas"]["ReserveScheduleDTO"][];
-            canceled?: components["schemas"]["ReserveScheduleDTO"][];
-        };
-        ReserveScheduleDTO: {
-            reserve: components["schemas"]["ReserveSummaryDTO"];
-            schedules: ("M_AULA_1" | "M_AULA_2" | "M_AULA_3" | "M_AULA_4" | "M_AULA_5" | "V_AULA_1" | "V_AULA_2" | "V_AULA_3" | "V_AULA_4" | "V_AULA_5" | "N_AULA_1" | "N_AULA_2" | "N_AULA_3" | "N_AULA_4")[];
-        };
-        ReserveSummaryDTO: {
-            /** Format: int64 */
-            id: number;
-            spaceName: string;
-            /** Format: int32 */
-            capacity: number;
-            /** Format: date */
-            reservedDateFrom: string;
-            /** Format: date */
-            reservedDateTo: string;
-            /** @enum {string} */
-            status: "CONFIRMED" | "PENDING" | "ABSENT" | "LOCKED" | "CANCELED";
             purpose: string;
+            status: components["schemas"]["EReserveStatus"];
+            space: components["schemas"]["SpaceResponseDTO"];
+            schedules: components["schemas"]["ScheduleResponseDTO"][];
         };
-        ManageUserRequestDTO: {
-            registration?: string;
-            username?: string;
-            /** Format: email */
-            email?: string;
-            /** @enum {string} */
-            role?: "OWNER" | "ADMIN" | "USER";
+        SpaceResponseDTO: {
+            /** Format: int64 */
+            id: number | string;
+            name: string;
             /** Format: int32 */
-            offset?: number;
-            /** Format: int32 */
-            limit?: number;
+            capacity: number | string;
+            description: string;
+            locked: boolean;
+            subjects: components["schemas"]["SpaceHashDataDTO"][];
+            resources: components["schemas"]["SpaceHashDataDTO"][];
         };
-        DeleteSubjectRequestDTO: {
-            subjectIds: number[];
+        SubjectCreateRequestDTO: {
+            name: string;
+            /** @default false */
+            enabled: boolean;
         };
-        DeleteSpaceDTO: {
-            spaceIds: number[];
+        SubjectEditRequestDTO: {
+            /** Format: int64 */
+            id: number | string;
+            name: null | string;
+            enabled: null | boolean;
         };
-        DeleteResourceRequestDTO: {
-            resourceIds: number[];
+        SubjectResponseDTO: {
+            /** Format: int64 */
+            id: number | string;
+            name: string;
+            enabled: boolean;
         };
     };
     responses: never;
@@ -763,512 +2057,11 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    createSubject: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["SubjectCreateRequestDTO"];
-            };
-        };
-        responses: {
-            /** @description Matéria criada com sucesso */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Erro ao criar matéria */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    postCreateSpace: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateSpaceRequestDTO"];
-            };
-        };
-        responses: {
-            /** @description Espaço criado com sucesso */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Erro ao criar espaço */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    postCreateResource: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["ResourceCreateRequestDTO"];
-            };
-        };
-        responses: {
-            /** @description Recurso criado com sucesso */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Erro ao criar recurso */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    createReserve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                spaceId: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateReserveRequestDTO"];
-            };
-        };
-        responses: {
-            /** @description Reserva criada com sucesso */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Dados da reserva inválidos ou conflitantes */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-            /** @description Autenticação do usuario ou espaço não encontrada */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    postSignUp: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SignUpRequestDTO"];
-            };
-        };
-        responses: {
-            /** @description Usuário registrado com sucesso */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Usuário já registrado */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    postSignOut: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Logout realizado com sucesso */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    postSignIn: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SignInRequestDTO"];
-            };
-        };
-        responses: {
-            /** @description Login realizado com sucesso */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Matricula ou senha incorretos, conta desabilitada ou conta trancada */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    getRefresh: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Login realizado com sucesso */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Matricula ou senha incorretos, conta desabilitada ou conta trancada */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    postForgotPassword: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ForgotPasswordRequestDTO"];
-            };
-        };
-        responses: {
-            /** @description Email de redefinição de senha enviado com sucesso */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Falha ao enviar email de redefinição de senha */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    updateSubject: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["SubjectUpdateRequestDTO"];
-            };
-        };
-        responses: {
-            /** @description Matéria editada com sucesso */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["Subject"];
-                };
-            };
-            /** @description Erro ao editar matéria */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    patchSpace: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PatchSpaceRequestDTO"];
-            };
-        };
-        responses: {
-            /** @description Espaço editado com sucesso */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Erro ao editar espaço */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    updateResource: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["ResourceUpdateRequestDTO"];
-            };
-        };
-        responses: {
-            /** @description Recurso editado com sucesso */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["Resource"];
-                };
-            };
-            /** @description Erro ao editar recurso */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-            /** @description Recurso não encontrado */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    editReserve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                reserveId: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReserveDateDTO"];
-            };
-        };
-        responses: {
-            /** @description Reserva editada com sucesso */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Reserva conflita com horarios ja reservados */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-            /** @description Nao pode editar reserva de outro usuario */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-            /** @description Reserva nao encontrada */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    patchResetPassword: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                token: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdatePasswordRequestDTO"];
-            };
-        };
-        responses: {
-            /** @description Senha atualizada com sucesso */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Token inválido ou expirado ou senha inválida */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    patchUpdate: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["ManageUserUpdateRequestDTO"];
-            };
-        };
-        responses: {
-            /** @description Usuário atualizado com sucesso */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Usuário não encontrado */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    getSubjects: {
+    ConfirmEmail: {
         parameters: {
             query?: {
-                name?: string;
-                limit?: number;
-                offset?: number;
+                UserId?: string;
+                Token?: string;
             };
             header?: never;
             path?: never;
@@ -1276,351 +2069,22 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Matérias listadas com sucesso */
+            /** @description OK */
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["Subject"][];
-                };
-            };
-            /** @description Nenhuma matéria encontrada */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    getSpaces: {
-        parameters: {
-            query?: {
-                name?: string;
-                capacity?: number;
-                resources?: number[];
-                subjects?: number[];
-                offset?: number;
-                limit?: number;
-                locked?: boolean;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Espaços encontrados */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["SpacesResponseDTO"];
-                };
-            };
-            /** @description Nenhum espaço encontrado */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    getResources: {
-        parameters: {
-            query?: {
-                name?: string;
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Recursos encontrados */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["Resource"][];
-                };
-            };
-            /** @description Nenhum recurso encontrado */
-            404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-        };
-    };
-    getHistory: {
-        parameters: {
-            query: {
-                yearMonth: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Lista de reservas encontrada */
-            200: {
+            /** @description Bad Request */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["ReserveHistoryDTO"];
-                };
-            };
-            /** @description Nenhuma reserva encontrada */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    getExistingSchedules: {
-        parameters: {
-            query: {
-                dateFrom: string;
-                dateTo: string;
-            };
-            header?: never;
-            path: {
-                spaceId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Horarios encontrados */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": ("M_AULA_1" | "M_AULA_2" | "M_AULA_3" | "M_AULA_4" | "M_AULA_5" | "V_AULA_1" | "V_AULA_2" | "V_AULA_3" | "V_AULA_4" | "V_AULA_5" | "N_AULA_1" | "N_AULA_2" | "N_AULA_3" | "N_AULA_4")[];
-                };
-            };
-            /** @description Horarios nao encontrados */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    getDateInfo: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                reserveId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Data da reserve */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ReserveDateDTO"];
-                };
-            };
-            /** @description Reserva nao encontrada */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    getUsers: {
-        parameters: {
-            query?: {
-                registration?: string;
-                username?: string;
-                email?: string;
-                role?: "OWNER" | "ADMIN" | "USER";
-                offset?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Retorna lista de usuarios encontrados */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ManageUserRequestDTO"][];
-                };
-            };
-            /** @description Usuário nao encontrado */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    deleteSubject: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["DeleteSubjectRequestDTO"];
-            };
-        };
-        responses: {
-            /** @description Matéria deletada com sucesso */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Matéria não encontrada */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    deleteSpace: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DeleteSpaceDTO"];
-            };
-        };
-        responses: {
-            /** @description Espaço deletado com sucesso */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Espaço não encontrado */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    deleteResource: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["DeleteResourceRequestDTO"];
-            };
-        };
-        responses: {
-            /** @description Recurso deletado com sucesso */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Recurso não encontrado */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-        };
-    };
-    getHistoryByYearMonth: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Reserva cancelada */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Provavelmente esta alterando reserva de outro usuario */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
-                };
-            };
-            /** @description Usuario ou reserva encontrada */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ErroResponseDTO"];
+                    "text/plain": components["schemas"]["IdentityError"][];
+                    "application/json": components["schemas"]["IdentityError"][];
+                    "text/json": components["schemas"]["IdentityError"][];
                 };
             };
         };

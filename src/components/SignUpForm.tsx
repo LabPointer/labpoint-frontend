@@ -42,7 +42,8 @@ const formSchema = z.object({
         .min(4, "Nome deve ter pelo menos 4 caracteres"),
     registration: z
         .string("Matricula invalida")
-        .min(4, "Matricula deve ter pelo menos 4 caracteres"),
+        .min(1, "Matricula deve ter pelo menos 1 caractere")
+        .regex(/^[0-9]+$/, "Matricula deve conter apenas números"),
     role: UserRole,
     email: z.email("Email invalido"),
     password: z
@@ -89,7 +90,7 @@ export function SignUpForm() {
                 body: {
                     username: value.name,
                     registration: value.registration,
-                    role: value.role as "OWNER" | "ADMIN" | "USER",
+                    role: 1,
                     email: value.email,
                     password: value.password,
                     passwordConfirm: value.passwordConfirm,

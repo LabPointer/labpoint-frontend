@@ -96,7 +96,7 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        {sessionInfo && (sessionInfo.role === "ADMIN" ||sessionInfo.role === "OWNER") && (
+        {sessionInfo && (sessionInfo.roles.includes("Admin") || sessionInfo.roles.includes("Owner")) && (
               <SidebarGroup className="px-3 py-5">
                 <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Coordenação</p>
                 <SidebarGroupContent>
@@ -155,7 +155,7 @@ export function AppSidebar() {
                 </SidebarGroupContent>
               </SidebarGroup>
             )}
-        {sessionInfo && (sessionInfo.role === "ADMIN" ||sessionInfo.role === "OWNER") && (
+        {sessionInfo && (sessionInfo.roles.includes("Admin") || sessionInfo.roles.includes("Owner")) && (
               <SidebarGroup className="px-3 py-5">
                 <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Diretoria</p>
                 <SidebarGroupContent>
@@ -194,7 +194,7 @@ export function AppSidebar() {
           <div className="flex flex-col justify-center min-w-0">
             <span className="truncate text-sm font-semibold">{sessionInfo?.username || "Nao definido"}</span>
             <span className="truncate text-xs text-[color:var(--sea-ink-soft)]">
-              {sessionInfo?.role || "Nao definido"}
+              {sessionInfo?.roles.join(", ") || "Nao definido"}
             </span>
           </div>
 

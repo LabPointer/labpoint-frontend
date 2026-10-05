@@ -16,7 +16,9 @@ import { Route as PrivateCalendarRouteImport } from './routes/_private/calendar'
 import { Route as PrivateHistoryRouteImport } from './routes/_private/history'
 import { Route as PrivateHomeRouteImport } from './routes/_private/home'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as PublicConfirmEmailRouteImport } from './routes/_public/confirm-email'
 import { Route as PublicForgetPasswordRouteImport } from './routes/_public/forget-password'
+import { Route as PublicResendEmailConfirmationRouteImport } from './routes/_public/resend-email-confirmation'
 import { Route as PublicResetPasswordRouteImport } from './routes/_public/reset-password'
 import { Route as PublicSignUpRouteImport } from './routes/_public/sign-up'
 import { Route as PrivateAdminManageReservesRouteImport } from './routes/_private/admin/manage-reserves'
@@ -57,11 +59,22 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PublicRouteRoute,
 } as any)
+const PublicConfirmEmailRoute = PublicConfirmEmailRouteImport.update({
+  id: '/confirm-email',
+  path: '/confirm-email',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
 const PublicForgetPasswordRoute = PublicForgetPasswordRouteImport.update({
   id: '/forget-password',
   path: '/forget-password',
   getParentRoute: () => PublicRouteRoute,
 } as any)
+const PublicResendEmailConfirmationRoute =
+  PublicResendEmailConfirmationRouteImport.update({
+    id: '/resend-email-confirmation',
+    path: '/resend-email-confirmation',
+    getParentRoute: () => PublicRouteRoute,
+  } as any)
 const PublicResetPasswordRoute = PublicResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
@@ -101,7 +114,9 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof PrivateCalendarRoute
   '/history': typeof PrivateHistoryRoute
   '/home': typeof PrivateHomeRoute
+  '/confirm-email': typeof PublicConfirmEmailRoute
   '/forget-password': typeof PublicForgetPasswordRoute
+  '/resend-email-confirmation': typeof PublicResendEmailConfirmationRoute
   '/reset-password': typeof PublicResetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
   '/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
@@ -115,7 +130,9 @@ export interface FileRoutesByTo {
   '/calendar': typeof PrivateCalendarRoute
   '/history': typeof PrivateHistoryRoute
   '/home': typeof PrivateHomeRoute
+  '/confirm-email': typeof PublicConfirmEmailRoute
   '/forget-password': typeof PublicForgetPasswordRoute
+  '/resend-email-confirmation': typeof PublicResendEmailConfirmationRoute
   '/reset-password': typeof PublicResetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
   '/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
@@ -131,7 +148,9 @@ export interface FileRoutesById {
   '/_private/calendar': typeof PrivateCalendarRoute
   '/_private/history': typeof PrivateHistoryRoute
   '/_private/home': typeof PrivateHomeRoute
+  '/_public/confirm-email': typeof PublicConfirmEmailRoute
   '/_public/forget-password': typeof PublicForgetPasswordRoute
+  '/_public/resend-email-confirmation': typeof PublicResendEmailConfirmationRoute
   '/_public/reset-password': typeof PublicResetPasswordRoute
   '/_public/sign-up': typeof PublicSignUpRoute
   '/_public/': typeof PublicIndexRoute
@@ -148,7 +167,9 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/history'
     | '/home'
+    | '/confirm-email'
     | '/forget-password'
+    | '/resend-email-confirmation'
     | '/reset-password'
     | '/sign-up'
     | '/admin/manage-reserves'
@@ -162,7 +183,9 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/history'
     | '/home'
+    | '/confirm-email'
     | '/forget-password'
+    | '/resend-email-confirmation'
     | '/reset-password'
     | '/sign-up'
     | '/admin/manage-reserves'
@@ -177,7 +200,9 @@ export interface FileRouteTypes {
     | '/_private/calendar'
     | '/_private/history'
     | '/_private/home'
+    | '/_public/confirm-email'
     | '/_public/forget-password'
+    | '/_public/resend-email-confirmation'
     | '/_public/reset-password'
     | '/_public/sign-up'
     | '/_public/'
@@ -243,11 +268,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRouteRoute
     }
+    '/_public/confirm-email': {
+      id: '/_public/confirm-email'
+      path: '/confirm-email'
+      fullPath: '/confirm-email'
+      preLoaderRoute: typeof PublicConfirmEmailRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
     '/_public/forget-password': {
       id: '/_public/forget-password'
       path: '/forget-password'
       fullPath: '/forget-password'
       preLoaderRoute: typeof PublicForgetPasswordRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/resend-email-confirmation': {
+      id: '/_public/resend-email-confirmation'
+      path: '/resend-email-confirmation'
+      fullPath: '/resend-email-confirmation'
+      preLoaderRoute: typeof PublicResendEmailConfirmationRouteImport
       parentRoute: typeof PublicRouteRoute
     }
     '/_public/reset-password': {
@@ -331,14 +370,18 @@ const PrivateRouteRouteWithChildren = PrivateRouteRoute._addFileChildren(
 )
 
 interface PublicRouteRouteChildren {
+  PublicConfirmEmailRoute: typeof PublicConfirmEmailRoute
   PublicForgetPasswordRoute: typeof PublicForgetPasswordRoute
+  PublicResendEmailConfirmationRoute: typeof PublicResendEmailConfirmationRoute
   PublicResetPasswordRoute: typeof PublicResetPasswordRoute
   PublicSignUpRoute: typeof PublicSignUpRoute
   PublicIndexRoute: typeof PublicIndexRoute
 }
 
 const PublicRouteRouteChildren: PublicRouteRouteChildren = {
+  PublicConfirmEmailRoute: PublicConfirmEmailRoute,
   PublicForgetPasswordRoute: PublicForgetPasswordRoute,
+  PublicResendEmailConfirmationRoute: PublicResendEmailConfirmationRoute,
   PublicResetPasswordRoute: PublicResetPasswordRoute,
   PublicSignUpRoute: PublicSignUpRoute,
   PublicIndexRoute: PublicIndexRoute,

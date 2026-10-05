@@ -23,6 +23,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     const theme = (await getThemeServerFn()) as z.infer<typeof setThemeValidator>;
 
     const sessionInfo = await getSessionServerFn();
+    if (sessionInfo) {
+      sessionInfo.username = sessionInfo.username.replace("+", " ");
+    }
 
     /*
     if (sessionInfo) {
