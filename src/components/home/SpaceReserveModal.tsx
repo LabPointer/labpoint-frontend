@@ -164,7 +164,7 @@ export function SpaceReserveModal(props: SpaceProps) {
 
       const {response, data, error} = res;
 
-      if (!response.ok && error) {
+      if (!response.ok && error && response.status !== 404) {
         toast.error(`Error ${response.status}: ${error.message}`, {
           duration: 3000,
           position: "bottom-center",
@@ -177,7 +177,7 @@ export function SpaceReserveModal(props: SpaceProps) {
         return;
       }
 
-      return data;
+      return data || [];
     },
     enabled: Boolean(date?.from && date?.to),
   });
