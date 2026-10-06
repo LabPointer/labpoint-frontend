@@ -22,7 +22,7 @@ function RouteComponent() {
   const { userId, token } = Route.useSearch();
   const navigate = useNavigate();
 
-  const _ = useQuery({
+  const { isLoading, isError } = useQuery({
     queryKey: ["query-confirm-email"],
     queryFn: async () => {
       const res = await api.GET("/auth/confirm-email", {
@@ -63,8 +63,15 @@ function RouteComponent() {
             borderColor: "green",
           },
         });
+
+      return true;
     },
   });
 
-  return <div className="font-bold text-center animate-pulse">Confirmando email!</div>;
+  if (isLoading) 
+    return <div className="font-bold text-center animate-pulse">Confirmando email...</div>;
+  if (isError) 
+    return <div className="font-bold text-center text-red-400 dark:text-red-400">Falha ao confirmar email! Redirecionando...</div>;
+  
+  return <div className="font-bold text-center animate-pulse">Email Confirmado! Redirecionando...</div>;
 }

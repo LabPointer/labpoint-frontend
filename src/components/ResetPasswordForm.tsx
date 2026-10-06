@@ -1,10 +1,9 @@
 import { useForm } from "@tanstack/react-form";
-import { createLink, useNavigate } from "@tanstack/react-router";
+import { createLink} from "@tanstack/react-router";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
-import { useApi } from "#/lib/utils/restapi";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -18,16 +17,16 @@ const formSchema = z.object({
   confirmPassword: z.string("Senha invalida"),
 });
 
-type ResetPasswordProps = {
-  token: string;
-};
+interface ResetPasswordProps {
+  isSubmitting: boolean;
+  isRedirectting: boolean;
+  onFormSubmitSuccess: (newPassowrd: string) => Promise<void>;
+}
 
 export function ResetPasswordForm(props: ResetPasswordProps) {
-  const { token } = props;
-  const api = useApi();
+  const { isSubmitting, isRedirectting, onFormSubmitSuccess } = props;
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const LinkButton = createLink(Button);
-  const navigate = useNavigate();
 
   const form = useForm({
     defaultValues: {
@@ -51,43 +50,7 @@ export function ResetPasswordForm(props: ResetPasswordProps) {
         return;
       }
 
-      const res = await api.PATCH("/auth/reset-password/{token}", {
-        params: {
-          path: { token: token },
-        },
-        body: {
-          password: value.password,
-        },
-      });
-
-      const { response, error } = res;
-
-      if (!response.ok && error) {
-        toast.error(`Error ${response.status}: ${error.message}`, {
-          duration: 3000,
-          position: "bottom-center",
-          style: {
-            color: "white",
-            backgroundColor: "red",
-            borderColor: "red",
-          },
-        });
-        form.reset();
-        return;
-      }
-
-      toast.success("Senha redefinida com sucesso!", {
-        duration: 3000,
-        position: "bottom-center",
-        onAutoClose: () => {
-          navigate({ to: "/" });
-        },
-        style: {
-          color: "white",
-          backgroundColor: "green",
-          borderColor: "green",
-        },
-      });
+      onFormSubmitSuccess(value.password);
       form.reset();
     },
   });
@@ -118,6 +81,7 @@ export function ResetPasswordForm(props: ResetPasswordProps) {
                     </FieldLabel>
                     <InputGroup>
                       <InputGroupInput
+                        disabled={isSubmitting || isRedirectting}
                         id={field.name}
                         name={field.name}
                         value={field.state.value}
@@ -154,6 +118,7 @@ export function ResetPasswordForm(props: ResetPasswordProps) {
                     </FieldLabel>
                     <InputGroup>
                       <InputGroupInput
+                        disabled={isSubmitting || isRedirectting}
                         id={field.name}
                         name={field.name}
                         value={field.state.value}
@@ -183,11 +148,11 @@ export function ResetPasswordForm(props: ResetPasswordProps) {
       </CardContent>
       <CardFooter className="bg-transparent">
         <Field orientation="vertical">
-          <Button type="submit" form="sign-in-form">
+          <Button type="submit" form="sign-in-form" disabled={isSubmitting || isRedirectting}>
             Redefinir senha
           </Button>
           <div className="w-full justify-center flex items-center gap-0">
-            <LinkButton className={"font-semibold px-1 dark:text-violet-400"} type="button" variant="link" to="/">
+            <LinkButton className={"font-semibold px-1 dark:text-violet-400"} type="button" variant="link" to="/" disabled={isSubmitting || isRedirectting}>
               <ArrowLeft />
               <span>Voltar para o login</span>
             </LinkButton>

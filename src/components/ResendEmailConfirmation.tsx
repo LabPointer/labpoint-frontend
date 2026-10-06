@@ -17,7 +17,7 @@ interface Props {
   onSubmitForm: (email: string) => Promise<void>;
 }
 
-export function ForgetPasswordForm({ onSubmitForm, isSubmitting, isRedirectting }: Props) {
+export function ResendEmailConfirmationForm({ onSubmitForm, isRedirectting, isSubmitting }: Props) {
   const LinkButton = createLink(Button);
   const form = useForm({
     defaultValues: {
@@ -35,7 +35,7 @@ export function ForgetPasswordForm({ onSubmitForm, isSubmitting, isRedirectting 
   return (
     <Card className="w-full sm:max-w-md bg-white shadow-md hover:shadow-lg dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15">
       <CardHeader className="pb-5 border-b">
-        <CardTitle className="font-bold">Recuperar senha</CardTitle>
+        <CardTitle className="font-bold">Reenviar email para confirmação</CardTitle>
         <CardDescription>Informe seu e-mail institucional e enviaremos as instruções de redefinição.</CardDescription>
       </CardHeader>
       <CardContent>
