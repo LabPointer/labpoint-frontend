@@ -1973,7 +1973,6 @@ export interface components {
         SignUpRequestDTO: {
             username: string;
             registration: string;
-            role: components["schemas"]["EAccountRole"];
             email: string;
             password: string;
         };

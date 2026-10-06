@@ -1,5 +1,19 @@
-import { createLink, useRouteContext, useRouter } from "@tanstack/react-router";
-import { Building, Calendar, ChartBar, Clipboard, FlaskConical, History, Home, LogOut, Users } from "lucide-react";
+import { createLink, useRouteContext, useRouter, type LinkProps } from "@tanstack/react-router";
+import {
+  Book,
+  Box,
+  Boxes,
+  Building,
+  Building2,
+  Calendar,
+  Clock,
+  FileText,
+  FlaskConical,
+  History,
+  Home,
+  LogOut,
+  Users,
+} from "lucide-react";
 import { useApi } from "#/lib/utils/restapi";
 import {
   Sidebar,
@@ -15,6 +29,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 
+type PageRoute = {
+  to: LinkProps["to"];
+  label: string;
+  icon: React.ReactNode;
+};
+
 export function AppSidebar() {
   const LinkButton = createLink(Button);
   const { sessionInfo } = useRouteContext({ from: "__root__" });
@@ -25,6 +45,70 @@ export function AppSidebar() {
     await api.POST("/auth/sign-out");
     await router.invalidate();
   }
+
+  const userRoutes: PageRoute[] = [
+    {
+      to: "/",
+      label: "Início",
+      icon: <Home className="size-4" />,
+    },
+    {
+      to: "/calendar",
+      label: "Calendario",
+      icon: <Calendar className="size-4" />,
+    },
+    {
+      to: "/history",
+      label: "Histórico",
+      icon: <History className="size-4" />,
+    },
+  ];
+
+  const adminRoutes: PageRoute[] = [
+    {
+      to: "/admin/manage-resources",
+      label: "Gerenciar recursos",
+      icon: <Box className="size-4" />,
+    },
+    {
+      to: "/admin/manage-subjects",
+      label: "Gerenciar matérias",
+      icon: <Book className="size-4" />,
+    },
+    {
+      to: "/admin/manage-schedules",
+      label: "Gerenciar horários",
+      icon: <Clock className="size-4" />,
+    },
+    {
+      to: "/admin/manage-users",
+      label: "Gerenciar usuários",
+      icon: <Users className="size-4" />,
+    },
+    {
+      to: "/admin/manage-spaces",
+      label: "Gerenciar espaços",
+      icon: <Building className="size-4" />,
+    },
+    {
+      to: "/admin/manage-space-reserve",
+      label: "Gerenciar reserva de espaços",
+      icon: <Building2 className="size-4" />,
+    },
+    {
+      to: "/admin/manage-resource-reserve",
+      label: "Gerenciar reserva de recursos",
+      icon: <Boxes className="size-4" />,
+    },
+  ];
+
+  const coordinatorRoutes: PageRoute[] = [
+    {
+      to: "/admin/reports",
+      label: "Relatorios",
+      icon: <FileText className="size-4" />,
+    },
+  ];
 
   return (
     <Sidebar className="border-sidebar-border/70">
@@ -44,144 +128,89 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem className="flex flex-col gap-y-1">
-                <SidebarMenuButton
-                  render={
-                    <LinkButton
-                      to="/home"
-                      variant="ghost"
-                      activeProps={{
-                        variant: "default",
-                        className: "hover:bg-violet-600 hover:text-white",
-                      }}
-                      className="h-10 justify-start gap-3 rounded-xl px-3"
-                    >
-                      <Home aria-hidden="true" className="size-4" />
-                      <span>Início</span>
-                    </LinkButton>
-                  }
-                />
-                <SidebarMenuButton
-                  render={
-                    <LinkButton
-                      to="/calendar"
-                      variant="ghost"
-                      activeProps={{
-                        variant: "default",
-                        className: "hover:bg-violet-600 hover:text-white",
-                      }}
-                      className="h-10 justify-start gap-3 rounded-xl px-3"
-                    >
-                      <Calendar aria-hidden="true" className="size-4" />
-                      <span>Calendario</span>
-                    </LinkButton>
-                  }
-                />
-                <SidebarMenuButton
-                  render={
-                    <LinkButton
-                      to="/history"
-                      variant="ghost"
-                      activeProps={{
-                        variant: "default",
-                        className: "hover:bg-violet-600 hover:text-white",
-                      }}
-                      className="h-10 justify-start gap-3 rounded-xl px-3"
-                    >
-                      <History aria-hidden="true" className="size-4" />
-                      <span>Histórico</span>
-                    </LinkButton>
-                  }
-                />
+                {userRoutes.map((route) => (
+                  <SidebarMenuButton
+                    key={route.to}
+                    render={
+                      <LinkButton
+                        to={route.to}
+                        variant="ghost"
+                        activeProps={{
+                          variant: "default",
+                          className: "hover:bg-violet-600 hover:text-white",
+                        }}
+                        className="h-10 justify-start gap-3 rounded-xl px-3"
+                      >
+                        {route.icon}
+                        <span>{route.label}</span>
+                      </LinkButton>
+                    }
+                  />
+                ))}
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
         {sessionInfo && (sessionInfo.roles.includes("Admin") || sessionInfo.roles.includes("Owner")) && (
-              <SidebarGroup className="px-3 py-5">
-                <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Coordenação</p>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton
-                        render={
-                          <LinkButton
-                            to="/admin/manage-spaces"
-                            variant="ghost"
-                            activeProps={{
-                              variant: "default",
-                              className: "hover:bg-violet-600 hover:text-white",
-                            }}
-                            className="h-10 justify-start gap-3 rounded-xl px-3"
-                          >
-                            <Building aria-hidden="true" className="size-4" />
-                            <span>Gerenciar salas</span>
-                          </LinkButton>
-                        }
-                      />
-                      <SidebarMenuButton
-                        render={
-                          <LinkButton
-                            to="/admin/manage-reserves"
-                            variant="ghost"
-                            activeProps={{
-                              variant: "default",
-                              className: "hover:bg-violet-600 hover:text-white",
-                            }}
-                            className="h-10 justify-start gap-3 rounded-xl px-3"
-                          >
-                            <Clipboard aria-hidden="true" className="size-4" />
-                            <span>Gerenciar reservas</span>
-                          </LinkButton>
-                        }
-                      />
-                      <SidebarMenuButton
-                        render={
-                          <LinkButton
-                            to="/admin/manage-users"
-                            variant="ghost"
-                            activeProps={{
-                              variant: "default",
-                              className: "hover:bg-violet-600 hover:text-white",
-                            }}
-                            className="h-10 justify-start gap-3 rounded-xl px-3"
-                          >
-                            <Users aria-hidden="true" className="size-4" />
-                            <span>Gerenciar usuarios</span>
-                          </LinkButton>
-                        }
-                      />
-                    </SidebarMenuItem>
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            )}
+          <SidebarGroup className="px-3 py-5">
+            <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Coordenação</p>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  {adminRoutes.map((route) => (
+                    <SidebarMenuButton
+                      key={route.to}
+                      render={
+                        <LinkButton
+                          to={route.to}
+                          variant="ghost"
+                          activeProps={{
+                            variant: "default",
+                            className: "hover:bg-violet-600 hover:text-white",
+                          }}
+                          className="h-10 justify-start gap-3 rounded-xl px-3"
+                        >
+                          {route.icon}
+                          <span>{route.label}</span>
+                        </LinkButton>
+                      }
+                    />
+                  ))}
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
         {sessionInfo && (sessionInfo.roles.includes("Admin") || sessionInfo.roles.includes("Owner")) && (
-              <SidebarGroup className="px-3 py-5">
-                <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Diretoria</p>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton
-                        render={
-                          <LinkButton
-                            to="/admin/report"
-                            variant="ghost"
-                            activeProps={{
-                              variant: "default",
-                              className: "hover:bg-violet-600 hover:text-white",
-                            }}
-                            className="h-10 justify-start gap-3 rounded-xl px-3"
-                          >
-                            <ChartBar aria-hidden="true" className="size-4" />
-                            <span>Relatórios</span>
-                          </LinkButton>
-                        }
-                      />
-                    </SidebarMenuItem>
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            )}
+          <SidebarGroup className="px-3 py-5">
+            <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Diretoria</p>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  {coordinatorRoutes.map((route) => (
+                    <SidebarMenuButton
+                      key={route.to}
+                      render={
+                        <LinkButton
+                          to={route.to}
+                          variant="ghost"
+                          activeProps={{
+                            variant: "default",
+                            className: "hover:bg-violet-600 hover:text-white",
+                          }}
+                          className="h-10 justify-start gap-3 rounded-xl px-3"
+                        >
+                          {route.icon}
+                          <span>{route.label}</span>
+                        </LinkButton>
+                      }
+                    />
+                  ))}
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border/70 px-5 py-4">

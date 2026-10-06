@@ -3,6 +3,7 @@ import { useDebounce } from "ahooks";
 import {
   Filter,
   SearchIcon,
+  Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useApi } from "#/lib/utils/restapi";
@@ -25,13 +26,16 @@ import {
 } from "@/components/ui/select";
 import { Field, FieldLabel } from "../ui/field";
 
-const minCapacity = [20, 50, 100, 150] as const;
+//capacity constraints
+const min = 10;
+const max = 300;
+const steps = 10;
 
 export type SpaceSearchFilters = {
   searchQuery: string;
+  minimumCapacity: number;
   resources: number[];
   subjects: number[];
-  minimumCapacity: (typeof minCapacity)[number];
 };
 
 type SpaceSearchBarProps = {
@@ -70,8 +74,7 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedResource, setSelectedResource] = useState<string>("-1");
   const [selectedSubject, setSelectedSubject] = useState<string>("-1");
-  const [minimumCapacity, setMinimumCapacity] =
-    useState<(typeof minCapacity)[number]>(20);
+  const [minimumCapacity, setMinimumCapacity] = useState(20);
 
   const currentFilters: SpaceSearchFilters = {
     searchQuery,
@@ -109,7 +112,7 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               id="search-spaces"
-              placeholder="Buscar por nome ou departamento..."
+              placeholder="Buscar por nome ou descrição..."
               className="text-sm"
             />
             <InputGroupAddon align="inline-start">
@@ -125,25 +128,24 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
           >
             Capacidade minima
           </FieldLabel>
-          <Select
-            defaultValue={"20"}
-            value={String(minimumCapacity)}
-            onValueChange={(value) => {
-              setMinimumCapacity(Number(value) as typeof minimumCapacity);
-            }}
-          >
-            <SelectTrigger id="capacity-select" className="w-full h-10">
-              <SelectValue placeholder="50 lugares..." />
-            </SelectTrigger>
-            <SelectContent>
-              {minCapacity.map((val) => (
-                <SelectItem key={`${val} lugares`} value={`${val}`}>
-                  {val} lugares
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <InputGroup className="h-10">
+            <InputGroupInput
+              value={minimumCapacity}
+              onChange={(e) => setMinimumCapacity(Number(e.target.value))}
+              id="search-spaces"
+              className="text-sm"
+              type="number"
+              min={min}
+              max={max}
+              step={steps}
+            />
+            <InputGroupAddon align="inline-start">
+              <Users className="size-4 text-muted-foreground" />
+            </InputGroupAddon>
+          </InputGroup>
         </Field>
+
+
         {/*Filtros avançados*/}
         <Collapsible>
           <CollapsibleTrigger

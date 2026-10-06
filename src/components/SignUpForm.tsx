@@ -1,10 +1,9 @@
 import { useForm } from "@tanstack/react-form";
-import { createLink, useNavigate } from "@tanstack/react-router";
+import { createLink } from "@tanstack/react-router";
 import { Eye, EyeOff } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
 import * as z from "zod";
-import { useApi } from "#/lib/utils/restapi";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -26,45 +25,42 @@ import {
     InputGroupButton,
     InputGroupInput,
 } from "@/components/ui/input-group";
-import { UserRole } from "@/lib/service";
-import {
-    Combobox,
-    ComboboxContent,
-    ComboboxEmpty,
-    ComboboxInput,
-    ComboboxItem,
-    ComboboxList,
-} from "./ui/combobox";
 
 const formSchema = z.object({
     name: z
         .string("Nome invalido")
-        .min(4, "Nome deve ter pelo menos 4 caracteres"),
+        .min(4, "Nome deve ter pelo menos 4 caracteres")
+        .max(100, "Nome deve ter no maximo 100 caracteres"),
     registration: z
         .string("Matricula invalida")
         .min(1, "Matricula deve ter pelo menos 1 caractere")
+        .max(20, "Matricula deve ter no maximo 20 caracteres")
         .regex(/^[0-9]+$/, "Matricula deve conter apenas números"),
-    role: UserRole,
     email: z.email("Email invalido"),
     password: z
         .string("Senha invalida")
-        .min(6, "Senha deve ter pelo menos 6 caracteres"),
+        .min(6, "Senha deve ter pelo menos 6 caracteres")
+        .max(100, "Senha deve ter no maximo 100 caracteres"),
     passwordConfirm: z
         .string("Confirmação de senha invalida")
-        .min(6, "Confirmação de senha deve ter pelo menos 6 caracteres"),
+        .min(6, "Confirmação de senha deve ter pelo menos 6 caracteres")
+        .max(100, "Confirmação de senha deve ter no maximo 100 caracteres"),
 });
 
-export function SignUpForm() {
+interface SignUpFormProps {
+    isLoading: boolean;
+    isRedirecting: boolean;
+    onFormSubmit: (name: string, registration: string, email: string, password: string) => Promise<void>;
+}
+
+export function SignUpForm({ isLoading, isRedirecting, onFormSubmit }: SignUpFormProps) {
     const LinkButton = createLink(Button);
     const [isPasswordVisible, setIsPasswordVisible] = React.useState(false);
-    const api = useApi();
-    const navigate = useNavigate();
 
     const form = useForm({
         defaultValues: {
             name: "",
             registration: "",
-            role: "USER",
             email: "",
             password: "",
             passwordConfirm: "",
@@ -86,50 +82,7 @@ export function SignUpForm() {
                 return;
             }
 
-            const response = await api.POST("/auth/sign-up", {
-                body: {
-                    username: value.name,
-                    registration: value.registration,
-                    role: 1,
-                    email: value.email,
-                    password: value.password,
-                    passwordConfirm: value.passwordConfirm,
-                },
-            });
-
-            const { ok, status, statusText } = response.response;
-
-            if (!ok) {
-                toast.error(
-                    `Erro ${status}: ${status === 400 ? "Usuário já registrado" : statusText}`,
-                    {
-                        duration: 2000,
-                        position: "bottom-center",
-                        style: {
-                            color: "white",
-                            backgroundColor: "red",
-                            borderColor: "red",
-                        },
-                    },
-                );
-                return;
-            }
-
-            toast.success(
-                `Usuario criado com sucesso! Aguarde para que um administrador ative sua conta.`,
-                {
-                    duration: 5000,
-                    onAutoClose: () => {
-                        navigate({ to: "/" });
-                    },
-                    position: "bottom-center",
-                    style: {
-                        color: "white",
-                        backgroundColor: "green",
-                        borderColor: "green",
-                    },
-                },
-            );
+            await onFormSubmit(value.name, value.registration, value.email, value.password);
         },
     });
 
@@ -165,6 +118,7 @@ export function SignUpForm() {
                                             Nome
                                         </FieldLabel>
                                         <Input
+                                            disabled={isRedirecting || isLoading}
                                             id={field.name}
                                             name={field.name}
                                             value={field.state.value}
@@ -202,6 +156,7 @@ export function SignUpForm() {
                                             Matrícula
                                         </FieldLabel>
                                         <Input
+                                            disabled={isRedirecting || isLoading}
                                             id={field.name}
                                             name={field.name}
                                             value={field.state.value}
@@ -215,55 +170,6 @@ export function SignUpForm() {
                                             placeholder="Matricula"
                                             autoComplete="off"
                                         />
-                                        {isInvalid && (
-                                            <FieldError
-                                                errors={field.state.meta.errors}
-                                            />
-                                        )}
-                                    </Field>
-                                );
-                            }}
-                        />
-                        <form.Field
-                            name="role"
-                            children={(field) => {
-                                const isInvalid =
-                                    field.state.meta.isTouched &&
-                                    !field.state.meta.isValid;
-                                return (
-                                    <Field data-invalid={isInvalid}>
-                                        <FieldLabel
-                                            className={"font-semibold"}
-                                            htmlFor={field.name}
-                                        >
-                                            Cargo
-                                        </FieldLabel>
-                                        <Combobox
-                                            items={UserRole.options}
-                                            defaultValue={UserRole.options[UserRole.options.indexOf(field.state.value as z.infer<typeof UserRole>)]}
-                                            onValueChange={(value) =>
-                                                field.handleChange(
-                                                    value ? value : "",
-                                                )
-                                            }
-                                        >
-                                            <ComboboxInput placeholder="Selecione um cargo" />
-                                            <ComboboxContent>
-                                                <ComboboxEmpty>
-                                                    No items found.
-                                                </ComboboxEmpty>
-                                                <ComboboxList>
-                                                    {(item) => (
-                                                        <ComboboxItem
-                                                            key={item}
-                                                            value={item}
-                                                        >
-                                                            {item}
-                                                        </ComboboxItem>
-                                                    )}
-                                                </ComboboxList>
-                                            </ComboboxContent>
-                                        </Combobox>
                                         {isInvalid && (
                                             <FieldError
                                                 errors={field.state.meta.errors}
@@ -288,6 +194,7 @@ export function SignUpForm() {
                                             E-mail
                                         </FieldLabel>
                                         <Input
+                                            disabled={isRedirecting || isLoading}
                                             id={field.name}
                                             name={field.name}
                                             value={field.state.value}
@@ -300,7 +207,7 @@ export function SignUpForm() {
                                             aria-invalid={isInvalid}
                                             type="email"
                                             placeholder="E-mail"
-                                            autoComplete="off"
+                                            autoComplete="on"
                                         />
                                         {isInvalid && (
                                             <FieldError
@@ -327,6 +234,7 @@ export function SignUpForm() {
                                         </FieldLabel>
                                         <InputGroup>
                                             <InputGroupInput
+                                                disabled={isRedirecting || isLoading}
                                                 id={field.name}
                                                 name={field.name}
                                                 value={field.state.value}
@@ -395,6 +303,7 @@ export function SignUpForm() {
                                         </FieldLabel>
                                         <InputGroup>
                                             <InputGroupInput
+                                                disabled={isRedirecting || isLoading}
                                                 id={field.name}
                                                 name={field.name}
                                                 value={field.state.value}
@@ -452,12 +361,13 @@ export function SignUpForm() {
             </CardContent>
             <CardFooter className="bg-transparent">
                 <Field orientation="vertical">
-                    <Button type="submit" form="sign-in-form">
+                    <Button type="submit" form="sign-in-form" disabled={isRedirecting || isLoading}>
                         Cadastrar
                     </Button>
                     <div className="w-full justify-center flex items-center gap-0">
                         <span>Já tem conta?</span>
                         <LinkButton
+                            disabled={isRedirecting || isLoading}
                             className={
                                 "font-semibold px-1 dark:text-violet-400 underline"
                             }

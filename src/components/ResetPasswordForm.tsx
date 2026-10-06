@@ -12,8 +12,8 @@ import { InputGroup, InputGroupButton, InputGroupInput } from "./ui/input-group"
 const formSchema = z.object({
   password: z
     .string("Senha invalida")
-    .min(5, "Senha deve ter pelo menos 5 caracteres")
-    .max(16, "Senha deve ter no maximo 16 caracteres"),
+    .min(6, "Senha deve ter pelo menos 6 caracteres")
+    .max(100, "Senha deve ter no maximo 100 caracteres"),
   confirmPassword: z.string("Senha invalida"),
 });
 
