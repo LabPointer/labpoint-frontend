@@ -1,35 +1,39 @@
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "ahooks";
-import {
-  Filter,
-  SearchIcon,
-  Users,
-} from "lucide-react";
+import { addDays, addYears, endOfYear, format, startOfToday, startOfTomorrow } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { CalendarIcon, Filter, SearchIcon, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import type { DateRange } from "react-day-picker";
+import { ApiError } from "#/lib/types/error-types";
 import { useApi } from "#/lib/utils/restapi";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { Button } from "../ui/button";
+import { Calendar } from "../ui/calendar";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxValue,
+} from "../ui/combobox";
 import { Field, FieldLabel } from "../ui/field";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 //capacity constraints
 const min = 10;
 const max = 300;
 const steps = 10;
+
+export type ResourceItem = {
+  name: string;
+  description: string;
+};
 
 export type SpaceSearchFilters = {
   searchQuery: string;
@@ -39,53 +43,182 @@ export type SpaceSearchFilters = {
 };
 
 type SpaceSearchBarProps = {
-  onSearch?: (filters: SpaceSearchFilters) => void;
+  onSearch: (filters: SpaceSearchFilters) => void;
 };
 
-export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
-  const api = useApi();
-  const {
-    data: globalData,
-    isError,
-    isLoading,
-  } = useQuery({
-    queryKey: ["global-data"],
+const api = useApi();
+
+function resourceQuery(name: string, enabled: boolean = true) {
+  const debouncedName = useDebounce(name, { wait: 500 });
+
+  const query = useQuery({
+    queryKey: ["resource-data", debouncedName],
     queryFn: async () => {
-      const [resourcesRes, subjectsRes] = await Promise.all([
-        api.GET("/resources"),
-        api.GET("/subjects"),
-      ]);
+      const res = await api.GET("/resource", {
+        params: {
+          query: {
+            SearchQuery: debouncedName,
+            Limit: 20,
+            CanReserve: false,
+            Enabled: true,
+          },
+        },
+      });
 
-      const resourcesMap = new Map<number, string>();
-      resourcesMap.set(-1, "Todos os recursos");
-      resourcesRes.data?.map((item) => resourcesMap.set(item.id || 0, item.name || "unknown"));
+      const { response, data, error } = res;
 
-      const subjectsMap = new Map<number, string>();
-      subjectsMap.set(-1, "Todas as disciplinas");
-      subjectsRes.data?.map((item) => subjectsMap.set(item.id || 0, item.name || "unknown"));
+      if (!response.ok && error) {
+        throw new ApiError(error.message || "Erro desconhecido", response.status, error.logout);
+      }
 
-      return {
-        resources: resourcesMap,
-        subjects: subjectsMap,
-      };
+      if (!data) {
+        throw new ApiError("Erro ao buscar recursos.", response.status, error?.logout ?? false);
+      }
+
+      return data;
     },
+    enabled,
   });
 
+  return query;
+}
+
+function subjectQuery(name: string, enabled: boolean) {
+  const debouncedName = useDebounce(name, { wait: 500 });
+
+  const query = useQuery({
+    queryKey: ["subject-data", debouncedName],
+    queryFn: async () => {
+      const res = await api.GET("/subject", {
+        params: {
+          query: {
+            Name: debouncedName,
+            Limit: 20,
+            IsActive: true,
+          },
+        },
+      });
+
+      const { response, data, error } = res;
+
+      if (!response.ok && error) {
+        throw new ApiError("Erro ao buscar recursos.", response.status, error?.logout ?? false);
+      }
+
+      if (!data) {
+        throw new ApiError("Erro ao buscar recursos.", response.status, error?.logout ?? false);
+      }
+
+      return data;
+    },
+    enabled,
+  });
+
+  return query;
+}
+
+function scheduleQuery(startFrom: string, endAt: string, enabled: boolean) {
+  const debouncedStart = useDebounce(startFrom, { wait: 500 });
+  const debouncedEnd = useDebounce(endAt, { wait: 500 });
+
+  const query = useQuery({
+    queryKey: ["schedule-data", debouncedStart, debouncedEnd],
+    queryFn: async () => {
+      const res = await api.GET("/subject");
+
+      const { response, data, error } = res;
+
+      if (!response.ok && error) {
+        throw new ApiError("Erro ao buscar recursos.", response.status, error?.logout ?? false);
+      }
+
+      if (!data) {
+        throw new ApiError("Erro ao buscar recursos.", response.status, error?.logout ?? false);
+      }
+
+      return data;
+    },
+    enabled,
+  });
+
+  return query;
+}
+
+export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
+  // Recursos
+  const [resourceName, setResourceName] = useState<string>("");
+  const {
+    data: resourceData,
+    isLoading: isResourceLoading,
+    isError: isResourceError,
+    error: resourceError,
+  } = resourceQuery(resourceName, true);
+
+  const [resourceMap, setResourceMap] = useState<Map<number, ResourceItem>>(new Map());
+
+  useEffect(() => {
+    if (resourceData) {
+      setResourceMap((prev) => {
+        const next = new Map(prev);
+        Object.values(resourceData).forEach((item) => {
+          next.set(Number(item.id), { name: item.name, description: item.description });
+        });
+        return next;
+      });
+    }
+  }, [resourceData]);
+
+  const isResourceFirstLoading = isResourceLoading && !resourceData;
+  const isResourceCriticalError = isResourceError && (resourceError as ApiError).logout;
+  const resourceList = Object.values(resourceData ?? {});
+
+  // Subjects
+  const [subjectName, setSubjectName] = useState<string>("");
+  const {
+    data: subjectData,
+    isLoading: isSubjectLoading,
+    isError: isSubjectError,
+    error: subjectError,
+  } = subjectQuery(subjectName, true);
+
+  const isSubjectFirstLoading = isSubjectLoading && !subjectData;
+  const isSubjectCriticalError = isSubjectError && (subjectError as ApiError).logout;
+  const subjectList = Object.values(subjectData ?? {});
+
+  const [subjectMap, setSubjectMap] = useState<Map<number, string>>(new Map());
+
+  useEffect(() => {
+    if (subjectData) {
+      setSubjectMap((prev) => {
+        const next = new Map(prev);
+        Object.values(subjectData).forEach((item) => {
+          next.set(Number(item.id), item.name);
+        });
+        return next;
+      });
+    }
+  }, [subjectData]);
+
+  // Calendario
+  const tomorrow = startOfTomorrow();
+  const maxDate = endOfYear(addYears(new Date(), 1));
+
+  // Pesquisa
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedResource, setSelectedResource] = useState<string>("-1");
-  const [selectedSubject, setSelectedSubject] = useState<string>("-1");
   const [minimumCapacity, setMinimumCapacity] = useState(20);
+  const [selectedResource, setSelectedResource] = useState<number[]>([]);
+  const availableResourceIds = Array.from(new Set([...selectedResource, ...resourceList.map((r) => Number(r.id))]));
+  const [selectedSubject, setSelectedSubject] = useState<number[]>([]);
+  const availableSubjectIds = Array.from(new Set([...selectedSubject, ...subjectList.map((r) => Number(r.id))]));
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: tomorrow,
+    to: addDays(tomorrow, 30),
+  });
 
   const currentFilters: SpaceSearchFilters = {
     searchQuery,
-    resources:
-      selectedResource && Number(selectedResource) >= 0
-        ? [Number(selectedResource)]
-        : [],
-    subjects:
-      selectedSubject && Number(selectedSubject) >= 0
-        ? [Number(selectedSubject)]
-        : [],
+    resources: selectedResource,
+    subjects: selectedSubject,
     minimumCapacity,
   };
 
@@ -101,10 +234,7 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
     <div className="bg-white dark:bg-white/5 rounded-md border dark:border-violet-500/10 shadow-md hover:shadow-lg p-4 dark:shadow-violet-300/15">
       <div className="flex flex-col gap-4">
         <Field className="w-full">
-          <FieldLabel
-            className="text-sm font-semibold text-neutral-800 dark:text-neutral-200"
-            htmlFor="search-spaces"
-          >
+          <FieldLabel className="text-sm font-semibold text-neutral-800 dark:text-neutral-200" htmlFor="search-spaces">
             Pesquisar
           </FieldLabel>
           <InputGroup className="h-10">
@@ -145,7 +275,6 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
           </InputGroup>
         </Field>
 
-
         {/*Filtros avançados*/}
         <Collapsible>
           <CollapsibleTrigger
@@ -159,6 +288,7 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
             </div>
           </CollapsibleTrigger>
           <CollapsibleContent className={"flex flex-col gap-y-4 pt-3"}>
+            {/* Recursos */}
             <Field className="w-full">
               <FieldLabel
                 className="text-sm font-semibold text-neutral-800 dark:text-neutral-200"
@@ -166,41 +296,57 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
               >
                 Equipamentos
               </FieldLabel>
-              <Select
-                defaultValue={"Todos os recursos"}
+              <Combobox
+                multiple
+                autoHighlight
+                items={availableResourceIds}
                 value={selectedResource}
-                onValueChange={(value) => setSelectedResource(value || "")}
-                disabled={isLoading || isError}
+                onValueChange={(values: number[]) => {
+                  setSelectedResource(values);
+                  setResourceName("");
+                }}
+                inputValue={resourceName}
+                onInputValueChange={setResourceName}
+                itemToStringLabel={(id: number) =>
+                  resourceMap.get(id) ? `${resourceMap.get(id)?.name} ${resourceMap.get(id)?.description}` : String(id)
+                }
+                disabled={isResourceCriticalError}
               >
-                <SelectTrigger id="equipment-select" className="w-full h-10">
-                  <SelectValue
+                <ComboboxChips className="w-full">
+                  <ComboboxValue>
+                    {selectedResource.map((id) => (
+                      <ComboboxChip key={id}>{resourceMap.get(id)?.name ?? "Sem nome"}</ComboboxChip>
+                    ))}
+                  </ComboboxValue>
+                  <ComboboxChipsInput
                     placeholder={
-                      isLoading
-                        ? "Carregando equipamentos..."
-                        : isError
-                          ? "Erro ao carregar equipamentos"
-                          : "Todos equipamentos"
+                      isResourceCriticalError
+                        ? "Erro ao carregar equipamentos"
+                        : isResourceFirstLoading
+                          ? "Carregando equipamentos..."
+                          : selectedResource.length > 0
+                            ? ""
+                            : "Selecione equipamentos..."
                     }
-                  >
-                    {(val: string | null) => {
-                      if (!val) return null;
-                      return globalData?.resources?.get(Number(val)) ?? val;
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {globalData?.resources &&
-                    Array.from(globalData.resources.entries()).map(
-                      ([id, name]) => (
-                        <SelectItem key={id} value={String(id)}>
-                          {name}
-                        </SelectItem>
-                      ),
+                    disabled={isResourceCriticalError}
+                  />
+                </ComboboxChips>
+                <ComboboxContent>
+                  <ComboboxEmpty>
+                    {isResourceFirstLoading ? "Carregando..." : "Nenhum equipamento encontrado."}
+                  </ComboboxEmpty>
+                  <ComboboxList className={"w-full"}>
+                    {(id: number) => (
+                      <ComboboxItem key={id} value={id}>
+                        {resourceMap.get(id)?.name ?? id}
+                      </ComboboxItem>
                     )}
-                </SelectContent>
-              </Select>
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
             </Field>
 
+            {/* Disciplinas */}
             <Field className="w-full">
               <FieldLabel
                 className="text-sm font-semibold text-neutral-800 dark:text-neutral-200"
@@ -208,39 +354,97 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
               >
                 Disciplinas
               </FieldLabel>
-              <Select
-                defaultValue={"Todas as disciplinas"}
+              <Combobox
+                multiple
+                autoHighlight
+                items={availableSubjectIds}
                 value={selectedSubject}
-                onValueChange={(value) => setSelectedSubject(value || "")}
-                disabled={isLoading || isError}
+                onValueChange={(values: number[]) => {
+                  setSelectedSubject(values);
+                  setSubjectName("");
+                }}
+                inputValue={subjectName}
+                onInputValueChange={setSubjectName}
+                itemToStringLabel={(id: number) => subjectMap.get(id) ?? String(id)}
+                disabled={isSubjectCriticalError}
               >
-                <SelectTrigger id="equipment-select" className="w-full h-10">
-                  <SelectValue
+                <ComboboxChips className="w-full">
+                  <ComboboxValue>
+                    {selectedSubject.map((id) => (
+                      <ComboboxChip key={id}>{subjectMap.get(id) ?? "Sem nome"}</ComboboxChip>
+                    ))}
+                  </ComboboxValue>
+                  <ComboboxChipsInput
                     placeholder={
-                      isLoading
-                        ? "Carregando disciplinas..."
-                        : isError
-                          ? "Erro ao carregar disciplinas"
-                          : "Todas as disciplinas"
+                      isSubjectCriticalError
+                        ? "Erro ao carregar disciplinas"
+                        : isSubjectFirstLoading
+                          ? "Carregando disciplinas..."
+                          : selectedSubject.length > 0
+                            ? ""
+                            : "Selecione disciplinas..."
                     }
-                  >
-                    {(val: string | null) => {
-                      if (!val) return null;
-                      return globalData?.subjects?.get(Number(val)) ?? val;
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {globalData?.subjects &&
-                    Array.from(globalData.subjects.entries()).map(
-                      ([id, name]) => (
-                        <SelectItem key={id} value={String(id)}>
-                          {name}
-                        </SelectItem>
-                      ),
+                    disabled={isSubjectCriticalError}
+                  />
+                </ComboboxChips>
+                <ComboboxContent>
+                  <ComboboxEmpty>
+                    {isSubjectFirstLoading ? "Carregando..." : "Nenhuma disciplina encontrada."}
+                  </ComboboxEmpty>
+                  <ComboboxList>
+                    {(id: number) => (
+                      <ComboboxItem key={id} value={id}>
+                        {subjectMap.get(id) ?? id}
+                      </ComboboxItem>
                     )}
-                </SelectContent>
-              </Select>
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
+            </Field>
+
+            {/* Data de inicio e termino */}
+            <Field className="w-full">
+              <FieldLabel
+                htmlFor="date-picker-range"
+                className="text-sm font-semibold text-neutral-800 dark:text-neutral-200"
+              >
+                Período
+              </FieldLabel>
+              <Popover>
+                <PopoverTrigger
+                  render={
+                    <Button variant="outline" id="date-picker-range" className="justify-start px-2.5 font-normal">
+                      <CalendarIcon data-icon="inline-start" />
+                      {dateRange?.from ? (
+                        dateRange.to ? (
+                          <>
+                            {format(dateRange.from, "dd 'de' MMM, yyyy", { locale: ptBR })} -{" "}
+                            {format(dateRange.to, "dd 'de' MMM, yyyy", { locale: ptBR })}
+                          </>
+                        ) : (
+                          format(dateRange.from, "dd 'de' MMM, yyyy", { locale: ptBR })
+                        )
+                      ) : (
+                        <span>Selecione uma data</span>
+                      )}
+                    </Button>
+                  }
+                />
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="range"
+                    locale={ptBR}
+                    defaultMonth={dateRange?.from}
+                    selected={dateRange}
+                    onSelect={setDateRange}
+                    numberOfMonths={2}
+                    disabled={[{ before: tomorrow }, { after: maxDate }]}
+                    startMonth={startOfToday()}
+                    endMonth={maxDate}
+                    className="rounded-lg border"
+                  />
+                </PopoverContent>
+              </Popover>
             </Field>
           </CollapsibleContent>
         </Collapsible>
