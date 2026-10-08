@@ -48,7 +48,7 @@ export function AppSidebar() {
 
   const userRoutes: PageRoute[] = [
     {
-      to: "/",
+      to: "/home",
       label: "Início",
       icon: <Home className="size-4" />,
     },

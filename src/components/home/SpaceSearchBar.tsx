@@ -40,10 +40,19 @@ export type SpaceSearchFilters = {
   minimumCapacity: number;
   resources: number[];
   subjects: number[];
+  startDate: Date;
+  endDate: Date;
+  schedules: number[];
 };
 
 type SpaceSearchBarProps = {
   onSearch: (filters: SpaceSearchFilters) => void;
+};
+
+const shiftNames: Record<number, string> = {
+  0: "Manhã",
+  1: "Tarde",
+  2: "Noite"
 };
 
 const api = useApi();
@@ -117,14 +126,11 @@ function subjectQuery(name: string, enabled: boolean) {
   return query;
 }
 
-function scheduleQuery(startFrom: string, endAt: string, enabled: boolean) {
-  const debouncedStart = useDebounce(startFrom, { wait: 500 });
-  const debouncedEnd = useDebounce(endAt, { wait: 500 });
-
+function scheduleQuery(enabled: boolean) {
   const query = useQuery({
-    queryKey: ["schedule-data", debouncedStart, debouncedEnd],
+    queryKey: ["schedule-data"],
     queryFn: async () => {
-      const res = await api.GET("/subject");
+      const res = await api.GET("/schedule");
 
       const { response, data, error } = res;
 
@@ -172,7 +178,7 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
   const isResourceCriticalError = isResourceError && (resourceError as ApiError).logout;
   const resourceList = Object.values(resourceData ?? {});
 
-  // Subjects
+  // Materias
   const [subjectName, setSubjectName] = useState<string>("");
   const {
     data: subjectData,
@@ -203,6 +209,33 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
   const tomorrow = startOfTomorrow();
   const maxDate = endOfYear(addYears(new Date(), 1));
 
+  // Horarios
+  const {
+    data: scheduleData,
+    isLoading: isScheduleLoading,
+    isError: isScheduleError,
+    error: scheduleError,
+  } = scheduleQuery(true);
+
+  const [scheduleMap, setScheduleMap] = useState<Map<number, string>>(new Map());
+
+  useEffect(() => {
+    if (scheduleData) {
+      setScheduleMap((prev) => {
+        const next = new Map(prev);
+        Object.values(scheduleData).forEach((item) => {
+          const label = `${shiftNames[item.shift]}: ${item.startAt.slice(0, 5)}${item.endAt ? ` - ${item.endAt.slice(0, 5)}` : ""}`;
+          next.set(Number(item.id), label);
+        });
+        return next;
+      });
+    }
+  }, [scheduleData]);
+
+  const isScheduleFirstLoading = isScheduleLoading && !scheduleData;
+  const isScheduleCriticalError = isScheduleError && (scheduleError as ApiError).logout;
+  const scheduleList = Object.values(scheduleData ?? {});
+
   // Pesquisa
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [minimumCapacity, setMinimumCapacity] = useState(20);
@@ -214,12 +247,17 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
     from: tomorrow,
     to: addDays(tomorrow, 30),
   });
+  const [selectedSchedule, setSelectedSchedule] = useState<number[]>([]);
+  const availableScheduleIds = Array.from(new Set([...selectedSchedule, ...scheduleList.map((r) => Number(r.id))]));
 
   const currentFilters: SpaceSearchFilters = {
     searchQuery,
     resources: selectedResource,
     subjects: selectedSubject,
     minimumCapacity,
+    startDate: dateRange?.from ?? tomorrow,
+    endDate: dateRange?.to ?? addDays(tomorrow, 30),
+    schedules: selectedSchedule,
   };
 
   const debouncedFilters = useDebounce(currentFilters, { wait: 1000 });
@@ -445,6 +483,59 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
                   />
                 </PopoverContent>
               </Popover>
+            </Field>
+
+            {/* Horarios */}
+            <Field className="w-full">
+              <FieldLabel
+                className="text-sm font-semibold text-neutral-800 dark:text-neutral-200"
+                htmlFor="equipment-select"
+              >
+                Horarios
+              </FieldLabel>
+              <Combobox
+                multiple
+                autoHighlight
+                items={availableScheduleIds}
+                value={selectedSchedule}
+                onValueChange={(values: number[]) => {
+                  setSelectedSchedule(values);
+                }}
+                itemToStringLabel={(id: number) => scheduleMap.get(id) ?? String(id)}
+                disabled={isSubjectCriticalError}
+              >
+                <ComboboxChips className="w-full">
+                  <ComboboxValue>
+                    {selectedSchedule.map((id) => (
+                      <ComboboxChip key={id}>{scheduleMap.get(id) ?? "Sem nome"}</ComboboxChip>
+                    ))}
+                  </ComboboxValue>
+                  <ComboboxChipsInput
+                    placeholder={
+                      isScheduleCriticalError
+                        ? "Erro ao carregar horarios"
+                        : isScheduleFirstLoading
+                          ? "Carregando horarios..."
+                          : selectedSchedule.length > 0
+                            ? ""
+                            : "Selecione horarios..."
+                    }
+                    disabled={isScheduleCriticalError}
+                  />
+                </ComboboxChips>
+                <ComboboxContent>
+                  <ComboboxEmpty>
+                    {isScheduleFirstLoading ? "Carregando..." : "Nenhum horario encontrado."}
+                  </ComboboxEmpty>
+                  <ComboboxList>
+                    {(id: number) => (
+                      <ComboboxItem key={id} value={id}>
+                        {scheduleMap.get(id) ?? id}
+                      </ComboboxItem>
+                    )}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
             </Field>
           </CollapsibleContent>
         </Collapsible>

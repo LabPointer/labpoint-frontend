@@ -22,7 +22,9 @@ import { Route as PublicResendEmailConfirmationRouteImport } from './routes/_pub
 import { Route as PublicResetPasswordRouteImport } from './routes/_public/reset-password'
 import { Route as PublicSignUpRouteImport } from './routes/_public/sign-up'
 import { Route as PrivateAdminManageReservesRouteImport } from './routes/_private/admin/manage-reserves'
+import { Route as PrivateAdminManageResourcesRouteImport } from './routes/_private/admin/manage-resources'
 import { Route as PrivateAdminManageSpacesRouteImport } from './routes/_private/admin/manage-spaces'
+import { Route as PrivateAdminManageSubjectsRouteImport } from './routes/_private/admin/manage-subjects'
 import { Route as PrivateAdminManageUsersRouteImport } from './routes/_private/admin/manage-users'
 import { Route as PrivateAdminReportRouteImport } from './routes/_private/admin/report'
 
@@ -91,10 +93,22 @@ const PrivateAdminManageReservesRoute =
     path: '/manage-reserves',
     getParentRoute: () => PrivateAdminRouteRoute,
   } as any)
+const PrivateAdminManageResourcesRoute =
+  PrivateAdminManageResourcesRouteImport.update({
+    id: '/manage-resources',
+    path: '/manage-resources',
+    getParentRoute: () => PrivateAdminRouteRoute,
+  } as any)
 const PrivateAdminManageSpacesRoute =
   PrivateAdminManageSpacesRouteImport.update({
     id: '/manage-spaces',
     path: '/manage-spaces',
+    getParentRoute: () => PrivateAdminRouteRoute,
+  } as any)
+const PrivateAdminManageSubjectsRoute =
+  PrivateAdminManageSubjectsRouteImport.update({
+    id: '/manage-subjects',
+    path: '/manage-subjects',
     getParentRoute: () => PrivateAdminRouteRoute,
   } as any)
 const PrivateAdminManageUsersRoute = PrivateAdminManageUsersRouteImport.update({
@@ -120,7 +134,9 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof PublicResetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
   '/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
+  '/admin/manage-resources': typeof PrivateAdminManageResourcesRoute
   '/admin/manage-spaces': typeof PrivateAdminManageSpacesRoute
+  '/admin/manage-subjects': typeof PrivateAdminManageSubjectsRoute
   '/admin/manage-users': typeof PrivateAdminManageUsersRoute
   '/admin/report': typeof PrivateAdminReportRoute
 }
@@ -136,7 +152,9 @@ export interface FileRoutesByTo {
   '/reset-password': typeof PublicResetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
   '/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
+  '/admin/manage-resources': typeof PrivateAdminManageResourcesRoute
   '/admin/manage-spaces': typeof PrivateAdminManageSpacesRoute
+  '/admin/manage-subjects': typeof PrivateAdminManageSubjectsRoute
   '/admin/manage-users': typeof PrivateAdminManageUsersRoute
   '/admin/report': typeof PrivateAdminReportRoute
 }
@@ -155,7 +173,9 @@ export interface FileRoutesById {
   '/_public/sign-up': typeof PublicSignUpRoute
   '/_public/': typeof PublicIndexRoute
   '/_private/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
+  '/_private/admin/manage-resources': typeof PrivateAdminManageResourcesRoute
   '/_private/admin/manage-spaces': typeof PrivateAdminManageSpacesRoute
+  '/_private/admin/manage-subjects': typeof PrivateAdminManageSubjectsRoute
   '/_private/admin/manage-users': typeof PrivateAdminManageUsersRoute
   '/_private/admin/report': typeof PrivateAdminReportRoute
 }
@@ -173,7 +193,9 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-up'
     | '/admin/manage-reserves'
+    | '/admin/manage-resources'
     | '/admin/manage-spaces'
+    | '/admin/manage-subjects'
     | '/admin/manage-users'
     | '/admin/report'
   fileRoutesByTo: FileRoutesByTo
@@ -189,7 +211,9 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sign-up'
     | '/admin/manage-reserves'
+    | '/admin/manage-resources'
     | '/admin/manage-spaces'
+    | '/admin/manage-subjects'
     | '/admin/manage-users'
     | '/admin/report'
   id:
@@ -207,7 +231,9 @@ export interface FileRouteTypes {
     | '/_public/sign-up'
     | '/_public/'
     | '/_private/admin/manage-reserves'
+    | '/_private/admin/manage-resources'
     | '/_private/admin/manage-spaces'
+    | '/_private/admin/manage-subjects'
     | '/_private/admin/manage-users'
     | '/_private/admin/report'
   fileRoutesById: FileRoutesById
@@ -310,11 +336,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateAdminManageReservesRouteImport
       parentRoute: typeof PrivateAdminRouteRoute
     }
+    '/_private/admin/manage-resources': {
+      id: '/_private/admin/manage-resources'
+      path: '/manage-resources'
+      fullPath: '/admin/manage-resources'
+      preLoaderRoute: typeof PrivateAdminManageResourcesRouteImport
+      parentRoute: typeof PrivateAdminRouteRoute
+    }
     '/_private/admin/manage-spaces': {
       id: '/_private/admin/manage-spaces'
       path: '/manage-spaces'
       fullPath: '/admin/manage-spaces'
       preLoaderRoute: typeof PrivateAdminManageSpacesRouteImport
+      parentRoute: typeof PrivateAdminRouteRoute
+    }
+    '/_private/admin/manage-subjects': {
+      id: '/_private/admin/manage-subjects'
+      path: '/manage-subjects'
+      fullPath: '/admin/manage-subjects'
+      preLoaderRoute: typeof PrivateAdminManageSubjectsRouteImport
       parentRoute: typeof PrivateAdminRouteRoute
     }
     '/_private/admin/manage-users': {
@@ -336,14 +376,18 @@ declare module '@tanstack/react-router' {
 
 interface PrivateAdminRouteRouteChildren {
   PrivateAdminManageReservesRoute: typeof PrivateAdminManageReservesRoute
+  PrivateAdminManageResourcesRoute: typeof PrivateAdminManageResourcesRoute
   PrivateAdminManageSpacesRoute: typeof PrivateAdminManageSpacesRoute
+  PrivateAdminManageSubjectsRoute: typeof PrivateAdminManageSubjectsRoute
   PrivateAdminManageUsersRoute: typeof PrivateAdminManageUsersRoute
   PrivateAdminReportRoute: typeof PrivateAdminReportRoute
 }
 
 const PrivateAdminRouteRouteChildren: PrivateAdminRouteRouteChildren = {
   PrivateAdminManageReservesRoute: PrivateAdminManageReservesRoute,
+  PrivateAdminManageResourcesRoute: PrivateAdminManageResourcesRoute,
   PrivateAdminManageSpacesRoute: PrivateAdminManageSpacesRoute,
+  PrivateAdminManageSubjectsRoute: PrivateAdminManageSubjectsRoute,
   PrivateAdminManageUsersRoute: PrivateAdminManageUsersRoute,
   PrivateAdminReportRoute: PrivateAdminReportRoute,
 }

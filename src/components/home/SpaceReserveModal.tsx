@@ -36,7 +36,7 @@ import { Checkbox } from "../ui/checkbox";
 import { InputGroup, InputGroupAddon, InputGroupText, InputGroupTextarea } from "../ui/input-group";
 
 type ListData = {
-  id: number;
+  id: string | number;
   name: string;
 };
 

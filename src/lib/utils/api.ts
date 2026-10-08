@@ -1002,6 +1002,177 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Listar todos os horarios
+         * @description Lista todas os horarios cadastrados
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ScheduleResponseDTO"][];
+                        "application/json": components["schemas"]["ScheduleResponseDTO"][];
+                        "text/json": components["schemas"]["ScheduleResponseDTO"][];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/schedule/admin/create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Criar horario
+         * @description Cria um novo horario. Apenas usuários com permissões adequadas podem criar horarios.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ScheduleCreateRequestDTO"];
+                    "text/json": components["schemas"]["ScheduleCreateRequestDTO"];
+                    "application/*+json": components["schemas"]["ScheduleCreateRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/schedule/admin/edit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Editar horario
+         * @description Edita um horario existente. Apenas usuários com permissões adequadas podem editar horarios.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ScheduleEditRequestDTO"];
+                    "text/json": components["schemas"]["ScheduleEditRequestDTO"];
+                    "application/*+json": components["schemas"]["ScheduleEditRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
     "/space": {
         parameters: {
             query?: never;
@@ -1954,6 +2125,24 @@ export interface components {
             description: string;
             canReserve: boolean;
             enabled: boolean;
+        };
+        ScheduleCreateRequestDTO: {
+            /** Format: time */
+            startAt: string;
+            /** Format: time */
+            endAt: string;
+            shift: components["schemas"]["EShift"];
+            enabled: boolean;
+        };
+        ScheduleEditRequestDTO: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: time */
+            startAt: null | string;
+            /** Format: time */
+            endAt: null | string;
+            shift: null | components["schemas"]["EShift"];
+            enabled: null | boolean;
         };
         ScheduleResponseDTO: {
             /** Format: int64 */
