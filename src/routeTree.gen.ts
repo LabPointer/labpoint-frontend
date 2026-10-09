@@ -23,6 +23,7 @@ import { Route as PublicResetPasswordRouteImport } from './routes/_public/reset-
 import { Route as PublicSignUpRouteImport } from './routes/_public/sign-up'
 import { Route as PrivateAdminManageReservesRouteImport } from './routes/_private/admin/manage-reserves'
 import { Route as PrivateAdminManageResourcesRouteImport } from './routes/_private/admin/manage-resources'
+import { Route as PrivateAdminManageSchedulesRouteImport } from './routes/_private/admin/manage-schedules'
 import { Route as PrivateAdminManageSpacesRouteImport } from './routes/_private/admin/manage-spaces'
 import { Route as PrivateAdminManageSubjectsRouteImport } from './routes/_private/admin/manage-subjects'
 import { Route as PrivateAdminManageUsersRouteImport } from './routes/_private/admin/manage-users'
@@ -99,6 +100,12 @@ const PrivateAdminManageResourcesRoute =
     path: '/manage-resources',
     getParentRoute: () => PrivateAdminRouteRoute,
   } as any)
+const PrivateAdminManageSchedulesRoute =
+  PrivateAdminManageSchedulesRouteImport.update({
+    id: '/manage-schedules',
+    path: '/manage-schedules',
+    getParentRoute: () => PrivateAdminRouteRoute,
+  } as any)
 const PrivateAdminManageSpacesRoute =
   PrivateAdminManageSpacesRouteImport.update({
     id: '/manage-spaces',
@@ -135,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof PublicSignUpRoute
   '/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
   '/admin/manage-resources': typeof PrivateAdminManageResourcesRoute
+  '/admin/manage-schedules': typeof PrivateAdminManageSchedulesRoute
   '/admin/manage-spaces': typeof PrivateAdminManageSpacesRoute
   '/admin/manage-subjects': typeof PrivateAdminManageSubjectsRoute
   '/admin/manage-users': typeof PrivateAdminManageUsersRoute
@@ -153,6 +161,7 @@ export interface FileRoutesByTo {
   '/sign-up': typeof PublicSignUpRoute
   '/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
   '/admin/manage-resources': typeof PrivateAdminManageResourcesRoute
+  '/admin/manage-schedules': typeof PrivateAdminManageSchedulesRoute
   '/admin/manage-spaces': typeof PrivateAdminManageSpacesRoute
   '/admin/manage-subjects': typeof PrivateAdminManageSubjectsRoute
   '/admin/manage-users': typeof PrivateAdminManageUsersRoute
@@ -174,6 +183,7 @@ export interface FileRoutesById {
   '/_public/': typeof PublicIndexRoute
   '/_private/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
   '/_private/admin/manage-resources': typeof PrivateAdminManageResourcesRoute
+  '/_private/admin/manage-schedules': typeof PrivateAdminManageSchedulesRoute
   '/_private/admin/manage-spaces': typeof PrivateAdminManageSpacesRoute
   '/_private/admin/manage-subjects': typeof PrivateAdminManageSubjectsRoute
   '/_private/admin/manage-users': typeof PrivateAdminManageUsersRoute
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/admin/manage-reserves'
     | '/admin/manage-resources'
+    | '/admin/manage-schedules'
     | '/admin/manage-spaces'
     | '/admin/manage-subjects'
     | '/admin/manage-users'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/admin/manage-reserves'
     | '/admin/manage-resources'
+    | '/admin/manage-schedules'
     | '/admin/manage-spaces'
     | '/admin/manage-subjects'
     | '/admin/manage-users'
@@ -232,6 +244,7 @@ export interface FileRouteTypes {
     | '/_public/'
     | '/_private/admin/manage-reserves'
     | '/_private/admin/manage-resources'
+    | '/_private/admin/manage-schedules'
     | '/_private/admin/manage-spaces'
     | '/_private/admin/manage-subjects'
     | '/_private/admin/manage-users'
@@ -343,6 +356,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateAdminManageResourcesRouteImport
       parentRoute: typeof PrivateAdminRouteRoute
     }
+    '/_private/admin/manage-schedules': {
+      id: '/_private/admin/manage-schedules'
+      path: '/manage-schedules'
+      fullPath: '/admin/manage-schedules'
+      preLoaderRoute: typeof PrivateAdminManageSchedulesRouteImport
+      parentRoute: typeof PrivateAdminRouteRoute
+    }
     '/_private/admin/manage-spaces': {
       id: '/_private/admin/manage-spaces'
       path: '/manage-spaces'
@@ -377,6 +397,7 @@ declare module '@tanstack/react-router' {
 interface PrivateAdminRouteRouteChildren {
   PrivateAdminManageReservesRoute: typeof PrivateAdminManageReservesRoute
   PrivateAdminManageResourcesRoute: typeof PrivateAdminManageResourcesRoute
+  PrivateAdminManageSchedulesRoute: typeof PrivateAdminManageSchedulesRoute
   PrivateAdminManageSpacesRoute: typeof PrivateAdminManageSpacesRoute
   PrivateAdminManageSubjectsRoute: typeof PrivateAdminManageSubjectsRoute
   PrivateAdminManageUsersRoute: typeof PrivateAdminManageUsersRoute
@@ -386,6 +407,7 @@ interface PrivateAdminRouteRouteChildren {
 const PrivateAdminRouteRouteChildren: PrivateAdminRouteRouteChildren = {
   PrivateAdminManageReservesRoute: PrivateAdminManageReservesRoute,
   PrivateAdminManageResourcesRoute: PrivateAdminManageResourcesRoute,
+  PrivateAdminManageSchedulesRoute: PrivateAdminManageSchedulesRoute,
   PrivateAdminManageSpacesRoute: PrivateAdminManageSpacesRoute,
   PrivateAdminManageSubjectsRoute: PrivateAdminManageSubjectsRoute,
   PrivateAdminManageUsersRoute: PrivateAdminManageUsersRoute,

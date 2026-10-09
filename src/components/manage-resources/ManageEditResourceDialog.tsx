@@ -10,9 +10,8 @@ import { InputGroup, InputGroupAddon, InputGroupText, InputGroupTextarea } from 
 export type ManageEditResourceData = {
   id: number;
   name: string;
-  description: string;
   canBeReserved: boolean;
-  status: boolean;
+  enabled: boolean;
 };
 
 export type ManageEditResourceDialogProps = {
@@ -24,19 +23,17 @@ export type ManageEditResourceDialogProps = {
 
 const formSchema = z.object({
   name: z.string().max(100, "Nome deve ter no máximo 100 caracteres."),
-  description: z.string().max(200, "Descrição deve ter no máximo 200 caracteres."),
   canBeReserved: z.boolean(),
-  status: z.boolean(),
+  enabled: z.boolean(),
 });
 
 export function ManageEditResourceDialog({ data, isOpen, onClose, onSubmit }: ManageEditResourceDialogProps) {
-  const { name, description, canBeReserved, status } = data;
+  const { name, canBeReserved, enabled } = data;
   const form = useForm({
     defaultValues: {
       name: "",
-      description: "",
       canBeReserved,
-      status,
+      enabled: enabled,
     },
     validators: {
       onSubmit: formSchema,
@@ -45,9 +42,8 @@ export function ManageEditResourceDialog({ data, isOpen, onClose, onSubmit }: Ma
       await onSubmit({
         id: data.id,
         name: value.name,
-        description: value.description,
         canBeReserved: value.canBeReserved,
-        status: value.status,
+        enabled: value.enabled,
       });
     },
   });
@@ -101,67 +97,46 @@ export function ManageEditResourceDialog({ data, isOpen, onClose, onSubmit }: Ma
               }}
             />
             <form.Field
-              name="description"
-              children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Descrição</FieldLabel>
-                    <InputGroup>
-                      <InputGroupTextarea
-                        id={field.name}
-                        name={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        placeholder={`Descrição atual: ${description}`}
-                        rows={6}
-                        className="min-h-24 resize-none"
-                        aria-invalid={isInvalid}
-                      />
-                      <InputGroupAddon align="block-end">
-                        <InputGroupText className="tabular-nums">
-                          {field.state.value.length}/200 characters
-                        </InputGroupText>
-                      </InputGroupAddon>
-                    </InputGroup>
-                    <FieldDescription>Descreva o para que serve o recurso.</FieldDescription>
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                  </Field>
-                );
-              }}
-            />
-            <form.Field
               name="canBeReserved"
               children={(field) => {
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
-                  <Field orientation="horizontal" data-invalid={isInvalid}>
-                    <Checkbox
-                      id="terms-checkbox-basic"
-                      name="terms-checkbox-basic"
-                      checked={field.state.value as boolean}
-                      onCheckedChange={(e) => field.setValue(e)}
-                    />
-                    <FieldLabel htmlFor="terms-checkbox-basic">Recurso pode ser reservado</FieldLabel>
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Reservavel</FieldLabel>
+                    <Field orientation="horizontal" data-invalid={isInvalid}>
+                      <Checkbox
+                        id="canBeReserved-checkbox-basic"
+                        name="canBeReserved-checkbox-basic"
+                        checked={field.state.value as boolean}
+                        onCheckedChange={(e) => field.setValue(e)}
+                      />
+                      <FieldLabel htmlFor="canBeReserved-checkbox-basic">{field.state.value as boolean ? 'Sim' : 'Não'}</FieldLabel>
+                      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    </Field>
+                    <FieldDescription>Recurso pode ser reservado.</FieldDescription>
                     {isInvalid && <FieldError errors={field.state.meta.errors} />}
                   </Field>
                 );
               }}
             />
             <form.Field
-              name="status"
+              name="enabled"
               children={(field) => {
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
-                  <Field orientation="horizontal" data-invalid={isInvalid}>
-                    <Checkbox
-                      id="terms-checkbox-basic"
-                      name="terms-checkbox-basic"
-                      checked={field.state.value as boolean}
-                      onCheckedChange={(e) => field.setValue(e)}
-                    />
-                    <FieldLabel htmlFor="terms-checkbox-basic">Status</FieldLabel>
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Ativo</FieldLabel>
+                    <Field orientation="horizontal" data-invalid={isInvalid}>
+                      <Checkbox
+                        id="enabled-checkbox-basic"
+                        name="enabled-checkbox-basic"
+                        checked={field.state.value as boolean}
+                        onCheckedChange={(e) => field.setValue(e)}
+                      />
+                      <FieldLabel htmlFor="enabled-checkbox-basic">{field.state.value as boolean ? 'Ativo' : 'Inativo'}</FieldLabel>
+                      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    </Field>
+                    <FieldDescription>Uma trava para usar o recurso.</FieldDescription>
                     {isInvalid && <FieldError errors={field.state.meta.errors} />}
                   </Field>
                 );
@@ -172,10 +147,10 @@ export function ManageEditResourceDialog({ data, isOpen, onClose, onSubmit }: Ma
         <DialogFooter className="flex bg-transparent border-t">
           <Field orientation="horizontal" className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => form.reset()}>
-              Reset
+              Limpar
             </Button>
             <Button type="submit" form="edit-resource-form">
-              Submit
+              Editar
             </Button>
           </Field>
         </DialogFooter>

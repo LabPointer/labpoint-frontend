@@ -62,7 +62,7 @@ export function ManageResourceSearchBar({ onSearch, onAddNewResource }: Resource
         <InputGroup>
           <InputGroupInput
             id="space-search"
-            placeholder="Buscar por nome ou descrição..."
+            placeholder="Buscar por nome..."
             onInput={(e) => setSearch(e.currentTarget.value)}
           />
           <InputGroupAddon align="inline-start">

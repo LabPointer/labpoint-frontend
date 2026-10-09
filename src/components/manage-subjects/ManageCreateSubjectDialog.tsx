@@ -2,7 +2,6 @@ import z from "zod";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { useForm } from "@tanstack/react-form";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "../ui/field";
-import { InputGroup, InputGroupTextarea, InputGroupAddon, InputGroupText } from "../ui/input-group";
 import { Checkbox } from "../ui/checkbox";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -33,7 +32,6 @@ export function ManageCreateSubjectDialog({ isOpen, onClose, onSubmit }: ManageC
       onSubmit: formSchema,
     },
     onSubmit: async ({ value }) => {
-      console.log("Submitting form with values:", value);
       await onSubmit(value);
     },
   });
@@ -92,14 +90,19 @@ export function ManageCreateSubjectDialog({ isOpen, onClose, onSubmit }: ManageC
               children={(field) => {
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
-                  <Field orientation="horizontal" data-invalid={isInvalid}>
-                    <Checkbox
-                      id="terms-checkbox-basic"
-                      name="terms-checkbox-basic"
-                      checked={field.state.value}
-                      onCheckedChange={(e) => field.setValue(e)}
-                    />
-                    <FieldLabel htmlFor="terms-checkbox-basic">Status</FieldLabel>
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Ativo</FieldLabel>
+                    <Field orientation="horizontal" data-invalid={isInvalid}>
+                      <Checkbox
+                        id="enabled-checkbox-basic"
+                        name="enabled-checkbox-basic"
+                        checked={field.state.value as boolean}
+                        onCheckedChange={(e) => field.setValue(e)}
+                      />
+                      <FieldLabel htmlFor="enabled-checkbox-basic">{field.state.value as boolean ? 'Ativo' : 'Inativo'}</FieldLabel>
+                      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    </Field>
+                    <FieldDescription>Uma trava para usar da materia.</FieldDescription>
                     {isInvalid && <FieldError errors={field.state.meta.errors} />}
                   </Field>
                 );
@@ -110,10 +113,10 @@ export function ManageCreateSubjectDialog({ isOpen, onClose, onSubmit }: ManageC
         <DialogFooter className="flex bg-transparent border-t">
           <Field orientation="horizontal" className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => form.reset()}>
-              Reset
+              Limpar
             </Button>
             <Button type="submit" form="create-subject-form">
-              Submit
+              Criar
             </Button>
           </Field>
         </DialogFooter>

@@ -3,35 +3,32 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
-  type ManageCreateSubjectData,
-  ManageCreateSubjectDialog,
-} from "#/components/manage-subjects/ManageCreateSubjectDialog";
-import {
-  type ManageEditSubjectData,
-  ManageEditSubjectDialog,
-  type ManageEditSubjectDialogProps,
-} from "#/components/manage-subjects/ManageEditSubjectDialog";
-import { ManageSubjectSearchBar, type SubjectFilters } from "#/components/manage-subjects/ManageSubjectSearchBar";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "#/components/ui/table";
+  type ManageCreateScheduleData,
+  ManageCreateScheduleDialog,
+} from "#/components/manage-schedules/ManageCreateScheduleDialog";
+import ScheduleSearchBar, { type ScheduleFilters } from "#/components/manage-schedules/ScheduleSearchBar";
 import { ApiError } from "#/lib/types/error-types";
 import { useApi } from "#/lib/utils/restapi";
+import {
+  ManageEditScheduleDialog,
+  type ManageEditScheduleData,
+} from "#/components/manage-schedules/ManageEditScheduleDialog";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "#/components/ui/table";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { Pencil } from "lucide-react";
 
 const api = useApi();
 
-function subjectQuery(search: string, enabled: boolean | undefined) {
+function scheduleQuery(shift: number | undefined, enabled: boolean | undefined) {
   const query = useQuery({
-    queryKey: ["subject-data", search, enabled],
+    queryKey: ["schedule-data", shift, enabled],
     queryFn: async () => {
-      const res = await api.GET("/subject", {
+      const res = await api.GET("/schedule", {
         params: {
           query: {
-            Name: search,
             Enabled: enabled,
-            limit: 30,
-            offset: 0,
+            shift: shift,
           },
         },
       });
@@ -43,7 +40,7 @@ function subjectQuery(search: string, enabled: boolean | undefined) {
       }
 
       if (!data) {
-        throw new ApiError("Nenhum recurso encontrado.", response.status, error?.logout ?? false);
+        throw new ApiError("Nenhum agendamento encontrado.", response.status, error?.logout ?? false);
       }
 
       return data;
@@ -53,67 +50,40 @@ function subjectQuery(search: string, enabled: boolean | undefined) {
   return query;
 }
 
-export const Route = createFileRoute("/_private/admin/manage-subjects")({
+export const Route = createFileRoute("/_private/admin/manage-schedules")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const [isCreateSubjectDialogOpen, setIsCreateSubjectDialogOpen] = useState(false);
-  const [isEditSubjectDialogOpen, setIsEditSubjectDialogOpen] = useState(false);
-  const [editSubjectProps, setEditSubjectProps] = useState<ManageEditSubjectDialogProps>({
-    data: {
-      id: 0,
-      name: "",
-      enabled: false,
-    },
-    isOpen: isEditSubjectDialogOpen,
-    onSubmit: handleEdit,
-    onClose: () => setIsEditSubjectDialogOpen(false),
-  });
-  const [searchFilter, setSearchFilter] = useState<SubjectFilters>();
+  const [isCreateScheduleDialogOpen, setIsCreateScheduleDialogOpen] = useState(false);
+  const [isEditScheduleDialogOpen, setIsEditScheduleDialogOpen] = useState(false);
+
+  const [editScheduleData, setEditScheduleData] = useState<ManageEditScheduleData>();
+
+  const [searchFilters, setSearchFilters] = useState<ScheduleFilters>({ shift: undefined, enabled: undefined });
   const {
-    data: subjectData,
-    isLoading: isSubjectLoading,
-    isError: isSubjectError,
-    error: subjectError,
+    data: scheduleData,
+    isLoading: isScheduleLoading,
+    isError: isScheduleError,
+    error: scheduleError,
     isFetching,
     refetch,
-  } = subjectQuery(searchFilter?.search || "", searchFilter?.status);
+  } = scheduleQuery(searchFilters.shift, searchFilters.enabled);
 
-  function handleSearch(filters: SubjectFilters) {
-    setSearchFilter(filters);
-  }
-
-  function handleCreateSubject() {
-    setIsCreateSubjectDialogOpen(true);
-  }
-
-  function handleEditSubject(data: ManageEditSubjectData) {
-    setEditSubjectProps({
-      data: {
-        id: data.id,
-        name: data.name,
-        enabled: data.enabled,
-      },
-      isOpen: isEditSubjectDialogOpen,
-      onSubmit: handleEdit,
-      onClose: () => setIsEditSubjectDialogOpen(false),
-    });
-    setIsEditSubjectDialogOpen(true);
-  }
-
-  async function handleSubmit(data: ManageCreateSubjectData) {
-    const res = await api.POST("/subject/admin/create", {
+  async function handleCreate(data: ManageCreateScheduleData) {
+    const res = await api.POST("/schedule/admin/create", {
       body: {
-        name: data.name,
         enabled: data.enabled,
+        startAt: data.startAt,
+        endAt: data.endAt,
+        shift: data.shift,
       },
     });
 
     const { response, error } = res;
 
     if (!response.ok && error) {
-      toast.error(`Error ${response.status}: ${error.message}`, {
+      toast.error(`Erro ${response.status}: ${error.message}`, {
         duration: 3000,
         position: "bottom-center",
         style: {
@@ -122,10 +92,9 @@ function RouteComponent() {
           borderColor: "red",
         },
       });
-      return;
     }
 
-    toast.success("Matéria criada com sucesso!", {
+    toast.success("Horario criado com sucesso!", {
       duration: 3000,
       position: "bottom-center",
       style: {
@@ -134,23 +103,26 @@ function RouteComponent() {
         borderColor: "green",
       },
     });
-    setIsCreateSubjectDialogOpen(false);
-    refetch();
+
+    setIsCreateScheduleDialogOpen(false);
+    await refetch();
   }
 
-  async function handleEdit(data: ManageEditSubjectData) {
-    const res = await api.PATCH("/subject/admin/edit", {
+  async function handleEdit(data: ManageEditScheduleData) {
+    const res = await api.PATCH("/schedule/admin/edit", {
       body: {
         id: data.id,
-        name: data.name.length > 0 ? data.name : null,
-        enabled: data.enabled,
+        enabled: data.enabled ?? null,
+        startAt: data.startAt ?? null,
+        endAt: data.endAt ?? null,
+        shift: data.shift ?? null,
       },
     });
 
     const { response, error } = res;
 
     if (!response.ok && error) {
-      toast.error(`Error ${response.status}: ${error.message}`, {
+      toast.error(`Erro ${response.status}: ${error.message}`, {
         duration: 3000,
         position: "bottom-center",
         style: {
@@ -159,10 +131,9 @@ function RouteComponent() {
           borderColor: "red",
         },
       });
-      return;
     }
 
-    toast.success("Matéria editada com sucesso!", {
+    toast.success("Horario editado com sucesso!", {
       duration: 3000,
       position: "bottom-center",
       style: {
@@ -171,59 +142,70 @@ function RouteComponent() {
         borderColor: "green",
       },
     });
-    setIsEditSubjectDialogOpen(false);
-    refetch();
+
+    setIsEditScheduleDialogOpen(false);
+    await refetch();
   }
 
   return (
     <>
-      <ManageCreateSubjectDialog
-        isOpen={isCreateSubjectDialogOpen}
-        onClose={() => setIsCreateSubjectDialogOpen(false)}
-        onSubmit={handleSubmit}
+      <ManageCreateScheduleDialog
+        isOpen={isCreateScheduleDialogOpen}
+        onClose={() => setIsCreateScheduleDialogOpen(false)}
+        onSubmit={handleCreate}
       />
-      <ManageEditSubjectDialog
-        data={editSubjectProps.data}
-        isOpen={isEditSubjectDialogOpen}
-        onClose={() => setIsEditSubjectDialogOpen(false)}
-        onSubmit={(data) => handleEdit(data)}
+
+      <ManageEditScheduleDialog
+        isOpen={isEditScheduleDialogOpen}
+        onClose={() => setIsEditScheduleDialogOpen(false)}
+        onSubmit={handleEdit}
+        data={editScheduleData ?? { id: 0, startAt: "", endAt: "", shift: 0, enabled: true }}
       />
 
       <section className="container mb-8">
-        <ManageSubjectSearchBar onSearch={handleSearch} onAddNewSubject={handleCreateSubject} />
+        <ScheduleSearchBar
+          onSearch={setSearchFilters}
+          onAddNewSchedule={() => {
+            setIsCreateScheduleDialogOpen(true);
+          }}
+        />
       </section>
 
       <section className="container">
         <div className="flex flex-wrap justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">Matérias</h2>
-          <span className="text-sm font-bold">Encontrados: {subjectData?.length || 0}</span>
+          <h2 className="text-xl font-bold">Horários</h2>
+          <span className="text-sm font-bold">Encontrados: {scheduleData?.length || 0}</span>
         </div>
-        {isSubjectLoading || isFetching ? (
+        {isScheduleLoading || isFetching ? (
           <div className="flex justify-center items-center h-32">
-            <p className="text-muted-foreground font-bold animate-pulse">Carregando materias...</p>
+            <p className="text-muted-foreground font-bold animate-pulse">Carregando horários...</p>
           </div>
-        ) : isSubjectError ? (
+        ) : isScheduleError ? (
           <div className="flex justify-center items-center h-32">
             <p className="text-destructive font-bold">
-              Erro: {subjectError instanceof ApiError ? subjectError.message : "Erro desconhecido"}
+              Erro: {scheduleError instanceof ApiError ? scheduleError.message : "Erro desconhecido"}
             </p>
           </div>
         ) : (
           <Table className="w-full bg-white dark:bg-white/5 border dark:border-violet-500/10 shadow-md hover:shadow-lg p-4 dark:shadow-violet-300/15">
-            <TableCaption>Lista de materia.</TableCaption>
+            <TableCaption>Lista de horários.</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-25">Nome</TableHead>
+                <TableHead className="w-25">Horario</TableHead>
+                <TableHead className="text-center">Turno</TableHead>
                 <TableHead className="text-center">Status</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {subjectData?.map((subject) => (
+              {scheduleData?.map((schedule) => (
                 <TableRow>
-                  <TableCell className="font-bold w-25">{subject.name}</TableCell>
+                  <TableCell className="font-bold w-25">{schedule.startAt} - {schedule.endAt}</TableCell>
                   <TableCell className="text-center">
-                    {subject.enabled ? (
+                    {schedule.shift === 0 ? "Manhã" : schedule.shift === 1 ? "Tarde" : "Noite"}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {schedule.enabled ? (
                       <Badge
                         variant="outline"
                         className="border-emerald-500/30 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-500/30 rounded-full px-2.5 py-0.5 text-xs font-normal"
@@ -245,7 +227,14 @@ function RouteComponent() {
                         variant={"outline"}
                         size="icon"
                         onClick={() => {
-                          handleEditSubject({ id: subject.id as number, name: subject.name, enabled: subject.enabled });
+                          setEditScheduleData({
+                            id: schedule.id as number,
+                            startAt: schedule.startAt,
+                            endAt: schedule.endAt,
+                            shift: schedule.shift,
+                            enabled: schedule.enabled,
+                          });
+                          setIsEditScheduleDialogOpen(true);
                         }}
                       >
                         <Pencil className="size-4" />

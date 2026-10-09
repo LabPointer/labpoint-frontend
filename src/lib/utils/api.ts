@@ -1015,7 +1015,10 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    shift?: components["schemas"]["EShift"];
+                    Enabled?: boolean;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -1860,7 +1863,7 @@ export interface paths {
             parameters: {
                 query?: {
                     Name?: string;
-                    IsActive?: boolean;
+                    Enabled?: boolean;
                     Limit?: number | string;
                     Offset?: number | string;
                 };
@@ -2087,7 +2090,6 @@ export interface components {
         };
         ResourceCreateRequestDTO: {
             name: string;
-            description: string;
             /** @default false */
             canReserve: boolean;
             /** @default true */
@@ -2097,7 +2099,6 @@ export interface components {
             /** Format: int64 */
             id: number | string;
             name: null | string;
-            description: null | string;
             canReserve: null | boolean;
             enabled: null | boolean;
         };
@@ -2115,14 +2116,12 @@ export interface components {
             /** Format: int64 */
             id: number | string;
             name: string;
-            description: string;
             spaceReserve: components["schemas"]["SpaceReserveResponseDTO"];
         };
         ResourceResponseDTO: {
             /** Format: int64 */
             id: number | string;
             name: string;
-            description: string;
             canReserve: boolean;
             enabled: boolean;
         };
@@ -2152,6 +2151,7 @@ export interface components {
             /** Format: time */
             endAt: string;
             shift: components["schemas"]["EShift"];
+            enabled: boolean;
         };
         SignInRequestDTO: {
             registration: string;

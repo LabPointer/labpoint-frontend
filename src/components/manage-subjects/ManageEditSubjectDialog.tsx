@@ -3,7 +3,7 @@ import z from "zod";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
-import { Field, FieldError, FieldGroup, FieldLabel } from "../ui/field";
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 
 export type ManageEditSubjectData = {
@@ -96,14 +96,19 @@ export function ManageEditSubjectDialog({ data, isOpen, onClose, onSubmit }: Man
               children={(field) => {
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
-                  <Field orientation="horizontal" data-invalid={isInvalid}>
-                    <Checkbox
-                      id="terms-checkbox-basic"
-                      name="terms-checkbox-basic"
-                      checked={field.state.value as boolean}
-                      onCheckedChange={(e) => field.setValue(e)}
-                    />
-                    <FieldLabel htmlFor="terms-checkbox-basic">Status</FieldLabel>
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Ativo</FieldLabel>
+                    <Field orientation="horizontal" data-invalid={isInvalid}>
+                      <Checkbox
+                        id="enabled-checkbox-basic"
+                        name="enabled-checkbox-basic"
+                        checked={field.state.value as boolean}
+                        onCheckedChange={(e) => field.setValue(e)}
+                      />
+                      <FieldLabel htmlFor="enabled-checkbox-basic">{field.state.value as boolean ? 'Ativo' : 'Inativo'}</FieldLabel>
+                      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    </Field>
+                    <FieldDescription>Uma trava para usar da materia.</FieldDescription>
                     {isInvalid && <FieldError errors={field.state.meta.errors} />}
                   </Field>
                 );
@@ -114,10 +119,10 @@ export function ManageEditSubjectDialog({ data, isOpen, onClose, onSubmit }: Man
         <DialogFooter className="flex bg-transparent border-t">
           <Field orientation="horizontal" className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => form.reset()}>
-              Reset
+              Limpar
             </Button>
             <Button type="submit" form="edit-subject-form">
-              Submit
+              Editar
             </Button>
           </Field>
         </DialogFooter>

@@ -14,8 +14,22 @@ const formSchema = z.object({
     .string("Senha invalida")
     .min(6, "Senha deve ter pelo menos 6 caracteres")
     .max(100, "Senha deve ter no maximo 100 caracteres"),
-  confirmPassword: z.string("Senha invalida"),
-});
+  passwordConfirm: z.string("Senha invalida"),
+})
+.superRefine((value, context) => {
+    if (value.password !== value.passwordConfirm) {
+      context.addIssue({
+        code: "custom",
+        path: ["password"],
+        message: "As senhas não coincidem.",
+      });
+      context.addIssue({
+        code: "custom",
+        path: ["passwordConfirm"],
+        message: "As senhas não coincidem.",
+      });
+    }
+  });
 
 interface ResetPasswordProps {
   isSubmitting: boolean;
@@ -31,25 +45,12 @@ export function ResetPasswordForm(props: ResetPasswordProps) {
   const form = useForm({
     defaultValues: {
       password: "",
-      confirmPassword: "",
+      passwordConfirm: "",
     },
     validators: {
       onSubmit: formSchema,
     },
     onSubmit: async ({ value }) => {
-      if (value.password !== value.confirmPassword) {
-        toast.error("As senhas não coincidem.", {
-          duration: 3000,
-          position: "bottom-center",
-          style: {
-            color: "white",
-            backgroundColor: "red",
-            borderColor: "red",
-          },
-        });
-        return;
-      }
-
       onFormSubmitSuccess(value.password);
       form.reset();
     },
@@ -108,7 +109,7 @@ export function ResetPasswordForm(props: ResetPasswordProps) {
             />
 
             <form.Field
-              name="confirmPassword"
+              name="passwordConfirm"
               children={(field) => {
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (

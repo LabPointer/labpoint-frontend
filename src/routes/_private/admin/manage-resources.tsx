@@ -2,13 +2,22 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { type ManageCreateResourceData, ManageCreateResourceDialog } from "#/components/manage-resources/ManageCreateResourceDialog";
-import { type ManageEditResourceData, ManageEditResourceDialog, type ManageEditResourceDialogProps } from "#/components/manage-resources/ManageEditResourceDialog";
+import {
+  type ManageCreateResourceData,
+  ManageCreateResourceDialog,
+} from "#/components/manage-resources/ManageCreateResourceDialog";
+import {
+  type ManageEditResourceData,
+  ManageEditResourceDialog,
+  type ManageEditResourceDialogProps,
+} from "#/components/manage-resources/ManageEditResourceDialog";
 import { ManageResourceSearchBar, type ResourceFilters } from "#/components/manage-resources/ManageResourceSearchBar";
-import { ManageResourceTableRow, type ResourceTableRowProps } from "#/components/manage-resources/ManageResourceTableRow";
-import { Table, TableBody, TableCaption, TableHead, TableHeader, TableRow } from "#/components/ui/table";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "#/components/ui/table";
 import { ApiError } from "#/lib/types/error-types";
 import { useApi } from "#/lib/utils/restapi";
+import { Badge } from "#/components/ui/badge";
+import { Button } from "#/components/ui/button";
+import { Pencil } from "lucide-react";
 
 const api = useApi();
 
@@ -56,9 +65,8 @@ function RouteComponent() {
     data: {
       id: 0,
       name: "",
-      description: "",
       canBeReserved: false,
-      status: false,
+      enabled: false,
     },
     isOpen: isEditResourceDialogOpen,
     onSubmit: handleEdit,
@@ -71,7 +79,7 @@ function RouteComponent() {
     isError: isResourceError,
     error: resourceError,
     isFetching,
-    refetch
+    refetch,
   } = resourceQuery(searchFilter?.search || "", searchFilter?.canBeReserved, searchFilter?.status);
 
   function handleSearch(filters: ResourceFilters) {
@@ -87,9 +95,8 @@ function RouteComponent() {
       data: {
         id: data.id,
         name: data.name,
-        description: data.description,
         canBeReserved: data.canBeReserved,
-        status: data.status,
+        enabled: data.enabled,
       },
       isOpen: isEditResourceDialogOpen,
       onSubmit: handleEdit,
@@ -102,9 +109,8 @@ function RouteComponent() {
     const res = await api.POST("/resource/admin/create", {
       body: {
         name: data.name,
-        description: data.description,
         canReserve: data.canBeReserved,
-        enabled: data.status,
+        enabled: data.enabled,
       },
     });
 
@@ -141,9 +147,8 @@ function RouteComponent() {
       body: {
         id: data.id,
         name: data.name.length > 0 ? data.name : null,
-        description: data.description.length > 0 ? data.description : null,
         canReserve: data.canBeReserved,
-        enabled: data.status,
+        enabled: data.enabled,
       },
     });
 
@@ -177,17 +182,24 @@ function RouteComponent() {
 
   return (
     <>
-      <ManageCreateResourceDialog isOpen={isCreateResourceDialogOpen} onClose={() => setIsCreateResourceDialogOpen(false)} onSubmit={handleSubmit} />
-      <ManageEditResourceDialog data={editResourceProps.data} isOpen={isEditResourceDialogOpen} onClose={() => setIsEditResourceDialogOpen(false)} onSubmit={handleEdit} />
+      <ManageCreateResourceDialog
+        isOpen={isCreateResourceDialogOpen}
+        onClose={() => setIsCreateResourceDialogOpen(false)}
+        onSubmit={handleSubmit}
+      />
+      <ManageEditResourceDialog
+        data={editResourceProps.data}
+        isOpen={isEditResourceDialogOpen}
+        onClose={() => setIsEditResourceDialogOpen(false)}
+        onSubmit={handleEdit}
+      />
 
       <section className="container mb-8">
         <ManageResourceSearchBar onSearch={handleSearch} onAddNewResource={handleCreateResource} />
       </section>
 
       <section className="container">
-        <div className="w-full flex items-center justify-end mb-6">
-          
-        </div>
+        <div className="w-full flex items-center justify-end mb-6"></div>
         <div className="flex flex-wrap justify-between items-center mb-6">
           <h2 className="text-xl font-bold">Recursos</h2>
           <span className="text-sm font-bold">Encontrados: {resourceData?.length || 0}</span>
@@ -204,7 +216,7 @@ function RouteComponent() {
           </div>
         ) : (
           <Table className="w-full bg-white dark:bg-white/5 border dark:border-violet-500/10 shadow-md hover:shadow-lg p-4 dark:shadow-violet-300/15">
-            <TableCaption>A list of your recent invoices.</TableCaption>
+            <TableCaption>Lista de recursos</TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-25">Nome</TableHead>
@@ -215,15 +227,54 @@ function RouteComponent() {
             </TableHeader>
             <TableBody>
               {resourceData?.map((resource) => (
-                <ManageResourceTableRow
-                  key={resource.id}
-                  id={resource.id as number}
-                  name={resource.name}
-                  description={resource.description}
-                  canBeReserved={resource.canReserve}
-                  status={resource.enabled}
-                  onEdit={(props) => handleEditResource(props)}
-                />
+                <TableRow>
+                  <TableCell className="font-bold w-25">{resource.name}</TableCell>
+                  <TableCell className="text-center">
+                    {resource.canReserve ? (
+                      <Badge
+                        variant="outline"
+                        className="border-emerald-500/30 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-500/30 rounded-full px-2.5 py-0.5 text-xs font-normal"
+                      >
+                        Sim
+                      </Badge>
+                    ) : (
+                      <Badge
+                        variant="outline"
+                        className="border-red-500/30 bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300 dark:border-red-500/30 rounded-full px-2.5 py-0.5 text-xs font-normal"
+                      >
+                        Não
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {status ? (
+                      <Badge
+                        variant="outline"
+                        className="border-emerald-500/30 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-500/30 rounded-full px-2.5 py-0.5 text-xs font-normal"
+                      >
+                        Ativo
+                      </Badge>
+                    ) : (
+                      <Badge
+                        variant="outline"
+                        className="border-red-500/30 bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300 dark:border-red-500/30 rounded-full px-2.5 py-0.5 text-xs font-normal"
+                      >
+                        Inativo
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-x-2">
+                      <Button
+                        variant={"outline"}
+                        size="icon"
+                        onClick={() => handleEdit({ id: resource.id as number, name: resource.name, canBeReserved: resource.canReserve, enabled: resource.enabled })}
+                      >
+                        <Pencil className="size-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
               ))}
             </TableBody>
           </Table>
