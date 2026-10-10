@@ -1,51 +1,78 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ManageUserSearchBar, type UserSearchFilters } from "@/components/manage-user/ManageUserSearchBar";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pencil } from "lucide-react";
-import { Button } from "#/components/ui/button";
-import { Badge } from "#/components/ui/badge";
-import { Suspense, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { ErrorBoundary, getErrorMessage } from "react-error-boundary";
-import { ManageSubjectTableRow } from "#/components/manage-subjects/ManageSubjectTableRow";
-import { ManageUserTableRow } from "#/components/manage-user/ManageUserTableRow";
+import { useState } from "react";
+import { useFormDialog } from "#/hooks/use-form-dialog";
+import { type Account, useAccounts, useEditAccount } from "#/lib/queries/accounts";
+import { succeeded } from "#/lib/utils/api-result";
+import { type ManageEditUserData, ManageEditUserDialog } from "@/components/manage-users/ManageEditUserDialog";
+import { ManageUserSearchBar, type UserFilters } from "@/components/manage-users/ManageUserSearchBar";
+import { ManageUserTable } from "@/components/manage-users/ManageUserTable";
+import { QueryBoundary } from "@/components/shared/QueryBoundary";
+import { ResultsHeader } from "@/components/shared/ResultsHeader";
 
 export const Route = createFileRoute("/_private/admin/manage-users")({
   component: RouteComponent,
 });
 
+const initialFilters: UserFilters = { search: "", role: undefined, subjectId: undefined, enabled: undefined };
+
 function RouteComponent() {
-  const queryClient = useQueryClient();
-  const [searchFilters, setSearchFilters] = useState<UserSearchFilters>();
+  const [filters, setFilters] = useState<UserFilters>(initialFilters);
+  const accounts = useAccounts(filters);
+  const editAccount = useEditAccount();
+
+  const editDialog = useFormDialog<Account>();
+
+  async function handleEditSubmit(data: ManageEditUserData) {
+    const editing = editDialog.target;
+    if (!editing) return;
+
+    // PATCH: campos `null` não são alterados pelo backend, então só enviamos o que mudou.
+    const previousSubjectId = editing.subject ? Number(editing.subject.id) : undefined;
+    const subjectChanged = data.subject !== undefined && data.subject.id !== previousSubjectId;
+
+    const ok = await succeeded(
+      editAccount.mutateAsync({
+        id: data.id,
+        username: data.username !== editing.username ? data.username : null,
+        registration: data.registration !== editing.registration ? data.registration : null,
+        role: data.role !== editing.role ? data.role : null,
+        lockAccount: data.enabled !== editing.enabled ? !data.enabled : null,
+        subjectId: subjectChanged ? (data.subject?.id ?? null) : null,
+      }),
+    );
+
+    if (ok) editDialog.close();
+  }
 
   return (
     <>
-      <section className="container mb-8">
-        <ManageUserSearchBar
-          onSearch={(filters) => {
-            setSearchFilters(filters);
-            queryClient.invalidateQueries({ queryKey: ["user-data"] });
-          }}
+      {editDialog.target && (
+        <ManageEditUserDialog
+          key={editDialog.session}
+          account={editDialog.target}
+          open={editDialog.isOpen}
+          onClose={editDialog.close}
+          onSubmit={handleEditSubmit}
         />
+      )}
+
+      <section className="container mb-8">
+        <ManageUserSearchBar onSearch={setFilters} />
       </section>
+
       <section className="container">
-        <ErrorBoundary
-          resetKeys={[searchFilters]}
-          fallbackRender={({ error }) => (
-            <div className="flex flex-col items-center justify-center gap-2">
-              <p className="text-center font-bold text-red-600 dark:text-red-400">Erro: {getErrorMessage(error)}</p>
-            </div>
-          )}
+        <ResultsHeader title="Usuários" count={accounts.data?.length ?? 0} />
+        <QueryBoundary
+          isPending={accounts.isPending}
+          isFetching={accounts.isFetching}
+          isError={accounts.isError}
+          error={accounts.error}
+          isEmpty={accounts.data?.length === 0}
+          loadingText="Carregando usuários..."
+          emptyText="Nenhum usuário encontrado."
         >
-          <Suspense fallback={<div className="text-center font-bold animate-pulse">Carregando usuarios...</div>}>
-            <ManageUserTableRow
-              props={searchFilters!}
-              onEdit={(data) => {
-                
-              }}
-            />
-          </Suspense>
-        </ErrorBoundary>
+          <ManageUserTable accounts={accounts.data ?? []} onEdit={editDialog.open} />
+        </QueryBoundary>
       </section>
     </>
   );

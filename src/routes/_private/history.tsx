@@ -8,7 +8,6 @@ import { useApi } from "#/lib/utils/restapi";
 import { HistoryCard } from "@/components/history/HistoryCard";
 import { MonthYearPicker } from "@/components/history/MonthYearPicker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Schedules } from "@/lib/service";
 
 export const Route = createFileRoute("/_private/history")({
   component: RouteComponent,

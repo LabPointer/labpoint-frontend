@@ -4,7 +4,7 @@ import * as z from "zod";
 
 const storageKey = "app-theme";
 export const getThemeServerFn = createServerFn().handler(
-	() => getCookie(storageKey) ?? "light",
+	() => (getCookie(storageKey) === "dark" ? "dark" : "light") as "light" | "dark",
 );
 export const setThemeValidator = z.enum(["light", "dark"]);
 export const setThemeServerFn = createServerFn()

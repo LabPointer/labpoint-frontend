@@ -2054,6 +2054,8 @@ export interface components {
             registration: null | string;
             username: null | string;
             role: null | components["schemas"]["EAccountRole"];
+            /** Format: int64 */
+            subjectId: null | number | string;
             lockAccount: null | boolean;
         };
         AdminSpaceReserveEditRequestDTO: {

@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { SignUpForm } from "@/components/SignUpForm";
 import { useApi } from "#/lib/utils/restapi";
 import { useState } from "react";
@@ -11,7 +11,6 @@ export const Route = createFileRoute("/_public/sign-up")({
 function RouteComponent() {
   const api = useApi();
   const navigate = useNavigate();
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRedirectting, setIsRedirectting] = useState(false);
 
@@ -29,7 +28,7 @@ function RouteComponent() {
     setIsSubmitting(false);
 
     const { error } = res;
-    const { ok, status, statusText } = res.response;
+    const { ok, status } = res.response;
 
     if (!ok && error) {
       toast.error(`Erro ${status}: ${error[0].description}`, {

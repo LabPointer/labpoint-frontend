@@ -3,40 +3,26 @@ import type { QueryClient } from "@tanstack/react-query";
 import { createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Toaster } from "sonner";
-import type z from "zod";
-import {
-  getSessionServerFn,
-  type sessionSchema,
-} from "#/lib/server/sign-in";
-import { getThemeServerFn, type setThemeValidator } from "#/lib/server/theme";
+import { getSessionServerFn } from "#/lib/server/sign-in";
+import { getThemeServerFn } from "#/lib/server/theme";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import appCss from "../styles.css?url";
 
+// `theme` e `sessionInfo` são adicionados ao contexto pelo `beforeLoad` abaixo (com tipos inferidos);
+// o contexto inicial do router só precisa do queryClient.
 interface MyRouterContext {
   queryClient: QueryClient;
-  theme: z.infer<typeof setThemeValidator>;
-  sessionInfo: z.infer<typeof sessionSchema> | undefined;
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   beforeLoad: async () => {
-    const theme = (await getThemeServerFn()) as z.infer<typeof setThemeValidator>;
+    const theme = await getThemeServerFn();
 
     const sessionInfo = await getSessionServerFn();
     if (sessionInfo) {
       sessionInfo.username = sessionInfo.username.replace("+", " ");
     }
 
-    /*
-    if (sessionInfo) {
-      await setSessionServerFn({
-        data: {
-          username: undefined,
-          role: "",
-        },
-      });
-    }
-    */
 
     return {
       theme,

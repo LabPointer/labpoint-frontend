@@ -1,168 +1,85 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Suspense, useState } from "react";
-import { toast } from "sonner";
-import {
-  type ManageCreateSubjectData,
-  ManageCreateSubjectDialog,
-} from "#/components/manage-subjects/ManageCreateSubjectDialog";
-import {
-  type ManageEditSubjectData,
-  ManageEditSubjectDialog,
-  type ManageEditSubjectDialogProps,
-} from "#/components/manage-subjects/ManageEditSubjectDialog";
-import { ManageSubjectSearchBar, type SubjectFilters } from "#/components/manage-subjects/ManageSubjectSearchBar";
-import { useApi } from "#/lib/utils/restapi";
-import { ErrorBoundary, getErrorMessage } from "react-error-boundary";
-import { ManageSubjectTableRow } from "#/components/manage-subjects/ManageSubjectTableRow";
-
-const api = useApi();
+import { useState } from "react";
+import { useFormDialog } from "#/hooks/use-form-dialog";
+import { type Subject, useCreateSubject, useEditSubject, useSubjects } from "#/lib/queries/subjects";
+import { succeeded } from "#/lib/utils/api-result";
+import { ManageSubjectDialog, type SubjectFormData } from "@/components/manage-subjects/ManageSubjectDialog";
+import { ManageSubjectSearchBar, type SubjectFilters } from "@/components/manage-subjects/ManageSubjectSearchBar";
+import { ManageSubjectTable } from "@/components/manage-subjects/ManageSubjectTable";
+import { QueryBoundary } from "@/components/shared/QueryBoundary";
+import { ResultsHeader } from "@/components/shared/ResultsHeader";
 
 export const Route = createFileRoute("/_private/admin/manage-subjects")({
   component: RouteComponent,
 });
 
+const initialFilters: SubjectFilters = { search: "", status: undefined };
+
 function RouteComponent() {
-  const queryClient = useQueryClient();
-  const [isCreateSubjectDialogOpen, setIsCreateSubjectDialogOpen] = useState(false);
-  const [isEditSubjectDialogOpen, setIsEditSubjectDialogOpen] = useState(false);
-  const [editSubjectProps, setEditSubjectProps] = useState<ManageEditSubjectDialogProps>({
-    data: {
-      id: 0,
-      name: "",
-      enabled: false,
-    },
-    isOpen: isEditSubjectDialogOpen,
-    onSubmit: handleEditSubmit,
-    onClose: () => setIsEditSubjectDialogOpen(false),
-  });
-  const [searchFilter, setSearchFilter] = useState<SubjectFilters>({
-    search: "",
-    enabled: undefined,
-  });
+  const [filters, setFilters] = useState<SubjectFilters>(initialFilters);
+  const subjects = useSubjects({ name: filters.search, enabled: filters.status });
+  const createSubject = useCreateSubject();
+  const editSubject = useEditSubject();
+  const createDialog = useFormDialog();
+  const editDialog = useFormDialog<Subject>();
 
-  async function handleCreateSubmit(data: ManageCreateSubjectData) {
-    const res = await api.POST("/subject/admin/create", {
-      body: {
-        name: data.name,
-        enabled: data.enabled,
-      },
-    });
-
-    const { response, error } = res;
-
-    if (!response.ok && error) {
-      toast.error(`Error ${response.status}: ${error.message}`, {
-        duration: 3000,
-        position: "bottom-center",
-        style: {
-          color: "white",
-          backgroundColor: "red",
-          borderColor: "red",
-        },
-      });
-      return;
-    }
-
-    toast.success("Matéria criada com sucesso!", {
-      duration: 3000,
-      position: "bottom-center",
-      style: {
-        color: "white",
-        backgroundColor: "green",
-        borderColor: "green",
-      },
-    });
-    setIsCreateSubjectDialogOpen(false);
-    queryClient.invalidateQueries({ queryKey: ["subject-data"] });
+  async function handleCreate(data: SubjectFormData) {
+    if (await succeeded(createSubject.mutateAsync(data))) createDialog.close();
   }
 
-  async function handleEditSubmit(data: ManageEditSubjectData) {
-    const res = await api.PATCH("/subject/admin/edit", {
-      body: {
-        id: data.id,
+  async function handleEdit(data: SubjectFormData) {
+    const subject = editDialog.target;
+    if (!subject) return;
+
+    const ok = await succeeded(
+      editSubject.mutateAsync({
+        id: subject.id,
         name: data.name.length > 0 ? data.name : null,
         enabled: data.enabled,
-      },
-    });
-
-    const { response, error } = res;
-
-    if (!response.ok && error) {
-      toast.error(`Error ${response.status}: ${error.message}`, {
-        duration: 3000,
-        position: "bottom-center",
-        style: {
-          color: "white",
-          backgroundColor: "red",
-          borderColor: "red",
-        },
-      });
-      return;
-    }
-
-    toast.success("Matéria editada com sucesso!", {
-      duration: 3000,
-      position: "bottom-center",
-      style: {
-        color: "white",
-        backgroundColor: "green",
-        borderColor: "green",
-      },
-    });
-    setIsEditSubjectDialogOpen(false);
-    queryClient.invalidateQueries({ queryKey: ["subject-data"] });
+      }),
+    );
+    if (ok) editDialog.close();
   }
 
   return (
     <>
-      <ManageCreateSubjectDialog
-        isOpen={isCreateSubjectDialogOpen}
-        onClose={() => setIsCreateSubjectDialogOpen(false)}
-        onSubmit={handleCreateSubmit}
-      />
-      <ManageEditSubjectDialog
-        data={editSubjectProps.data}
-        isOpen={isEditSubjectDialogOpen}
-        onClose={() => setIsEditSubjectDialogOpen(false)}
-        onSubmit={(data) => handleEditSubmit(data)}
-      />
+      {createDialog.mounted && (
+        <ManageSubjectDialog
+          key={createDialog.session}
+          mode="create"
+          open={createDialog.isOpen}
+          onClose={createDialog.close}
+          onSubmit={handleCreate}
+        />
+      )}
+      {editDialog.target && (
+        <ManageSubjectDialog
+          key={editDialog.session}
+          mode="edit"
+          subject={editDialog.target}
+          open={editDialog.isOpen}
+          onClose={editDialog.close}
+          onSubmit={handleEdit}
+        />
+      )}
 
       <section className="container mb-8">
-        <ManageSubjectSearchBar
-          onSearch={(filters) => {
-            setSearchFilter(filters);
-            queryClient.invalidateQueries({ queryKey: ["subject-data"] });
-          }}
-          onAddNewSubject={() => setIsCreateSubjectDialogOpen(true)}
-        />
+        <ManageSubjectSearchBar onSearch={setFilters} onAddNewSubject={() => createDialog.open()} />
       </section>
 
       <section className="container">
-        <ErrorBoundary
-          resetKeys={[searchFilter]}
-          fallbackRender={({ error }) => (
-            <div className="flex flex-col items-center justify-center gap-2">
-              <p className="text-center font-bold text-red-600 dark:text-red-400">Erro: {getErrorMessage(error)}</p>
-            </div>
-          )}
+        <ResultsHeader title="Matérias" count={subjects.data?.length ?? 0} />
+        <QueryBoundary
+          isPending={subjects.isPending}
+          isFetching={subjects.isFetching}
+          isError={subjects.isError}
+          error={subjects.error}
+          isEmpty={subjects.data?.length === 0}
+          loadingText="Carregando matérias..."
+          emptyText="Nenhuma matéria encontrada."
         >
-          <Suspense fallback={<div className="text-center font-bold animate-pulse">Carregando matérias...</div>}>
-            <ManageSubjectTableRow
-              props={searchFilter}
-              onEdit={(data) => {
-                setEditSubjectProps({
-                  data,
-                  isOpen: false,
-                  onSubmit: handleEditSubmit,
-                  onClose: () => setIsEditSubjectDialogOpen(false),
-                });
-
-                setIsEditSubjectDialogOpen(true);
-              }}
-            />
-          </Suspense>
-        </ErrorBoundary>
+          <ManageSubjectTable subjects={subjects.data ?? []} onEdit={editDialog.open} />
+        </QueryBoundary>
       </section>
     </>
   );

@@ -1,176 +1,86 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Suspense, useState } from "react";
-import { ErrorBoundary, getErrorMessage } from "react-error-boundary";
-import { toast } from "sonner";
-import {
-  type ManageCreateResourceData,
-  ManageCreateResourceDialog,
-} from "#/components/manage-resources/ManageCreateResourceDialog";
-import {
-  type ManageEditResourceData,
-  ManageEditResourceDialog,
-  type ManageEditResourceDialogProps,
-} from "#/components/manage-resources/ManageEditResourceDialog";
-import { ManageResourceSearchBar, type ResourceFilters } from "#/components/manage-resources/ManageResourceSearchBar";
-import { ManageResourceTableRow } from "#/components/manage-resources/ManageResourceTableRow";
-import { useApi } from "#/lib/utils/restapi";
+import { useState } from "react";
+import { useFormDialog } from "#/hooks/use-form-dialog";
+import { type Resource, useCreateResource, useEditResource, useResources } from "#/lib/queries/resources";
+import { succeeded } from "#/lib/utils/api-result";
+import { ManageResourceDialog, type ResourceFormData } from "@/components/manage-resources/ManageResourceDialog";
+import { ManageResourceSearchBar, type ResourceFilters } from "@/components/manage-resources/ManageResourceSearchBar";
+import { ManageResourceTable } from "@/components/manage-resources/ManageResourceTable";
+import { QueryBoundary } from "@/components/shared/QueryBoundary";
+import { ResultsHeader } from "@/components/shared/ResultsHeader";
 
 export const Route = createFileRoute("/_private/admin/manage-resources")({
   component: RouteComponent,
 });
 
+const initialFilters: ResourceFilters = { search: "", canReserve: undefined, enabled: undefined };
+
 function RouteComponent() {
-  const api = useApi();
-  const queryClient = useQueryClient();
-  const [isCreateResourceDialogOpen, setIsCreateResourceDialogOpen] = useState(false);
-  const [isEditResourceDialogOpen, setIsEditResourceDialogOpen] = useState(false);
-  const [editResourceProps, setEditResourceProps] = useState<ManageEditResourceDialogProps>({
-    data: {
-      id: 0,
-      name: "",
-      canReserve: false,
-      enabled: false,
-    },
-    isOpen: isEditResourceDialogOpen,
-    onSubmit: handleEditSubmit,
-    onClose: () => setIsEditResourceDialogOpen(false),
-  });
-  const [searchFilter, setSearchFilter] = useState<ResourceFilters>({
-    search: "",
-    canReserve: undefined,
-    enabled: undefined,
-  });
+  const [filters, setFilters] = useState<ResourceFilters>(initialFilters);
+  const resources = useResources({ name: filters.search, canReserve: filters.canReserve, enabled: filters.enabled });
+  const createResource = useCreateResource();
+  const editResource = useEditResource();
+  const createDialog = useFormDialog();
+  const editDialog = useFormDialog<Resource>();
 
-  async function handleCreateSubmit(data: ManageCreateResourceData) {
-    const res = await api.POST("/resource/admin/create", {
-      body: {
-        name: data.name,
-        canReserve: data.canBeReserved,
-        enabled: data.enabled,
-      },
-    });
-
-    const { response, error } = res;
-
-    if (!response.ok && error) {
-      toast.error(`Error ${response.status}: ${error.message}`, {
-        duration: 3000,
-        position: "bottom-center",
-        style: {
-          color: "white",
-          backgroundColor: "red",
-          borderColor: "red",
-        },
-      });
-      return;
-    }
-
-    toast.success("Recurso criado com sucesso!", {
-      duration: 3000,
-      position: "bottom-center",
-      style: {
-        color: "white",
-        backgroundColor: "green",
-        borderColor: "green",
-      },
-    });
-    setIsCreateResourceDialogOpen(false);
-    queryClient.invalidateQueries({ queryKey: ["resource-data"] });
+  async function handleCreate(data: ResourceFormData) {
+    if (await succeeded(createResource.mutateAsync(data))) createDialog.close();
   }
 
-  async function handleEditSubmit(data: ManageEditResourceData) {
-    const res = await api.PATCH("/resource/admin/edit", {
-      body: {
-        id: data.id,
+  async function handleEdit(data: ResourceFormData) {
+    const resource = editDialog.target;
+    if (!resource) return;
+
+    const ok = await succeeded(
+      editResource.mutateAsync({
+        id: resource.id,
         name: data.name.length > 0 ? data.name : null,
         canReserve: data.canReserve,
         enabled: data.enabled,
-      },
-    });
-
-    const { response, error } = res;
-
-    if (!response.ok && error) {
-      toast.error(`Error ${response.status}: ${error.message}`, {
-        duration: 3000,
-        position: "bottom-center",
-        style: {
-          color: "white",
-          backgroundColor: "red",
-          borderColor: "red",
-        },
-      });
-      return;
-    }
-
-    toast.success("Recurso editado com sucesso!", {
-      duration: 3000,
-      position: "bottom-center",
-      style: {
-        color: "white",
-        backgroundColor: "green",
-        borderColor: "green",
-      },
-    });
-    setIsEditResourceDialogOpen(false);
-    queryClient.invalidateQueries({ queryKey: ["resource-data"] });
+      }),
+    );
+    if (ok) editDialog.close();
   }
 
   return (
     <>
-      <ManageCreateResourceDialog
-        isOpen={isCreateResourceDialogOpen}
-        onClose={() => setIsCreateResourceDialogOpen(false)}
-        onSubmit={handleCreateSubmit}
-      />
-      <ManageEditResourceDialog
-        data={editResourceProps.data}
-        isOpen={isEditResourceDialogOpen}
-        onClose={() => setIsEditResourceDialogOpen(false)}
-        onSubmit={handleEditSubmit}
-      />
+      {createDialog.mounted && (
+        <ManageResourceDialog
+          key={createDialog.session}
+          mode="create"
+          open={createDialog.isOpen}
+          onClose={createDialog.close}
+          onSubmit={handleCreate}
+        />
+      )}
+      {editDialog.target && (
+        <ManageResourceDialog
+          key={editDialog.session}
+          mode="edit"
+          resource={editDialog.target}
+          open={editDialog.isOpen}
+          onClose={editDialog.close}
+          onSubmit={handleEdit}
+        />
+      )}
 
       <section className="container mb-8">
-        <ManageResourceSearchBar
-          onSearch={(filters) => {
-            setSearchFilter(filters);
-            queryClient.invalidateQueries({ queryKey: ["resource-data"] });
-          }}
-          onAddNewResource={() => setIsCreateResourceDialogOpen(true)}
-        />
+        <ManageResourceSearchBar onSearch={setFilters} onAddNewResource={() => createDialog.open()} />
       </section>
 
       <section className="container">
-        <ErrorBoundary
-          resetKeys={[searchFilter]}
-          fallbackRender={({ error }) => (
-            <div className="flex flex-col items-center justify-center gap-2">
-              <p className="text-center font-bold text-red-600 dark:text-red-400">Erro: {getErrorMessage(error)}</p>
-            </div>
-          )}
+        <ResultsHeader title="Recursos" count={resources.data?.length ?? 0} />
+        <QueryBoundary
+          isPending={resources.isPending}
+          isFetching={resources.isFetching}
+          isError={resources.isError}
+          error={resources.error}
+          isEmpty={resources.data?.length === 0}
+          loadingText="Carregando recursos..."
+          emptyText="Nenhum recurso encontrado."
         >
-          <Suspense fallback={<div className="text-center font-bold animate-pulse">Carregando recursos...</div>}>
-            <ManageResourceTableRow
-              props={searchFilter}
-              onEdit={(data) => {
-                setEditResourceProps({
-                  data: {
-                    id: data.id,
-                    name: data.name,
-                    canReserve: data.canReserve,
-                    enabled: data.enabled,
-                  },
-                  isOpen: isEditResourceDialogOpen,
-                  onSubmit: handleEditSubmit,
-                  onClose: () => setIsEditResourceDialogOpen(false),
-                });
-
-                setIsEditResourceDialogOpen(true);
-              }}
-            />
-          </Suspense>
-        </ErrorBoundary>
+          <ManageResourceTable resources={resources.data ?? []} onEdit={editDialog.open} />
+        </QueryBoundary>
       </section>
     </>
   );

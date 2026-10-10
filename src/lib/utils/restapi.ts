@@ -47,4 +47,8 @@ const authMiddleware: Middleware = {
 };
 client.use(authMiddleware);
 
+/** Cliente tipado (singleton). Prefira importar `api` direto: não é um hook. */
+export const api = client;
+
+/** @deprecated mantido por compatibilidade; use `api`. */
 export const useApi = () => client;

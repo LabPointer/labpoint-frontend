@@ -1,165 +1,78 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Suspense, useState } from "react";
-import { toast } from "sonner";
-import {
-  type ManageCreateScheduleData,
-  ManageCreateScheduleDialog,
-} from "#/components/manage-schedules/ManageCreateScheduleDialog";
-import ScheduleSearchBar, { type ScheduleFilters } from "#/components/manage-schedules/ManageScheduleSearchBar";
-import { useApi } from "#/lib/utils/restapi";
-import {
-  ManageEditScheduleDialog,
-  type ManageEditScheduleData,
-} from "#/components/manage-schedules/ManageEditScheduleDialog";
-import { ErrorBoundary, getErrorMessage } from "react-error-boundary";
-import { ManageScheduleTableRow } from "#/components/manage-schedules/ManageScheduleTableRow";
-
-const api = useApi();
+import { useState } from "react";
+import { useFormDialog } from "#/hooks/use-form-dialog";
+import { type Schedule, useCreateSchedule, useEditSchedule, useSchedules } from "#/lib/queries/schedules";
+import { succeeded } from "#/lib/utils/api-result";
+import { ManageScheduleDialog, type ScheduleFormData } from "@/components/manage-schedules/ManageScheduleDialog";
+import { ManageScheduleSearchBar, type ScheduleFilters } from "@/components/manage-schedules/ManageScheduleSearchBar";
+import { ManageScheduleTable } from "@/components/manage-schedules/ManageScheduleTable";
+import { QueryBoundary } from "@/components/shared/QueryBoundary";
+import { ResultsHeader } from "@/components/shared/ResultsHeader";
 
 export const Route = createFileRoute("/_private/admin/manage-schedules")({
   component: RouteComponent,
 });
 
+const initialFilters: ScheduleFilters = { shift: undefined, enabled: undefined };
+
 function RouteComponent() {
-  const queryClient = useQueryClient();
-  const [isCreateScheduleDialogOpen, setIsCreateScheduleDialogOpen] = useState(false);
-  const [isEditScheduleDialogOpen, setIsEditScheduleDialogOpen] = useState(false);
+  const [filters, setFilters] = useState<ScheduleFilters>(initialFilters);
+  const schedules = useSchedules(filters);
+  const createSchedule = useCreateSchedule();
+  const editSchedule = useEditSchedule();
+  const createDialog = useFormDialog();
+  const editDialog = useFormDialog<Schedule>();
 
-  const [editScheduleData, setEditScheduleData] = useState<ManageEditScheduleData>();
-
-  const [searchFilters, setSearchFilters] = useState<ScheduleFilters>({ shift: undefined, enabled: undefined });
-
-  async function handleCreateSubmit(data: ManageCreateScheduleData) {
-    const res = await api.POST("/schedule/admin/create", {
-      body: {
-        enabled: data.enabled,
-        startAt: data.startAt,
-        endAt: data.endAt,
-        shift: data.shift,
-      },
-    });
-
-    const { response, error } = res;
-
-    if (!response.ok && error) {
-      toast.error(`Erro ${response.status}: ${error.message}`, {
-        duration: 3000,
-        position: "bottom-center",
-        style: {
-          color: "white",
-          backgroundColor: "red",
-          borderColor: "red",
-        },
-      });
-    }
-
-    toast.success("Horario criado com sucesso!", {
-      duration: 3000,
-      position: "bottom-center",
-      style: {
-        color: "white",
-        backgroundColor: "green",
-        borderColor: "green",
-      },
-    });
-
-    setIsCreateScheduleDialogOpen(false);
-    queryClient.invalidateQueries({ queryKey: ["schedule-data"] });
+  async function handleCreate(data: ScheduleFormData) {
+    if (await succeeded(createSchedule.mutateAsync(data))) createDialog.close();
   }
 
-  async function handleEditSubmit(data: ManageEditScheduleData) {
-    const res = await api.PATCH("/schedule/admin/edit", {
-      body: {
-        id: data.id,
-        enabled: data.enabled ?? null,
-        startAt: data.startAt ?? null,
-        endAt: data.endAt ?? null,
-        shift: data.shift ?? null,
-      },
-    });
+  async function handleEdit(data: ScheduleFormData) {
+    const schedule = editDialog.target;
+    if (!schedule) return;
 
-    const { response, error } = res;
-
-    if (!response.ok && error) {
-      toast.error(`Erro ${response.status}: ${error.message}`, {
-        duration: 3000,
-        position: "bottom-center",
-        style: {
-          color: "white",
-          backgroundColor: "red",
-          borderColor: "red",
-        },
-      });
-    }
-
-    toast.success("Horario editado com sucesso!", {
-      duration: 3000,
-      position: "bottom-center",
-      style: {
-        color: "white",
-        backgroundColor: "green",
-        borderColor: "green",
-      },
-    });
-
-    setIsEditScheduleDialogOpen(false);
-    queryClient.invalidateQueries({ queryKey: ["schedule-data"] });
+    if (await succeeded(editSchedule.mutateAsync({ id: schedule.id, ...data }))) editDialog.close();
   }
 
   return (
     <>
-      <ManageCreateScheduleDialog
-        isOpen={isCreateScheduleDialogOpen}
-        onClose={() => setIsCreateScheduleDialogOpen(false)}
-        onSubmit={handleCreateSubmit}
-      />
-
-      <ManageEditScheduleDialog
-        isOpen={isEditScheduleDialogOpen}
-        onClose={() => setIsEditScheduleDialogOpen(false)}
-        onSubmit={handleEditSubmit}
-        data={editScheduleData ?? { id: 0, startAt: "", endAt: "", shift: 0, enabled: true }}
-      />
+      {createDialog.mounted && (
+        <ManageScheduleDialog
+          key={createDialog.session}
+          mode="create"
+          open={createDialog.isOpen}
+          onClose={createDialog.close}
+          onSubmit={handleCreate}
+        />
+      )}
+      {editDialog.target && (
+        <ManageScheduleDialog
+          key={editDialog.session}
+          mode="edit"
+          schedule={editDialog.target}
+          open={editDialog.isOpen}
+          onClose={editDialog.close}
+          onSubmit={handleEdit}
+        />
+      )}
 
       <section className="container mb-8">
-        <ScheduleSearchBar
-          onSearch={(filters) => {
-            setSearchFilters(filters);
-            queryClient.invalidateQueries({ queryKey: ["schedule-data"] });
-          }}
-          onAddNewSchedule={() => {
-            setIsCreateScheduleDialogOpen(true);
-          }}
-        />
+        <ManageScheduleSearchBar onSearch={setFilters} onAddNewSchedule={() => createDialog.open()} />
       </section>
 
       <section className="container">
-        <ErrorBoundary
-          resetKeys={[searchFilters]}
-          fallbackRender={({ error }) => (
-            <div className="flex flex-col items-center justify-center gap-2">
-              <p className="text-center font-bold text-red-600 dark:text-red-400">Erro: {getErrorMessage(error)}</p>
-            </div>
-          )}
+        <ResultsHeader title="Horários" count={schedules.data?.length ?? 0} />
+        <QueryBoundary
+          isPending={schedules.isPending}
+          isFetching={schedules.isFetching}
+          isError={schedules.isError}
+          error={schedules.error}
+          isEmpty={schedules.data?.length === 0}
+          loadingText="Carregando horários..."
+          emptyText="Nenhum horário encontrado."
         >
-          <Suspense fallback={<div className="text-center font-bold animate-pulse">Carregando horarios...</div>}>
-            <ManageScheduleTableRow
-              props={searchFilters}
-              onEdit={(data) => {
-                setEditScheduleData({
-                  id: data.id,
-                  startAt: data.startAt,
-                  endAt: data.endAt,
-                  shift: data.shift,
-                  enabled: data.enabled,
-                });
-
-                setIsEditScheduleDialogOpen(true);
-              }}
-            />
-          </Suspense>
-        </ErrorBoundary>
+          <ManageScheduleTable schedules={schedules.data ?? []} onEdit={editDialog.open} />
+        </QueryBoundary>
       </section>
     </>
   );

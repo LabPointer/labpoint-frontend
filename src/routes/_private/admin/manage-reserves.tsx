@@ -22,7 +22,7 @@ function RouteComponent() {
 			</section>
 			<section className="container">
 				<Table className="w-full bg-white dark:bg-white/5 border dark:border-violet-500/10 shadow-md hover:shadow-lg p-4 dark:shadow-violet-300/15">
-					<TableCaption>A list of your recent invoices.</TableCaption>
+					<TableCaption>Lista de reservas.</TableCaption>
 					<TableHeader>
 						<TableRow>
 							<TableHead className="w-[100px]">Espaço</TableHead>

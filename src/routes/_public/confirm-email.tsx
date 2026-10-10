@@ -33,7 +33,7 @@ function RouteComponent() {
           },
         },
       });
-      const {response, data, error} = res;
+      const { response, error } = res;
 
       if (!response.ok && error) {
         toast.error(`Erro ${response.status}: ${error[0].description}`, {

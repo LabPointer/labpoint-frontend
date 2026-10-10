@@ -34,7 +34,6 @@ export interface HistoryCardProps {
 }
 
 export function HistoryCard({
-  id,
   spaceName,
   capacity,
   status,

@@ -22,7 +22,7 @@ function RouteComponent() {
         },
       });
 
-      const { response, data, error } = res;
+      const { response, error } = res;
       
       setIsSubmitting(false);
 

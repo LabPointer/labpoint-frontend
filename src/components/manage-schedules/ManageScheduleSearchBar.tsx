@@ -1,111 +1,66 @@
-import { useDebounce } from "ahooks";
 import { PlusIcon } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Button } from "../ui/button";
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-  ComboboxValue,
-} from "../ui/combobox";
-import { Field, FieldLabel } from "../ui/field";
+import { useEffect, useMemo, useState } from "react";
+import { useDebouncedValue } from "#/hooks/use-debounced-value";
+import { type FilterOption, FilterSelect } from "@/components/shared/FilterSelect";
+import { SearchPanel } from "@/components/shared/SearchPanel";
+import { Button } from "@/components/ui/button";
 
 export type ScheduleFilters = {
   shift: number | undefined;
   enabled: boolean | undefined;
 };
 
-export type ScheduleSearchBarProps = {
+const shiftOptions: FilterOption<number | undefined>[] = [
+  { label: "Todos os turnos", value: undefined },
+  { label: "Manhã", value: 0 },
+  { label: "Tarde", value: 1 },
+  { label: "Noite", value: 2 },
+];
+
+const statusOptions: FilterOption<boolean | undefined>[] = [
+  { label: "Todos os status", value: undefined },
+  { label: "Ativo", value: true },
+  { label: "Inativo", value: false },
+];
+
+type ManageScheduleSearchBarProps = {
   onSearch: (filters: ScheduleFilters) => void;
   onAddNewSchedule: () => void;
 };
 
-const statusRecord: Record<string, boolean | undefined> = {
-  "Todos os status": undefined,
-  Ativo: true,
-  Inativo: false,
-};
+export function ManageScheduleSearchBar({ onSearch, onAddNewSchedule }: ManageScheduleSearchBarProps) {
+  const [shift, setShift] = useState<number | undefined>(undefined);
+  const [enabled, setEnabled] = useState<boolean | undefined>(undefined);
 
-const shiftRecord: Record<string, number | undefined> = {
-  "Todos os turnos": undefined,
-  Manha: 0,
-  Tarde: 1,
-  Noite: 2,
-};
-
-export default function ManageScheduleSearchBar({ onSearch, onAddNewSchedule }: ScheduleSearchBarProps) {
-  const statuses = ["Todos os status", "Ativo", "Inativo"];
-  const [status, setStatus] = useState(statuses[0]);
-  const shifts = ["Todos os turnos", "Manha", "Tarde", "Noite"];
-  const [shift, setShift] = useState(shifts[0]);
-  const debouncedStatus: ScheduleFilters = useDebounce(
-    { enabled: statusRecord[status], shift: shiftRecord[shift] },
-    { wait: 500 },
-  );
+  const filters = useMemo<ScheduleFilters>(() => ({ shift, enabled }), [shift, enabled]);
+  const debouncedFilters = useDebouncedValue(filters, 500);
 
   useEffect(() => {
-    onSearch({ shift: shiftRecord[shift], enabled: statusRecord[status] });
-  }, [debouncedStatus.shift, debouncedStatus.enabled]);
+    onSearch(debouncedFilters);
+  }, [debouncedFilters, onSearch]);
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border bg-white p-4 shadow-md hover:shadow-lg dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15">
-      <Field className="w-full">
-        <FieldLabel htmlFor="space-status" className="font-bold">
-          Turno
-        </FieldLabel>
-        <Combobox items={shifts} value={shift} onValueChange={(value) => setShift(value ?? shifts[0])}>
-          <ComboboxInput
-            id="space-status"
-            aria-label="Filtrar por turno"
-            placeholder="Todos os turnos"
-            className="w-full"
-            showClear={false}
-          />
-          <ComboboxContent>
-            <ComboboxEmpty>Nenhum turno encontrado.</ComboboxEmpty>
-            <ComboboxList>
-              {(item) => (
-                <ComboboxItem key={item} value={item}>
-                  <ComboboxValue>{item}</ComboboxValue>
-                </ComboboxItem>
-              )}
-            </ComboboxList>
-          </ComboboxContent>
-        </Combobox>
-      </Field>
-
-      <Field className="w-full">
-        <FieldLabel htmlFor="space-status" className="font-bold">
-          Status
-        </FieldLabel>
-        <Combobox items={statuses} value={status} onValueChange={(value) => setStatus(value ?? statuses[0])}>
-          <ComboboxInput
-            id="space-status"
-            aria-label="Filtrar por status"
-            placeholder="Todos os status"
-            className="w-full"
-            showClear={false}
-          />
-          <ComboboxContent>
-            <ComboboxEmpty>Nenhum status encontrado.</ComboboxEmpty>
-            <ComboboxList>
-              {(item) => (
-                <ComboboxItem key={item} value={item}>
-                  <ComboboxValue>{item}</ComboboxValue>
-                </ComboboxItem>
-              )}
-            </ComboboxList>
-          </ComboboxContent>
-        </Combobox>
-      </Field>
-
+    <SearchPanel>
+      <FilterSelect
+        id="schedule-shift"
+        label="Turno"
+        options={shiftOptions}
+        value={shift}
+        onValueChange={setShift}
+        className="w-full"
+      />
+      <FilterSelect
+        id="schedule-status"
+        label="Status"
+        options={statusOptions}
+        value={enabled}
+        onValueChange={setEnabled}
+        className="w-full"
+      />
       <Button className="w-full shrink-0 lg:w-auto" type="button" onClick={onAddNewSchedule}>
         <PlusIcon />
-        Adicionar Horario
+        Adicionar horário
       </Button>
-    </div>
+    </SearchPanel>
   );
 }
