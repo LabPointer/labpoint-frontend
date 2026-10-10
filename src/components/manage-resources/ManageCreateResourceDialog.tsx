@@ -43,7 +43,7 @@ export function ManageCreateResourceDialog({ isOpen, onClose, onSubmit }: Manage
   return (
     <Dialog
       open={isOpen}
-      onOpenChange={(open, eventDetails) => {
+      onOpenChange={(open) => {
         if (open === false) {
           form.reset();
           onClose();

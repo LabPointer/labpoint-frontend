@@ -1,4 +1,4 @@
-import { QueryErrorResetBoundary, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
 import { ErrorBoundary, getErrorMessage } from "react-error-boundary";
@@ -41,29 +41,6 @@ function RouteComponent() {
     canReserve: undefined,
     enabled: undefined,
   });
-
-  function handleFilters(filters: ResourceFilters) {
-    setSearchFilter(filters);
-  }
-
-  function handleCreateResourceDialog() {
-    setIsCreateResourceDialogOpen(true);
-  }
-
-  function handleEditResourceDialog(data: ManageEditResourceData) {
-    setEditResourceProps({
-      data: {
-        id: data.id,
-        name: data.name,
-        canReserve: data.canReserve,
-        enabled: data.enabled,
-      },
-      isOpen: isEditResourceDialogOpen,
-      onSubmit: handleEditSubmit,
-      onClose: () => setIsEditResourceDialogOpen(false),
-    });
-    setIsEditResourceDialogOpen(true);
-  }
 
   async function handleCreateSubmit(data: ManageCreateResourceData) {
     const res = await api.POST("/resource/admin/create", {
@@ -137,7 +114,6 @@ function RouteComponent() {
       },
     });
     setIsEditResourceDialogOpen(false);
-    
     queryClient.invalidateQueries({ queryKey: ["resource-data"] });
   }
 
@@ -156,7 +132,13 @@ function RouteComponent() {
       />
 
       <section className="container mb-8">
-        <ManageResourceSearchBar onSearch={handleFilters} onAddNewResource={handleCreateResourceDialog} />
+        <ManageResourceSearchBar
+          onSearch={(filters) => {
+            setSearchFilter(filters);
+            queryClient.invalidateQueries({ queryKey: ["resource-data"] });
+          }}
+          onAddNewResource={() => setIsCreateResourceDialogOpen(true)}
+        />
       </section>
 
       <section className="container">
@@ -171,14 +153,21 @@ function RouteComponent() {
           <Suspense fallback={<div className="text-center font-bold animate-pulse">Carregando recursos...</div>}>
             <ManageResourceTableRow
               props={searchFilter}
-              onEdit={(data) =>
-                handleEditResourceDialog({
-                  id: data.id,
-                  name: data.name,
-                  canReserve: data.canReserve,
-                  enabled: data.enabled,
-                })
-              }
+              onEdit={(data) => {
+                setEditResourceProps({
+                  data: {
+                    id: data.id,
+                    name: data.name,
+                    canReserve: data.canReserve,
+                    enabled: data.enabled,
+                  },
+                  isOpen: isEditResourceDialogOpen,
+                  onSubmit: handleEditSubmit,
+                  onClose: () => setIsEditResourceDialogOpen(false),
+                });
+
+                setIsEditResourceDialogOpen(true);
+              }}
             />
           </Suspense>
         </ErrorBoundary>

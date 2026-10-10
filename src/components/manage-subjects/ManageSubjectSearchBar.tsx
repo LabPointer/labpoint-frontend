@@ -1,3 +1,4 @@
+import { useDebounce } from "ahooks";
 import { PlusIcon, SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
@@ -12,17 +13,16 @@ import {
 import { Field, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Button } from "../ui/button";
-import { useDebounce } from "ahooks";
 
 const statusRecord: Record<string, boolean | undefined> = {
   "Todos os status": undefined,
-  "Ativo": true,
-  "Inativo": false,
+  Ativo: true,
+  Inativo: false,
 };
 
 export type SubjectFilters = {
   search: string;
-  status: boolean | undefined;
+  enabled: boolean | undefined;
 };
 
 type SubjectSearchBarProps = {
@@ -35,14 +35,11 @@ export function ManageSubjectSearchBar({ onSearch, onAddNewSubject }: SubjectSea
   const statuses = ["Todos os status", "Ativo", "Inativo"];
   const [status, setStatus] = useState(statuses[0]);
 
-  const debouncedFilters = useDebounce(
-    { search, status: statusRecord[status] } as SubjectFilters,
-    { wait: 500 },
-  );
+  const debouncedFilters = useDebounce({ search, enabled: statusRecord[status] } as SubjectFilters, { wait: 500 });
 
   useEffect(() => {
     onSearch(debouncedFilters);
-  }, [debouncedFilters]);
+  }, [debouncedFilters.search, debouncedFilters.enabled]);
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border bg-white p-4 shadow-md hover:shadow-lg dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15">

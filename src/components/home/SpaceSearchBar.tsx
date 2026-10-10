@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "ahooks";
 import { addDays, addYears, endOfYear, format, startOfToday, startOfTomorrow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Filter, SearchIcon, Users } from "lucide-react";
+import { Anchor, CalendarIcon, Filter, SearchIcon, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { ApiError } from "#/lib/types/error-types";
@@ -32,7 +32,6 @@ const steps = 10;
 
 export type ResourceItem = {
   name: string;
-  description: string;
 };
 
 export type SpaceSearchFilters = {
@@ -111,11 +110,11 @@ function subjectQuery(name: string, enabled: boolean) {
       const { response, data, error } = res;
 
       if (!response.ok && error) {
-        throw new ApiError("Erro ao buscar recursos.", response.status, error?.logout ?? false);
+        throw new ApiError("Erro ao buscar matérias.", response.status, error?.logout ?? false);
       }
 
       if (!data) {
-        throw new ApiError("Erro ao buscar recursos.", response.status, error?.logout ?? false);
+        throw new ApiError("Erro ao buscar matérias.", response.status, error?.logout ?? false);
       }
 
       return data;
@@ -167,7 +166,7 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
       setResourceMap((prev) => {
         const next = new Map(prev);
         Object.values(resourceData).forEach((item) => {
-          next.set(Number(item.id), { name: item.name, description: item.description });
+          next.set(Number(item.id), { name: item.name });
         });
         return next;
       });
@@ -260,7 +259,7 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
     schedules: selectedSchedule,
   };
 
-  const debouncedFilters = useDebounce(currentFilters, { wait: 1000 });
+  const debouncedFilters = useDebounce(currentFilters, { wait: 500 });
 
   useEffect(() => {
     if (onSearch) {
@@ -346,7 +345,7 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
                 inputValue={resourceName}
                 onInputValueChange={setResourceName}
                 itemToStringLabel={(id: number) =>
-                  resourceMap.get(id) ? `${resourceMap.get(id)?.name} ${resourceMap.get(id)?.description}` : String(id)
+                  resourceMap.get(id) ? `${resourceMap.get(id)?.name}` : String(id)
                 }
                 disabled={isResourceCriticalError}
               >
@@ -369,7 +368,7 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
                     disabled={isResourceCriticalError}
                   />
                 </ComboboxChips>
-                <ComboboxContent>
+                <ComboboxContent className={"w-full"}>
                   <ComboboxEmpty>
                     {isResourceFirstLoading ? "Carregando..." : "Nenhum equipamento encontrado."}
                   </ComboboxEmpty>

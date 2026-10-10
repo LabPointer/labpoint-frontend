@@ -18,7 +18,6 @@ function resourceQuery({ search, canReserve, enabled }: ResourceFilters) {
   const query = useSuspenseQuery({
     queryKey: ["resource-data", search, canReserve, enabled],
     queryFn: async () => {
-        console.log("Fetching resources with filters:", { search, canReserve, enabled });
       const res = await api.GET("/resource", {
         params: {
           query: {
@@ -37,11 +36,7 @@ function resourceQuery({ search, canReserve, enabled }: ResourceFilters) {
         throw new ApiError(error.message, response.status, error.logout);
       }
 
-      if (!data) {
-        throw new ApiError("Nenhum recurso encontrado", 404, false);
-      }
-
-      return data;
+      return data ?? [];
     },
   });
 

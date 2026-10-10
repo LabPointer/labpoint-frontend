@@ -2046,6 +2046,7 @@ export interface components {
             username: string;
             email: string;
             role: components["schemas"]["EAccountRole"];
+            subject: null | components["schemas"]["SubjectResponseDTO"];
             enabled: boolean;
         };
         AdminAccountEditRequestDTO: {

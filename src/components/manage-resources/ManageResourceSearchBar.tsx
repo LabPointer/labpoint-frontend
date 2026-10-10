@@ -51,7 +51,7 @@ export function ManageResourceSearchBar({ onSearch, onAddNewResource }: Resource
 
   useEffect(() => {
     onSearch(debouncedFilters);
-  }, [debouncedFilters]);
+  }, [debouncedFilters.search, debouncedFilters.canReserve, debouncedFilters.enabled]);
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border bg-white p-4 shadow-md hover:shadow-lg dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15">
