@@ -1,3 +1,4 @@
+import { useDebounce } from "ahooks";
 import { PlusIcon, SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
@@ -12,7 +13,6 @@ import {
 import { Field, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Button } from "../ui/button";
-import { useDebounce } from "ahooks";
 
 const statusRecord: Record<string, boolean | undefined> = {
   "Todos os status": undefined,
@@ -20,7 +20,7 @@ const statusRecord: Record<string, boolean | undefined> = {
   "Inativo": false,
 };
 
-const canBeReservedRecord: Record<string, boolean | undefined> = {
+const canReserveRecord: Record<string, boolean | undefined> = {
   "Todos os status": undefined,
   "Sim": true,
   "Não": false,
@@ -28,8 +28,8 @@ const canBeReservedRecord: Record<string, boolean | undefined> = {
 
 export type ResourceFilters = {
   search: string;
-  canBeReserved: boolean | undefined;
-  status: boolean | undefined;
+  canReserve: boolean | undefined;
+  enabled: boolean | undefined;
 };
 
 type ResourceSearchBarProps = {
@@ -39,13 +39,13 @@ type ResourceSearchBarProps = {
 
 export function ManageResourceSearchBar({ onSearch, onAddNewResource }: ResourceSearchBarProps) {
   const [search, setSearch] = useState("");
-  const canBeReservedOptions = ["Todos os status", "Sim", "Não"];
-  const [canBeReserved, setCanBeReserved] = useState(canBeReservedOptions[0]);
+  const canReserveOptions = ["Todos os status", "Sim", "Não"];
+  const [canReserve, setCanReserve] = useState(canReserveOptions[0]);
   const statuses = ["Todos os status", "Ativo", "Inativo"];
   const [status, setStatus] = useState(statuses[0]);
 
   const debouncedFilters = useDebounce(
-    { search, status: statusRecord[status], canBeReserved: canBeReservedRecord[canBeReserved] } as ResourceFilters,
+    { search, enabled: statusRecord[status], canReserve: canReserveRecord[canReserve] } as ResourceFilters,
     { wait: 500 },
   );
 
@@ -76,9 +76,9 @@ export function ManageResourceSearchBar({ onSearch, onAddNewResource }: Resource
           Pode reservar
         </FieldLabel>
         <Combobox
-          items={canBeReservedOptions}
-          value={canBeReserved}
-          onValueChange={(value) => setCanBeReserved(value ?? canBeReservedOptions[0])}
+          items={canReserveOptions}
+          value={canReserve}
+          onValueChange={(value) => setCanReserve(value ?? canReserveOptions[0])}
         >
           <ComboboxInput
             id="space-status"

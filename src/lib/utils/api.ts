@@ -189,7 +189,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/account/admin/edit/{accountId}": {
+    "/account/admin/edit": {
         parameters: {
             query?: never;
             header?: never;
@@ -210,9 +210,7 @@ export interface paths {
             parameters: {
                 query?: never;
                 header?: never;
-                path: {
-                    accountId: string;
-                };
+                path?: never;
                 cookie?: never;
             };
             requestBody: {
@@ -598,7 +596,7 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    SearchQuery?: string;
+                    Name?: string;
                     CanReserve?: boolean;
                     Enabled?: boolean;
                     Limit?: number | string;
@@ -2048,8 +2046,10 @@ export interface components {
             username: string;
             email: string;
             role: components["schemas"]["EAccountRole"];
+            enabled: boolean;
         };
         AdminAccountEditRequestDTO: {
+            id: string;
             registration: null | string;
             username: null | string;
             role: null | components["schemas"]["EAccountRole"];

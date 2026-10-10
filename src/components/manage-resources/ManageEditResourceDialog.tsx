@@ -10,7 +10,7 @@ import { InputGroup, InputGroupAddon, InputGroupText, InputGroupTextarea } from 
 export type ManageEditResourceData = {
   id: number;
   name: string;
-  canBeReserved: boolean;
+  canReserve: boolean;
   enabled: boolean;
 };
 
@@ -23,16 +23,16 @@ export type ManageEditResourceDialogProps = {
 
 const formSchema = z.object({
   name: z.string().max(100, "Nome deve ter no máximo 100 caracteres."),
-  canBeReserved: z.boolean(),
+  canReserve: z.boolean(),
   enabled: z.boolean(),
 });
 
 export function ManageEditResourceDialog({ data, isOpen, onClose, onSubmit }: ManageEditResourceDialogProps) {
-  const { name, canBeReserved, enabled } = data;
+  const { name, canReserve: canReserved, enabled } = data;
   const form = useForm({
     defaultValues: {
       name: "",
-      canBeReserved,
+      canReserve: canReserved,
       enabled: enabled,
     },
     validators: {
@@ -42,9 +42,11 @@ export function ManageEditResourceDialog({ data, isOpen, onClose, onSubmit }: Ma
       await onSubmit({
         id: data.id,
         name: value.name,
-        canBeReserved: value.canBeReserved,
+        canReserve: value.canReserve,
         enabled: value.enabled,
       });
+
+      form.reset();
     },
   });
 
@@ -97,7 +99,7 @@ export function ManageEditResourceDialog({ data, isOpen, onClose, onSubmit }: Ma
               }}
             />
             <form.Field
-              name="canBeReserved"
+              name="canReserve"
               children={(field) => {
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
