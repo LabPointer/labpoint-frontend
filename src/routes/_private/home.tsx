@@ -19,15 +19,21 @@ function RouteComponent() {
   // A barra de pesquisa emite os filtros iniciais na montagem; a query só roda depois disso.
   const [filters, setFilters] = useState<SpaceSearchFilters | null>(null);
 
+  // O backend valida Capacity em 10..200 (fora disso responde 400): só enviamos quando válida.
+  const capacity = filters && filters.minimumCapacity >= 10 ? Math.min(filters.minimumCapacity, 200) : undefined;
+  // Disponibilidade é calculada por horário: sem horários escolhidos, não enviamos o período
+  // (senão o backend esconde qualquer espaço que tenha alguma reserva na janela).
+  const checkAvailability = Boolean(filters && filters.schedules.length > 0);
+
   const spaces = useSpaces(
     {
       search: filters?.searchQuery,
-      capacity: filters?.minimumCapacity,
+      capacity,
       resources: filters?.resources,
       subjects: filters?.subjects,
-      schedules: filters?.schedules,
-      startAt: filters ? format(filters.startDate, "yyyy-MM-dd") : undefined,
-      endAt: filters ? format(filters.endDate, "yyyy-MM-dd") : undefined,
+      schedules: checkAvailability ? filters?.schedules : undefined,
+      startAt: checkAvailability && filters ? format(filters.startDate, "yyyy-MM-dd") : undefined,
+      endAt: checkAvailability && filters ? format(filters.endDate, "yyyy-MM-dd") : undefined,
     },
     { enabled: filters !== null },
   );

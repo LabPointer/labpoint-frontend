@@ -94,11 +94,11 @@ export function ReservationEventPopup({ data, trigger }: ReservationEventPopupPr
 // Cor de fundo do header do popup, derivada do status
 function getStatusBgColor(status: ReservationEventData["status"]): string {
   const map: Record<string, string> = {
+    BOOKING: "var(--color-amber-500)",
     CONFIRMED: "var(--color-emerald-500)",
-    PENDING: "var(--color-amber-500)",
-    ABSENT: "var(--color-orange-500)",
-    LOCKED: "var(--color-blue-500)",
     CANCELED: "var(--color-rose-500)",
+    REJECTED: "var(--color-orange-500)",
+    BLOCKED: "var(--color-blue-500)",
   };
   return map[status] ?? "var(--color-slate-500)";
 }

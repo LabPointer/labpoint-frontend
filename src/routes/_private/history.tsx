@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_private/history")({
 const tabs: { value: ReserveTab; label: string }[] = [
   { value: "next", label: "Próximas" },
   { value: "concluded", label: "Concluídas" },
-  { value: "canceled", label: "Canceladas" },
+  { value: "canceled", label: "Canceladas e recusadas" },
 ];
 
 function RouteComponent() {

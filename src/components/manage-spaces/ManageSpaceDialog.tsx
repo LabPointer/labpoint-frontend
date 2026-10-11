@@ -31,7 +31,11 @@ const optionSchema = z.object({ id: z.number(), name: z.string() });
 
 const formSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório.").max(100, "Nome deve ter no máximo 100 caracteres."),
-  description: z.string(),
+  description: z
+    .string()
+    .trim()
+    .min(1, "Descrição é obrigatória.")
+    .max(200, "Descrição deve ter no máximo 200 caracteres."),
   capacity: z
     .number("Capacidade deve ser um número.")
     .int("Capacidade deve ser um número inteiro.")
@@ -127,20 +131,26 @@ export function ManageSpaceDialog({ mode, space, open, onClose, onSubmit }: Mana
       </form.Field>
 
       <form.Field name="description">
-        {(field) => (
-          <Field>
-            <FieldLabel htmlFor={`${mode}-space-description`}>Descrição</FieldLabel>
-            <Textarea
-              id={`${mode}-space-description`}
-              name={field.name}
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(event) => field.handleChange(event.target.value)}
-              placeholder="Descrição do espaço..."
-              rows={3}
-            />
-          </Field>
-        )}
+        {(field) => {
+          const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor={`${mode}-space-description`}>Descrição</FieldLabel>
+              <Textarea
+                id={`${mode}-space-description`}
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(event) => field.handleChange(event.target.value)}
+                aria-invalid={isInvalid}
+                placeholder="Descrição do espaço..."
+                rows={3}
+                maxLength={200}
+              />
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          );
+        }}
       </form.Field>
 
       <form.Field name="resources">

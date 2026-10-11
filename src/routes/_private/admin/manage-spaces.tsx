@@ -40,7 +40,7 @@ function RouteComponent() {
     const ok = await succeeded(
       createSpace.mutateAsync({
         name: data.name,
-        description: data.description,
+        description: data.description.trim(),
         capacity: data.capacity,
         locked: !data.enabled,
         subjects: data.subjects.map((subject) => subject.id),
@@ -58,7 +58,7 @@ function RouteComponent() {
       editSpace.mutateAsync({
         id: space.id,
         name: data.name,
-        description: data.description,
+        description: data.description.trim(),
         capacity: data.capacity,
         locked: !data.enabled,
         subjects: data.subjects.map((subject) => subject.id),

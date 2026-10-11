@@ -36,7 +36,7 @@ type SpaceReserveModalProps = {
   onSubmit: (data: SpaceReserveFormData) => Promise<void>;
 };
 
-const PURPOSE_MAX = 100;
+const PURPOSE_MAX = 200;
 
 const formSchema = z.object({
   range: z

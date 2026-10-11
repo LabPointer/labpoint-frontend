@@ -16,7 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 // restrições de capacidade
 const MIN_CAPACITY = 10;
-const MAX_CAPACITY = 300;
+const MAX_CAPACITY = 200;
 const CAPACITY_STEP = 10;
 const DEFAULT_CAPACITY = 20;
 

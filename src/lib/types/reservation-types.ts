@@ -1,7 +1,7 @@
 import type { Schedule } from "#/lib/queries/schedules";
 
 /** Status de uma reserva, em texto (convertido de `EReserveStatus` por `statusFromNumber`). */
-export type ReservationStatus = "CONFIRMED" | "PENDING" | "ABSENT" | "LOCKED" | "CANCELED";
+export type ReservationStatus = "BOOKING" | "CONFIRMED" | "CANCELED" | "REJECTED" | "BLOCKED";
 
 /** Dados extras armazenados em CalendarEvent.data para eventos de reserva */
 export interface ReservationEventData {
