@@ -1,264 +1,108 @@
-import { useForm } from "@tanstack/react-form";
-import { useQuery } from "@tanstack/react-query";
-import { addDays, format, parseISO, startOfDay } from "date-fns";
-import { CalendarIcon, PencilIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
+import { parseISO } from "date-fns";
+import { useMemo } from "react";
 import type { DateRange } from "react-day-picker";
-import { toast } from "sonner";
 import z from "zod";
-import { useApi } from "#/lib/utils/restapi";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import type { Reserve } from "#/lib/queries/reserves";
+import { scheduleLabel, sortSchedules } from "#/lib/queries/schedules";
+import { DateRangeField, firstAvailableDate } from "@/components/reserve/DateRangeField";
+import { ReserveScheduleField } from "@/components/reserve/ReserveScheduleField";
+import { FormDialog } from "@/components/shared/FormDialog";
+import type { RemoteOption } from "@/components/shared/RemoteCombobox";
 
-
-// Props
-
-export type HistoryEditModalProps = {
-  /** ID da reserva a ser editada */
-  id: number;
-  /** Nome do espaço reservado (ex: "Sala 101") */
-  name: string;
-  /** Descrição/propósito da reserva (ex: "Workshop de Desenvolvimento Web") */
-  description: string;
-  /** Controla se o modal está aberto ou fechado */
-  open: boolean;
-  /** Callback chamado ao abrir ou fechar o modal */
-  onOpenChange: (open: boolean) => void;
+export type HistoryEditFormData = {
+  range: DateRange;
+  schedules: RemoteOption[];
 };
 
-// Validação
-
-const tomorrow = startOfDay(addDays(new Date(), 1));
+type HistoryEditModalProps = {
+  reserve: Reserve;
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (data: HistoryEditFormData) => Promise<void>;
+};
 
 const formSchema = z.object({
-  dateFrom: z.date("Selecione a data de início."),
-  dateTo: z.date("Selecione a data de término."),
+  range: z
+    .custom<DateRange | undefined>()
+    .refine((range) => Boolean(range?.from), "Selecione a data da reserva.")
+    .refine(
+      (range) => !range?.from || range.from >= firstAvailableDate(),
+      "A nova data deve começar a partir de amanhã.",
+    ),
+  schedules: z.array(z.object({ id: z.number(), name: z.string() })).min(1, "Selecione pelo menos um horário."),
 });
 
-// Componentes
+/**
+ * Altera período e horários de uma reserva. Os valores iniciais vêm da própria reserva (já carregada
+ * na listagem), então não há mais busca de "date-info". O pai deve remontar o modal (`key`) a cada abertura.
+ */
+export function HistoryEditModal({ reserve, open, onClose, onSubmit }: HistoryEditModalProps) {
+  const ownScheduleIds = useMemo(() => reserve.schedules.map((schedule) => Number(schedule.id)), [reserve.schedules]);
 
-export function HistoryEditModal({ id, name, description, open, onOpenChange }: HistoryEditModalProps) {
-  const api = useApi();
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
-
-  // Busca as datas atuais da reserva ao abrir o modal
-  const { data, isLoading: isLoadingDates, isError } = useQuery({
-    queryKey: ["reserve-date-info", id],
-    queryFn: async () => {
-      const res = await api.GET("/reserve/date-info/{reserveId}", {
-        params: { path: { reserveId: id } },
-      });
-
-      const { response, data, error } = res;
-
-      if (!response.ok && error) {
-        toast.error(`Erro ${response.status}: ${error.message}`, {
-          duration: 3000,
-          position: "bottom-center",
-          style: {
-            color: "white",
-            backgroundColor: "red",
-            borderColor: "red",
-          },
-        });
-        throw error;
-      }
-
-      return data;
-    },
-    enabled: open,
-  });
-
-  useEffect(() => {
-    if (isError) {
-      toast.error("Erro ao carregar informações da reserva.", {
-        duration: 3000,
-        position: "bottom-center",
-        style: {
-          color: "white",
-          backgroundColor: "red",
-          borderColor: "red",
-        },
-      });
-    }
-    if (!isLoadingDates && data) {
-      const from = parseISO(data.dateFrom);
-      const to = parseISO(data.dateTo);
-      setDateRange({ from, to });
-      form.setFieldValue("dateFrom", from);
-      form.setFieldValue("dateTo", to);
-    }
-  }, [isLoadingDates, data]);
-
-  // Formulário
   const form = useForm({
     defaultValues: {
-      dateFrom: new Date(),
-      dateTo: new Date(),
+      range: { from: parseISO(reserve.dateFrom), to: parseISO(reserve.dateTo) } as DateRange | undefined,
+      schedules: sortSchedules(reserve.schedules).map((schedule) => ({
+        id: Number(schedule.id),
+        name: scheduleLabel(schedule),
+      })) as RemoteOption[],
     },
-    validators: {
-      onSubmit: formSchema,
-    },
+    validators: { onSubmit: formSchema },
     onSubmit: async ({ value }) => {
-      const res = await api.PATCH("/reserve/edit-date/{reserveId}", {
-        params: { path: { reserveId: id } },
-        body: {
-          dateFrom: format(value.dateFrom, "yyyy-MM-dd"),
-          dateTo: format(value.dateTo, "yyyy-MM-dd"),
-        },
-      });
-
-      const { response, error } = res;
-
-      if (!response.ok && error) {
-        toast.error(`Erro ${response.status}: ${error.message}`, {
-          duration: 3000,
-          position: "bottom-center",
-          style: { color: "white", backgroundColor: "red", borderColor: "red" },
-        });
-        return;
-      }
-
-      toast.success("Data da reserva atualizada com sucesso!", {
-        duration: 3000,
-        position: "bottom-center",
-        style: { color: "white", backgroundColor: "green", borderColor: "green" },
-      });
-      handleClose();
+      if (!value.range?.from) return;
+      await onSubmit({ range: value.range, schedules: value.schedules });
     },
   });
-
-  // Handlers 
-
-  function handleClose() {
-    form.reset();
-    setDateRange(undefined);
-    onOpenChange(false);
-  }
-
-  function handleDateSelect(range: DateRange | undefined) {
-    setDateRange(range);
-    if (range?.from) form.setFieldValue("dateFrom", range.from);
-    if (range?.to) form.setFieldValue("dateTo", range.to);
-  }
-
-  // Render
+  const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
   return (
-    <Dialog open={open} onOpenChange={(next) => !next && handleClose()}>
-      <DialogContent className="sm:max-w-md bg-white/70 dark:bg-black/70 backdrop-blur-xl rounded-md border dark:border-violet-500/10 shadow-md hover:shadow-lg p-4 dark:shadow-violet-300/15">
-        {/* ── Cabeçalho ── */}
-        <DialogHeader>
-          <DialogTitle>
-            <div className="flex items-center gap-2">
-              <PencilIcon className="text-purple-600 dark:text-purple-400" size={18} />
-              <span>Alterar data da reserva</span>
-            </div>
-          </DialogTitle>
-
-          {/* Identificação da reserva: nome — descrição */}
-          <DialogDescription>
-            <p className="text-xs text-muted-foreground">
-              {name} — {description}
-            </p>
-          </DialogDescription>
-        </DialogHeader>
-
-        {/* Formulário*/}
-        <form
-          id="history-edit-form"
-          name="history-edit-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            form.handleSubmit();
-          }}
-        >
-          <FieldGroup>
-            <form.Field
-              name="dateFrom"
-              children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-
-                return (
-                  <Field>
-                    <FieldLabel htmlFor="history-date-picker-range">Nova data</FieldLabel>
-
-                    {/* Date range picker desabilitado até a API retornar os dados */}
-                    <Popover>
-                      <PopoverTrigger
-                        render={
-                          <Button
-                            variant="outline"
-                            id="history-date-picker-range"
-                            className="justify-start px-2.5 font-normal w-full"
-                            disabled={isLoadingDates || isError}
-                          >
-                            <CalendarIcon data-icon="inline-start" />
-                            {isLoadingDates ? (
-                              <span className="text-muted-foreground">Carregando datas...</span>
-                            ) : isError ? (
-                              <span className="text-muted-foreground">Erro ao carregar datas</span>
-                            ) : dateRange?.from ? (
-                              dateRange.to ? (
-                                <>
-                                  {format(dateRange.from, "dd/MM/yyyy")} - {format(dateRange.to, "dd/MM/yyyy")}
-                                </>
-                              ) : (
-                                format(dateRange.from, "dd/MM/yyyy")
-                              )
-                            ) : (
-                              <span className="text-muted-foreground">Selecione o período</span>
-                            )}
-                          </Button>
-                        }
-                      />
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="range"
-                          defaultMonth={dateRange?.from ?? tomorrow}
-                          selected={dateRange}
-                          disabled={{ before: tomorrow }}
-                          onSelect={handleDateSelect}
-                          numberOfMonths={1}
-                        />
-                      </PopoverContent>
-                    </Popover>
-
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                  </Field>
-                );
-              }}
-            />
-          </FieldGroup>
-        </form>
-
-        {/* Rodapé com CTA */}
-        <DialogFooter className="flex bg-transparent border-t pt-2">
-          <Button type="button" variant="outline" onClick={handleClose}>
-            Cancelar
-          </Button>
-
-          {/* Botão desabilitado enquanto carrega datas ou o formulário está submetendo */}
-          <form.Subscribe
-            selector={(state) => [state.isSubmitting]}
-            children={([isSubmitting]) => (
-              <Button type="submit" form="history-edit-form" disabled={isLoadingDates || isSubmitting || isError}>
-                Salvar
-              </Button>
-            )}
+    <FormDialog
+      open={open}
+      onClose={() => {
+        form.reset();
+        onClose();
+      }}
+      title="Alterar reserva"
+      description={`${reserve.space.name} — ${reserve.purpose}`}
+      formId="history-edit-form"
+      submitLabel="Salvar"
+      isSubmitting={isSubmitting}
+      onSubmit={() => form.handleSubmit()}
+      onReset={() => form.reset()}
+    >
+      <form.Field name="range">
+        {(field) => (
+          <DateRangeField
+            id="history-date-range"
+            label="Nova data"
+            value={field.state.value}
+            errors={field.state.meta.isTouched ? field.state.meta.errors : undefined}
+            onChange={(range) => {
+              field.handleChange(range);
+              form.setFieldValue("schedules", []);
+            }}
           />
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        )}
+      </form.Field>
+
+      <form.Subscribe selector={(state) => state.values.range}>
+        {(range) => (
+          <form.Field name="schedules">
+            {(field) => (
+              <ReserveScheduleField
+                id="history-schedules"
+                spaceId={Number(reserve.space.id)}
+                range={range}
+                ownScheduleIds={ownScheduleIds}
+                value={field.state.value}
+                onChange={field.handleChange}
+                errors={field.state.meta.isTouched ? field.state.meta.errors : undefined}
+              />
+            )}
+          </form.Field>
+        )}
+      </form.Subscribe>
+    </FormDialog>
   );
 }

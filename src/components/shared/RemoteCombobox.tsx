@@ -70,9 +70,11 @@ export function RemoteCombobox({
 
   return (
     <Field className={className}>
-      <FieldLabel htmlFor={id} className="font-bold">
-        {label}
-      </FieldLabel>
+      {label && (
+        <FieldLabel htmlFor={id} className="font-bold">
+          {label}
+        </FieldLabel>
+      )}
       <Combobox
         items={items}
         value={selected}
@@ -109,6 +111,7 @@ type MultiProps = Omit<CommonProps, "onSearchChange"> & {
   onValueChange: (value: RemoteOption[]) => void;
   /** Sem `onSearchChange` o filtro é feito localmente (listas pequenas e já carregadas). */
   onSearchChange?: (text: string) => void;
+  disabled?: boolean;
 };
 
 export function RemoteMultiCombobox({
@@ -122,6 +125,7 @@ export function RemoteMultiCombobox({
   onValueChange,
   placeholder,
   emptyText,
+  disabled,
   className,
 }: MultiProps) {
   const anchor = useComboboxAnchor();
@@ -135,12 +139,15 @@ export function RemoteMultiCombobox({
 
   return (
     <Field className={className}>
-      <FieldLabel htmlFor={id} className="font-bold">
-        {label}
-      </FieldLabel>
+      {label && (
+        <FieldLabel htmlFor={id} className="font-bold">
+          {label}
+        </FieldLabel>
+      )}
       <Combobox
         multiple
         autoHighlight
+        disabled={disabled}
         items={items}
         value={value}
         onValueChange={onValueChange}

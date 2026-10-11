@@ -1,9 +1,11 @@
+import { PlusIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
 import { ResourceMultiSelect, SubjectMultiSelect } from "@/components/shared/entity-selects";
 import { type FilterOption, FilterSelect } from "@/components/shared/FilterSelect";
 import type { RemoteOption } from "@/components/shared/RemoteCombobox";
 import { SearchPanel, SearchTextField } from "@/components/shared/SearchPanel";
+import { Button } from "@/components/ui/button";
 
 export type SpaceFilters = {
   search: string;
@@ -21,9 +23,10 @@ const statusOptions: FilterOption<boolean | undefined>[] = [
 
 type ManageSpaceSearchBarProps = {
   onSearch: (filters: SpaceFilters) => void;
+  onAddNewSpace: () => void;
 };
 
-export function ManageSpaceSearchBar({ onSearch }: ManageSpaceSearchBarProps) {
+export function ManageSpaceSearchBar({ onSearch, onAddNewSpace }: ManageSpaceSearchBarProps) {
   const [search, setSearch] = useState("");
   const [subjects, setSubjects] = useState<RemoteOption[]>([]);
   const [resources, setResources] = useState<RemoteOption[]>([]);
@@ -55,7 +58,13 @@ export function ManageSpaceSearchBar({ onSearch }: ManageSpaceSearchBarProps) {
 
       <div className="grid gap-4 md:grid-cols-3">
         <SubjectMultiSelect id="space-subjects" label="Matérias" value={subjects} onValueChange={setSubjects} />
-        <ResourceMultiSelect id="space-resources" label="Recursos" value={resources} onValueChange={setResources} />
+        <ResourceMultiSelect
+          id="space-resources"
+          label="Recursos"
+          canReserve={false}
+          value={resources}
+          onValueChange={setResources}
+        />
         <FilterSelect
           id="space-status"
           label="Status"
@@ -64,6 +73,11 @@ export function ManageSpaceSearchBar({ onSearch }: ManageSpaceSearchBarProps) {
           onValueChange={setLocked}
         />
       </div>
+
+      <Button className="w-full shrink-0 lg:w-auto" type="button" onClick={onAddNewSpace}>
+        <PlusIcon />
+        Adicionar espaço
+      </Button>
     </SearchPanel>
   );
 }

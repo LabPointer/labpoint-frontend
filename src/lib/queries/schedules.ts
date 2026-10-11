@@ -14,6 +14,19 @@ export const scheduleKeys = {
 
 export const shiftLabels: Record<number, string> = { 0: "Manhã", 1: "Tarde", 2: "Noite" };
 
+/** "07:30:00" → "07:30" */
+export const hhmm = (time: string) => time.slice(0, 5);
+
+/** "Manhã - 07:30 às 08:30" */
+export function scheduleLabel(schedule: Pick<Schedule, "shift" | "startAt" | "endAt">) {
+  return `${shiftLabels[schedule.shift] ?? "—"} - ${hhmm(schedule.startAt)} às ${hhmm(schedule.endAt)}`;
+}
+
+/** Ordena por turno e horário de início. */
+export function sortSchedules<T extends Pick<Schedule, "shift" | "startAt">>(schedules: T[]): T[] {
+  return [...schedules].sort((a, b) => a.shift - b.shift || a.startAt.localeCompare(b.startAt));
+}
+
 export function useSchedules(params: ScheduleParams = {}, options: { enabled?: boolean } = {}) {
   const { shift, enabled } = params;
 

@@ -1,6 +1,7 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { components } from "#/lib/utils/api";
-import { unwrapList } from "#/lib/utils/api-result";
+import { assertOk, unwrapList } from "#/lib/utils/api-result";
+import { notifyError, notifySuccess } from "#/lib/utils/notify";
 import { api } from "#/lib/utils/restapi";
 
 export type Space = components["schemas"]["SpaceResponseDTO"];
@@ -62,5 +63,33 @@ export function useSpaces(params: SpaceParams = {}, options: { enabled?: boolean
       ),
     enabled: options.enabled ?? true,
     placeholderData: keepPreviousData,
+  });
+}
+
+export function useCreateSpace() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (body: components["schemas"]["SpaceCreateRequestDTO"]) =>
+      assertOk(await api.POST("/space/admin/create", { body })),
+    onSuccess: () => {
+      notifySuccess("Espaço criado com sucesso!");
+      return queryClient.invalidateQueries({ queryKey: spaceKeys.all });
+    },
+    onError: notifyError,
+  });
+}
+
+export function useEditSpace() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (body: components["schemas"]["SpaceEditRequestDTO"]) =>
+      assertOk(await api.PATCH("/space/admin/edit", { body })),
+    onSuccess: () => {
+      notifySuccess("Espaço editado com sucesso!");
+      return queryClient.invalidateQueries({ queryKey: spaceKeys.all });
+    },
+    onError: notifyError,
   });
 }

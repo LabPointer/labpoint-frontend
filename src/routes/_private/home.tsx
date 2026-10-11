@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { useState } from "react";
+import { useFormDialog } from "#/hooks/use-form-dialog";
+import { toApiDate, useCreateReserve } from "#/lib/queries/reserves";
 import { useSpaces } from "#/lib/queries/spaces";
+import { succeeded } from "#/lib/utils/api-result";
 import { SpaceCard } from "@/components/home/SpaceCard";
-import { type SpaceProps, SpaceReserveModal } from "@/components/home/SpaceReserveModal";
+import { type SpaceProps, type SpaceReserveFormData, SpaceReserveModal } from "@/components/home/SpaceReserveModal";
 import { SpaceSearchBar, type SpaceSearchFilters } from "@/components/home/SpaceSearchBar";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
@@ -29,12 +32,26 @@ function RouteComponent() {
     { enabled: filters !== null },
   );
 
-  const [selectedSpace, setSelectedSpace] = useState<SpaceProps | null>(null);
-  const [isReserveOpen, setIsReserveOpen] = useState(false);
+  const createReserve = useCreateReserve();
+  const reserveDialog = useFormDialog<SpaceProps>();
+  const reservingSpace = reserveDialog.target;
 
-  function handleReserveSpace(spaceProps: SpaceProps) {
-    setSelectedSpace(spaceProps);
-    setIsReserveOpen(true);
+  async function handleReserve(data: SpaceReserveFormData) {
+    if (!reservingSpace || !data.range.from) return;
+
+    const ok = await succeeded(
+      createReserve.mutateAsync({
+        spaceId: reservingSpace.id,
+        body: {
+          startAt: toApiDate(data.range.from),
+          // sem fim selecionado = reserva de um único dia
+          endAt: toApiDate(data.range.to ?? data.range.from),
+          scheduleIds: data.schedules.map((schedule) => schedule.id),
+          purpose: data.purpose,
+        },
+      }),
+    );
+    if (ok) reserveDialog.close();
   }
 
   return (
@@ -42,7 +59,15 @@ function RouteComponent() {
       <section className="container mb-8">
         <SpaceSearchBar onSearch={setFilters} />
       </section>
-      {selectedSpace && <SpaceReserveModal {...selectedSpace} open={isReserveOpen} onOpenChange={setIsReserveOpen} />}
+      {reservingSpace && (
+        <SpaceReserveModal
+          key={reserveDialog.session}
+          space={reservingSpace}
+          open={reserveDialog.isOpen}
+          onClose={reserveDialog.close}
+          onSubmit={handleReserve}
+        />
+      )}
       <section className="container">
         <ResultsHeader title="Laboratórios" count={spaces.data?.length ?? 0} />
         <QueryBoundary
@@ -66,7 +91,7 @@ function RouteComponent() {
                   subjects={space.subjects.map((item) => ({ id: Number(item.id), name: item.name }))}
                   locked={space.locked}
                   onReserve={() =>
-                    handleReserveSpace({
+                    reserveDialog.open({
                       id: Number(space.id),
                       name: space.name,
                       capacity: Number(space.capacity),

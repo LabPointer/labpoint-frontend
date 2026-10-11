@@ -16,6 +16,8 @@ type FormDialogProps = {
   onClose: () => void;
   title: string;
   description: string;
+  /** Conteúdo extra logo abaixo da descrição (ex.: resumo do item sendo editado). */
+  headerExtra?: ReactNode;
   formId: string;
   submitLabel: string;
   isSubmitting?: boolean;
@@ -30,6 +32,7 @@ export function FormDialog({
   onClose,
   title,
   description,
+  headerExtra,
   formId,
   submitLabel,
   isSubmitting = false,
@@ -49,10 +52,11 @@ export function FormDialog({
         if (!nextOpen) onClose();
       }}
     >
-      <DialogContent className="rounded-md border bg-white/70 p-4 shadow-md backdrop-blur-xl hover:shadow-lg sm:max-w-md dark:border-violet-500/10 dark:bg-black/70 dark:shadow-violet-300/15">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto rounded-md border bg-white/70 p-4 shadow-md backdrop-blur-xl hover:shadow-lg sm:max-w-md dark:border-violet-500/10 dark:bg-black/70 dark:shadow-violet-300/15">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
+          {headerExtra}
         </DialogHeader>
 
         <form id={formId} onSubmit={handleSubmit}>
