@@ -12,13 +12,22 @@ import {
 type CancelReserveDialogProps = {
   open: boolean;
   spaceName: string;
+  /** Quando informado (admin), diz de quem é a reserva. */
+  userName?: string;
   isPending: boolean;
   onClose: () => void;
   onConfirm: () => void;
 };
 
 /** Confirmação antes de cancelar: a ação não pode ser desfeita. */
-export function CancelReserveDialog({ open, spaceName, isPending, onClose, onConfirm }: CancelReserveDialogProps) {
+export function CancelReserveDialog({
+  open,
+  spaceName,
+  userName,
+  isPending,
+  onClose,
+  onConfirm,
+}: CancelReserveDialogProps) {
   return (
     <AlertDialog
       open={open}
@@ -30,8 +39,8 @@ export function CancelReserveDialog({ open, spaceName, isPending, onClose, onCon
         <AlertDialogHeader>
           <AlertDialogTitle>Cancelar reserva?</AlertDialogTitle>
           <AlertDialogDescription>
-            A reserva de {spaceName} será cancelada e os horários voltarão a ficar disponíveis. Essa ação não pode ser
-            desfeita.
+            {userName ? `A reserva de ${userName} em ${spaceName}` : `A reserva de ${spaceName}`} será cancelada e os
+            horários voltarão a ficar disponíveis. Essa ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

@@ -2,11 +2,11 @@ import { Info, Pencil } from "lucide-react";
 import { memo } from "react";
 import { useFormDialog } from "#/hooks/use-form-dialog";
 import type { Space } from "#/lib/queries/spaces";
+import { InfoDialog } from "@/components/shared/InfoDialog";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { SpaceInfoDialog } from "./SpaceInfoDialog";
 
 type InfoKind = "description" | "subjects" | "resources";
 type InfoTarget = { space: Space; kind: InfoKind };
@@ -29,14 +29,14 @@ export function ManageSpaceTable({ spaces, onEdit }: ManageSpaceTableProps) {
   return (
     <>
       {target && (
-        <SpaceInfoDialog
+        <InfoDialog
           open={info.isOpen}
           onClose={info.close}
           title={`${infoTitles[target.kind]} · ${target.space.name}`}
           description={`${infoTitles[target.kind]} do espaço.`}
         >
           <SpaceInfoContent target={target} />
-        </SpaceInfoDialog>
+        </InfoDialog>
       )}
 
       <Table className="w-full border bg-white p-4 shadow-md hover:shadow-lg dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15">

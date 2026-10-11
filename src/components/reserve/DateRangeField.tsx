@@ -11,11 +11,19 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 export const firstAvailableDate = () => startOfDay(addDays(new Date(), 1));
 
 /** Período máximo de uma reserva, em dias. */
-const MAX_RANGE_DAYS = 30;
+const DEFAULT_MAX_RANGE_DAYS = 30;
 
 type DateRangeFieldProps = {
   id: string;
   label: string;
+  /** Primeiro dia selecionável. Padrão: amanhã. `null` = sem restrição (permite hoje e dias passados). */
+  minDate?: Date | null;
+  /** Último dia selecionável. Padrão: sem limite. */
+  maxDate?: Date;
+  /** Tamanho máximo do período, em dias. Padrão: 30. `null` = sem limite. */
+  maxDays?: number | null;
+  /** Texto de ajuda abaixo do campo. Padrão descreve o limite de dias; `null` oculta. */
+  hint?: string | null;
   value: DateRange | undefined;
   onChange: (range: DateRange | undefined) => void;
   errors?: ({ message?: string } | undefined)[];
@@ -24,14 +32,25 @@ type DateRangeFieldProps = {
 
 const fmt = (date: Date) => format(date, "dd/MM/yyyy", { locale: ptBR });
 
-export function DateRangeField({ id, label, value, onChange, errors, disabled }: DateRangeFieldProps) {
-  const minDate = firstAvailableDate();
+export function DateRangeField({
+  id,
+  label,
+  minDate: minDateProp,
+  maxDate,
+  maxDays = DEFAULT_MAX_RANGE_DAYS,
+  hint,
+  value,
+  onChange,
+  errors,
+  disabled,
+}: DateRangeFieldProps) {
+  const minDate = minDateProp === undefined ? firstAvailableDate() : minDateProp;
 
   function handleSelect(range: DateRange | undefined) {
     // limita o período a MAX_RANGE_DAYS a partir do início
     const clamped =
-      range?.from && range.to && range.to > addDays(range.from, MAX_RANGE_DAYS)
-        ? { from: range.from, to: addDays(range.from, MAX_RANGE_DAYS) }
+      maxDays !== null && range?.from && range.to && range.to > addDays(range.from, maxDays)
+        ? { from: range.from, to: addDays(range.from, maxDays) }
         : range;
     onChange(clamped);
   }
@@ -70,15 +89,22 @@ export function DateRangeField({ id, label, value, onChange, errors, disabled }:
           <Calendar
             mode="range"
             locale={ptBR}
-            defaultMonth={value?.from ?? minDate}
+            defaultMonth={value?.from ?? minDate ?? new Date()}
             selected={value}
-            disabled={{ before: minDate }}
+            disabled={[...(minDate ? [{ before: minDate }] : []), ...(maxDate ? [{ after: maxDate }] : [])]}
             onSelect={handleSelect}
             numberOfMonths={1}
           />
         </PopoverContent>
       </Popover>
-      <p className="text-xs text-muted-foreground">Selecione um dia ou um período de até {MAX_RANGE_DAYS} dias.</p>
+      {hint !== null && (
+        <p className="text-xs text-muted-foreground">
+          {hint ??
+            (maxDays === null
+              ? "Selecione um dia ou um período."
+              : `Selecione um dia ou um período de até ${maxDays} dias.`)}
+        </p>
+      )}
       {hasErrors && <FieldError errors={errors} />}
     </Field>
   );

@@ -4,9 +4,8 @@ import { CalendarIcon, Filter, SearchIcon, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
-import { shiftLabels, useSchedules } from "#/lib/queries/schedules";
-import { ResourceMultiSelect, SubjectMultiSelect } from "@/components/shared/entity-selects";
-import { RemoteMultiCombobox, type RemoteOption } from "@/components/shared/RemoteCombobox";
+import { ResourceMultiSelect, ScheduleMultiSelect, SubjectMultiSelect } from "@/components/shared/entity-selects";
+import type { RemoteOption } from "@/components/shared/RemoteCombobox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Button } from "../ui/button";
@@ -46,17 +45,6 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
   const [subjects, setSubjects] = useState<RemoteOption[]>([]);
   const [schedules, setSchedules] = useState<RemoteOption[]>([]);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({ from: tomorrow, to: addDays(tomorrow, 30) });
-
-  // Horários: poucos itens, carregados uma única vez e filtrados localmente.
-  const scheduleQuery = useSchedules({ enabled: true });
-  const scheduleOptions = useMemo<RemoteOption[]>(
-    () =>
-      (scheduleQuery.data ?? []).map((schedule) => ({
-        id: Number(schedule.id),
-        name: `${shiftLabels[schedule.shift] ?? "—"}: ${schedule.startAt.slice(0, 5)} - ${schedule.endAt.slice(0, 5)}`,
-      })),
-    [scheduleQuery.data],
-  );
 
   const filters = useMemo<SpaceSearchFilters>(
     () => ({
@@ -187,16 +175,12 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
               </Popover>
             </Field>
 
-            <RemoteMultiCombobox
+            <ScheduleMultiSelect
               id="space-schedules"
               label="Horários"
-              options={scheduleOptions}
-              isLoading={scheduleQuery.isPending}
-              isError={scheduleQuery.isError}
               value={schedules}
               onValueChange={setSchedules}
-              placeholder="Selecione horários..."
-              emptyText="Nenhum horário encontrado."
+              enabledOnly
             />
           </CollapsibleContent>
         </Collapsible>

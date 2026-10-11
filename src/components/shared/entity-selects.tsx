@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
+import { useAccounts } from "#/lib/queries/accounts";
 import { useResources } from "#/lib/queries/resources";
+import { scheduleLabel, sortSchedules, useSchedules } from "#/lib/queries/schedules";
 import { useSubjects } from "#/lib/queries/subjects";
 import { RemoteCombobox, RemoteMultiCombobox, type RemoteOption } from "./RemoteCombobox";
 
@@ -132,6 +134,85 @@ export function ResourceMultiSelect({
       onValueChange={onValueChange}
       placeholder="Qualquer recurso"
       emptyText="Nenhum recurso encontrado."
+    />
+  );
+}
+
+type ScheduleMultiSelectProps = Pick<MultiSelectProps, "id" | "value" | "onValueChange" | "className"> & {
+  label?: string;
+  /** Lista apenas horários ativos. */
+  enabledOnly?: boolean;
+};
+
+/** Horários: poucos itens, carregados de uma vez (`/schedule`) e filtrados localmente. */
+export function ScheduleMultiSelect({
+  id,
+  label = "Horários",
+  value,
+  onValueChange,
+  enabledOnly = false,
+  className,
+}: ScheduleMultiSelectProps) {
+  const query = useSchedules({ enabled: enabledOnly ? true : undefined });
+  const options = useMemo<RemoteOption[]>(
+    () =>
+      sortSchedules(query.data ?? []).map((schedule) => ({ id: Number(schedule.id), name: scheduleLabel(schedule) })),
+    [query.data],
+  );
+
+  return (
+    <RemoteMultiCombobox
+      id={id}
+      label={label}
+      className={className}
+      options={options}
+      isLoading={query.isPending}
+      isError={query.isError}
+      value={value}
+      onValueChange={onValueChange}
+      placeholder="Qualquer horário"
+      emptyText="Nenhum horário encontrado."
+    />
+  );
+}
+
+type AccountMultiSelectProps = {
+  id: string;
+  label?: string;
+  value: RemoteOption<string>[];
+  onValueChange: (value: RemoteOption<string>[]) => void;
+  className?: string;
+};
+
+/** Usuários: busca no servidor por nome, matrícula ou e-mail (`/account/admin`), até 20 resultados. */
+export function AccountMultiSelect({
+  id,
+  label = "Usuários",
+  value,
+  onValueChange,
+  className,
+}: AccountMultiSelectProps) {
+  const { search, setText } = useRemoteSearch();
+  const query = useAccounts({ search, limit: OPTIONS_LIMIT });
+  const options = useMemo<RemoteOption<string>[]>(
+    () =>
+      (query.data ?? []).map((account) => ({ id: account.id, name: `${account.username} (${account.registration})` })),
+    [query.data],
+  );
+
+  return (
+    <RemoteMultiCombobox
+      id={id}
+      label={label}
+      className={className}
+      options={options}
+      isLoading={query.isFetching}
+      isError={query.isError}
+      onSearchChange={setText}
+      value={value}
+      onValueChange={onValueChange}
+      placeholder="Nome, matrícula ou e-mail"
+      emptyText="Nenhum usuário encontrado."
     />
   );
 }

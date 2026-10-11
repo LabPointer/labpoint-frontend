@@ -1398,9 +1398,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["SpaceResponseDTO"][];
-                        "application/json": components["schemas"]["SpaceResponseDTO"][];
-                        "text/json": components["schemas"]["SpaceResponseDTO"][];
+                        "text/plain": components["schemas"]["SpaceReserveResponseDTO"][];
+                        "application/json": components["schemas"]["SpaceReserveResponseDTO"][];
+                        "text/json": components["schemas"]["SpaceReserveResponseDTO"][];
                     };
                 };
                 /** @description Bad Request */
@@ -1742,9 +1742,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["SpaceResponseDTO"][];
-                        "application/json": components["schemas"]["SpaceResponseDTO"][];
-                        "text/json": components["schemas"]["SpaceResponseDTO"][];
+                        "text/plain": components["schemas"]["AdminSpaceReserveResponseDTO"][];
+                        "application/json": components["schemas"]["AdminSpaceReserveResponseDTO"][];
+                        "text/json": components["schemas"]["AdminSpaceReserveResponseDTO"][];
                     };
                 };
                 /** @description Bad Request */
@@ -2060,6 +2060,21 @@ export interface components {
         };
         AdminSpaceReserveEditRequestDTO: {
             status: components["schemas"]["EReserveStatus"];
+        };
+        AdminSpaceReserveResponseDTO: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date */
+            dateFrom: string;
+            /** Format: date */
+            dateTo: string;
+            purpose: string;
+            status: components["schemas"]["EReserveStatus"];
+            spaces: components["schemas"]["SpaceResponseDTO"];
+            account: components["schemas"]["AccountResponseDTO"];
+            schedules: components["schemas"]["ScheduleResponseDTO"][];
         };
         EAccountRole: number;
         EmailRequestDTO: {

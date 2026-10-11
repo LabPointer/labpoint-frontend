@@ -14,12 +14,12 @@ import {
 } from "@/components/ui/combobox";
 import { Field, FieldLabel } from "@/components/ui/field";
 
-export type RemoteOption = { id: number; name: string };
+export type RemoteOption<TId extends number | string = number> = { id: TId; name: string };
 
-type CommonProps = {
+type CommonProps<TId extends number | string = number> = {
   id: string;
   label: string;
-  options: readonly RemoteOption[];
+  options: readonly RemoteOption<TId>[];
   isLoading: boolean;
   isError: boolean;
   /** Chamado com o texto digitado (e "" ao fechar). O pai é quem refaz a query. */
@@ -28,9 +28,6 @@ type CommonProps = {
   emptyText?: string;
   className?: string;
 };
-
-const labelOf = (option: RemoteOption) => option.name;
-const sameOption = (a: RemoteOption, b: RemoteOption) => a.id === b.id;
 
 function emptyMessage({ isLoading, isError, emptyText }: Pick<CommonProps, "isLoading" | "isError" | "emptyText">) {
   if (isError) return "Erro ao carregar opções.";
@@ -79,8 +76,8 @@ export function RemoteCombobox({
         items={items}
         value={selected}
         onValueChange={(option) => onValueChange(!option || option.id === ANY_ID ? undefined : option)}
-        itemToStringLabel={labelOf}
-        isItemEqualToValue={sameOption}
+        itemToStringLabel={(option) => option.name}
+        isItemEqualToValue={(a, b) => a.id === b.id}
         // a busca é feita no servidor: desliga o filtro local do base-ui
         filter={null}
         onInputValueChange={(text, details) => {
@@ -106,15 +103,15 @@ export function RemoteCombobox({
   );
 }
 
-type MultiProps = Omit<CommonProps, "onSearchChange"> & {
-  value: RemoteOption[];
-  onValueChange: (value: RemoteOption[]) => void;
+type MultiProps<TId extends number | string> = Omit<CommonProps<TId>, "onSearchChange"> & {
+  value: RemoteOption<TId>[];
+  onValueChange: (value: RemoteOption<TId>[]) => void;
   /** Sem `onSearchChange` o filtro é feito localmente (listas pequenas e já carregadas). */
   onSearchChange?: (text: string) => void;
   disabled?: boolean;
 };
 
-export function RemoteMultiCombobox({
+export function RemoteMultiCombobox<TId extends number | string = number>({
   id,
   label,
   options,
@@ -127,12 +124,12 @@ export function RemoteMultiCombobox({
   emptyText,
   disabled,
   className,
-}: MultiProps) {
+}: MultiProps<TId>) {
   const anchor = useComboboxAnchor();
 
   // mantém os já selecionados na lista mesmo que a busca atual não os retorne
   const items = useMemo(() => {
-    const byId = new Map<number, RemoteOption>();
+    const byId = new Map<TId, RemoteOption<TId>>();
     for (const option of [...value, ...options]) byId.set(option.id, option);
     return [...byId.values()];
   }, [value, options]);
@@ -151,8 +148,8 @@ export function RemoteMultiCombobox({
         items={items}
         value={value}
         onValueChange={onValueChange}
-        itemToStringLabel={labelOf}
-        isItemEqualToValue={sameOption}
+        itemToStringLabel={(option) => option.name}
+        isItemEqualToValue={(a, b) => a.id === b.id}
         filter={onSearchChange ? null : undefined}
         onInputValueChange={(text, details) => {
           if (details.reason === "input-change") onSearchChange?.(text);
@@ -163,7 +160,7 @@ export function RemoteMultiCombobox({
       >
         <ComboboxChips ref={anchor} className="w-full">
           <ComboboxValue>
-            {(selected: RemoteOption[]) => (
+            {(selected: RemoteOption<TId>[]) => (
               <Fragment>
                 {selected.map((option) => (
                   <ComboboxChip key={option.id}>{option.name}</ComboboxChip>
@@ -176,7 +173,7 @@ export function RemoteMultiCombobox({
         <ComboboxContent anchor={anchor}>
           <ComboboxEmpty>{emptyMessage({ isLoading, isError, emptyText })}</ComboboxEmpty>
           <ComboboxList>
-            {(option: RemoteOption) => (
+            {(option: RemoteOption<TId>) => (
               <ComboboxItem key={option.id} value={option}>
                 {option.name}
               </ComboboxItem>
