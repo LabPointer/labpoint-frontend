@@ -23,7 +23,7 @@ import { ManageReserveTable } from "@/components/manage-reserves/ManageReserveTa
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
 
-export const Route = createFileRoute("/_private/admin/manage-reserves")({
+export const Route = createFileRoute("/_private/admin/manage-space-reserves")({
   component: RouteComponent,
 });
 

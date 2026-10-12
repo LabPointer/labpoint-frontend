@@ -81,7 +81,7 @@ const adminRoutes: PageRoute[] = [
     icon: <Building className="size-4" />,
   },
   {
-    to: "/admin/manage-reserves",
+    to: "/admin/manage-space-reserves",
     label: "Gerenciar reserva de espaços",
     icon: <Building2 className="size-4" />,
   },

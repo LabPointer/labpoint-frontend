@@ -21,9 +21,9 @@ import { Route as PublicForgetPasswordRouteImport } from './routes/_public/forge
 import { Route as PublicResendEmailConfirmationRouteImport } from './routes/_public/resend-email-confirmation'
 import { Route as PublicResetPasswordRouteImport } from './routes/_public/reset-password'
 import { Route as PublicSignUpRouteImport } from './routes/_public/sign-up'
-import { Route as PrivateAdminManageReservesRouteImport } from './routes/_private/admin/manage-reserves'
 import { Route as PrivateAdminManageResourcesRouteImport } from './routes/_private/admin/manage-resources'
 import { Route as PrivateAdminManageSchedulesRouteImport } from './routes/_private/admin/manage-schedules'
+import { Route as PrivateAdminManageSpaceReservesRouteImport } from './routes/_private/admin/manage-space-reserves'
 import { Route as PrivateAdminManageSpacesRouteImport } from './routes/_private/admin/manage-spaces'
 import { Route as PrivateAdminManageSubjectsRouteImport } from './routes/_private/admin/manage-subjects'
 import { Route as PrivateAdminManageUsersRouteImport } from './routes/_private/admin/manage-users'
@@ -88,12 +88,6 @@ const PublicSignUpRoute = PublicSignUpRouteImport.update({
   path: '/sign-up',
   getParentRoute: () => PublicRouteRoute,
 } as any)
-const PrivateAdminManageReservesRoute =
-  PrivateAdminManageReservesRouteImport.update({
-    id: '/manage-reserves',
-    path: '/manage-reserves',
-    getParentRoute: () => PrivateAdminRouteRoute,
-  } as any)
 const PrivateAdminManageResourcesRoute =
   PrivateAdminManageResourcesRouteImport.update({
     id: '/manage-resources',
@@ -104,6 +98,12 @@ const PrivateAdminManageSchedulesRoute =
   PrivateAdminManageSchedulesRouteImport.update({
     id: '/manage-schedules',
     path: '/manage-schedules',
+    getParentRoute: () => PrivateAdminRouteRoute,
+  } as any)
+const PrivateAdminManageSpaceReservesRoute =
+  PrivateAdminManageSpaceReservesRouteImport.update({
+    id: '/manage-space-reserves',
+    path: '/manage-space-reserves',
     getParentRoute: () => PrivateAdminRouteRoute,
   } as any)
 const PrivateAdminManageSpacesRoute =
@@ -140,9 +140,9 @@ export interface FileRoutesByFullPath {
   '/resend-email-confirmation': typeof PublicResendEmailConfirmationRoute
   '/reset-password': typeof PublicResetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
-  '/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
   '/admin/manage-resources': typeof PrivateAdminManageResourcesRoute
   '/admin/manage-schedules': typeof PrivateAdminManageSchedulesRoute
+  '/admin/manage-space-reserves': typeof PrivateAdminManageSpaceReservesRoute
   '/admin/manage-spaces': typeof PrivateAdminManageSpacesRoute
   '/admin/manage-subjects': typeof PrivateAdminManageSubjectsRoute
   '/admin/manage-users': typeof PrivateAdminManageUsersRoute
@@ -159,9 +159,9 @@ export interface FileRoutesByTo {
   '/resend-email-confirmation': typeof PublicResendEmailConfirmationRoute
   '/reset-password': typeof PublicResetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
-  '/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
   '/admin/manage-resources': typeof PrivateAdminManageResourcesRoute
   '/admin/manage-schedules': typeof PrivateAdminManageSchedulesRoute
+  '/admin/manage-space-reserves': typeof PrivateAdminManageSpaceReservesRoute
   '/admin/manage-spaces': typeof PrivateAdminManageSpacesRoute
   '/admin/manage-subjects': typeof PrivateAdminManageSubjectsRoute
   '/admin/manage-users': typeof PrivateAdminManageUsersRoute
@@ -181,9 +181,9 @@ export interface FileRoutesById {
   '/_public/reset-password': typeof PublicResetPasswordRoute
   '/_public/sign-up': typeof PublicSignUpRoute
   '/_public/': typeof PublicIndexRoute
-  '/_private/admin/manage-reserves': typeof PrivateAdminManageReservesRoute
   '/_private/admin/manage-resources': typeof PrivateAdminManageResourcesRoute
   '/_private/admin/manage-schedules': typeof PrivateAdminManageSchedulesRoute
+  '/_private/admin/manage-space-reserves': typeof PrivateAdminManageSpaceReservesRoute
   '/_private/admin/manage-spaces': typeof PrivateAdminManageSpacesRoute
   '/_private/admin/manage-subjects': typeof PrivateAdminManageSubjectsRoute
   '/_private/admin/manage-users': typeof PrivateAdminManageUsersRoute
@@ -202,9 +202,9 @@ export interface FileRouteTypes {
     | '/resend-email-confirmation'
     | '/reset-password'
     | '/sign-up'
-    | '/admin/manage-reserves'
     | '/admin/manage-resources'
     | '/admin/manage-schedules'
+    | '/admin/manage-space-reserves'
     | '/admin/manage-spaces'
     | '/admin/manage-subjects'
     | '/admin/manage-users'
@@ -221,9 +221,9 @@ export interface FileRouteTypes {
     | '/resend-email-confirmation'
     | '/reset-password'
     | '/sign-up'
-    | '/admin/manage-reserves'
     | '/admin/manage-resources'
     | '/admin/manage-schedules'
+    | '/admin/manage-space-reserves'
     | '/admin/manage-spaces'
     | '/admin/manage-subjects'
     | '/admin/manage-users'
@@ -242,9 +242,9 @@ export interface FileRouteTypes {
     | '/_public/reset-password'
     | '/_public/sign-up'
     | '/_public/'
-    | '/_private/admin/manage-reserves'
     | '/_private/admin/manage-resources'
     | '/_private/admin/manage-schedules'
+    | '/_private/admin/manage-space-reserves'
     | '/_private/admin/manage-spaces'
     | '/_private/admin/manage-subjects'
     | '/_private/admin/manage-users'
@@ -342,13 +342,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicSignUpRouteImport
       parentRoute: typeof PublicRouteRoute
     }
-    '/_private/admin/manage-reserves': {
-      id: '/_private/admin/manage-reserves'
-      path: '/manage-reserves'
-      fullPath: '/admin/manage-reserves'
-      preLoaderRoute: typeof PrivateAdminManageReservesRouteImport
-      parentRoute: typeof PrivateAdminRouteRoute
-    }
     '/_private/admin/manage-resources': {
       id: '/_private/admin/manage-resources'
       path: '/manage-resources'
@@ -361,6 +354,13 @@ declare module '@tanstack/react-router' {
       path: '/manage-schedules'
       fullPath: '/admin/manage-schedules'
       preLoaderRoute: typeof PrivateAdminManageSchedulesRouteImport
+      parentRoute: typeof PrivateAdminRouteRoute
+    }
+    '/_private/admin/manage-space-reserves': {
+      id: '/_private/admin/manage-space-reserves'
+      path: '/manage-space-reserves'
+      fullPath: '/admin/manage-space-reserves'
+      preLoaderRoute: typeof PrivateAdminManageSpaceReservesRouteImport
       parentRoute: typeof PrivateAdminRouteRoute
     }
     '/_private/admin/manage-spaces': {
@@ -395,9 +395,9 @@ declare module '@tanstack/react-router' {
 }
 
 interface PrivateAdminRouteRouteChildren {
-  PrivateAdminManageReservesRoute: typeof PrivateAdminManageReservesRoute
   PrivateAdminManageResourcesRoute: typeof PrivateAdminManageResourcesRoute
   PrivateAdminManageSchedulesRoute: typeof PrivateAdminManageSchedulesRoute
+  PrivateAdminManageSpaceReservesRoute: typeof PrivateAdminManageSpaceReservesRoute
   PrivateAdminManageSpacesRoute: typeof PrivateAdminManageSpacesRoute
   PrivateAdminManageSubjectsRoute: typeof PrivateAdminManageSubjectsRoute
   PrivateAdminManageUsersRoute: typeof PrivateAdminManageUsersRoute
@@ -405,9 +405,9 @@ interface PrivateAdminRouteRouteChildren {
 }
 
 const PrivateAdminRouteRouteChildren: PrivateAdminRouteRouteChildren = {
-  PrivateAdminManageReservesRoute: PrivateAdminManageReservesRoute,
   PrivateAdminManageResourcesRoute: PrivateAdminManageResourcesRoute,
   PrivateAdminManageSchedulesRoute: PrivateAdminManageSchedulesRoute,
+  PrivateAdminManageSpaceReservesRoute: PrivateAdminManageSpaceReservesRoute,
   PrivateAdminManageSpacesRoute: PrivateAdminManageSpacesRoute,
   PrivateAdminManageSubjectsRoute: PrivateAdminManageSubjectsRoute,
   PrivateAdminManageUsersRoute: PrivateAdminManageUsersRoute,

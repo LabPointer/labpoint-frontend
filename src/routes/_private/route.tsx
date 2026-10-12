@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, redirect, useLocation } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useLocation, type LinkProps } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/AppSideBar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -13,22 +13,22 @@ export const Route = createFileRoute("/_private")({
     component: RouteComponent,
 });
 
-const routeTitles: Record<string, string> = {
-    "/home": "Início",
-    "/calendar": "Calendário",
-    "/history": "Histórico",
-    "/admin/manage-spaces": "Gerenciar espaços",
-    "/admin/manage-reserves": "Gerenciar reservas",
-    "/admin/manage-users": "Gerenciar usuários",
-    "/admin/manage-resources": "Gerenciar recursos",
-    "/admin/manage-subjects": "Gerenciar matérias",
-    "/admin/manage-schedules": "Gerenciar horários",
-    "/admin/report": "Relatórios",
-};
+const routeTitles: Map<LinkProps["to"], string> = new Map([
+    ["/home", "Início"],
+    ["/calendar", "Calendário"],
+    ["/history", "Histórico"],
+    ["/admin/manage-spaces", "Gerenciar espaços"],
+    ["/admin/manage-space-reserves", "Gerenciar reservas de espaço"],
+    ["/admin/manage-users", "Gerenciar usuários"],
+    ["/admin/manage-resources", "Gerenciar recursos"],
+    ["/admin/manage-subjects", "Gerenciar matérias"],
+    ["/admin/manage-schedules", "Gerenciar horários"],
+    ["/admin/report", "Relatórios"],
+]);
 
 function RouteComponent() {
     const { pathname } = useLocation();
-    const routeTitle = routeTitles[pathname] ?? "Labpoint";
+    const routeTitle = routeTitles.get(pathname as LinkProps["to"]) ?? "Labpoint";
 
     return (
         <>
@@ -41,7 +41,7 @@ function RouteComponent() {
                         </div>
 
                         <div>
-                            <h1 className="text-lg font-bold  mt-0.5">
+                            <h1 className="text-lg font-bold  mt-0.5 text-center">
                                 {routeTitle}
                             </h1>
                         </div>

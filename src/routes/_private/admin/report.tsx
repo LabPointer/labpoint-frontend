@@ -5,5 +5,5 @@ export const Route = createFileRoute('/_private/admin/report')({
 })
 
 function RouteComponent() {
-  return <div>Hello "/_private/report"!</div>
+  return <div className="text-red-500 w-full text-center">Indisponivel</div>
 }
