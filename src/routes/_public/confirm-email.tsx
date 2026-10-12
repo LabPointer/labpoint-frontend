@@ -1,8 +1,11 @@
-import { useApi } from "#/lib/utils/restapi";
+import { api } from "#/lib/utils/restapi";
+import { notifyError, notifySuccess } from "#/lib/utils/notify";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
+import { CheckCircle, XCircle } from "lucide-react";
 import z from "zod";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
 
 const emailConfirmationSearchSchema = z.object({
   userId: z.string().min(1, "User ID é obrigatório"),
@@ -18,60 +21,52 @@ export const Route = createFileRoute("/_public/confirm-email")({
 });
 
 function RouteComponent() {
-  const api = useApi();
   const { userId, token } = Route.useSearch();
   const navigate = useNavigate();
 
   const { isLoading, isError } = useQuery({
-    queryKey: ["query-confirm-email"],
+    queryKey: ["query-confirm-email", userId, token],
     queryFn: async () => {
-      const res = await api.GET("/auth/confirm-email", {
-        params: {
-          query: {
-            Token: token,
-            UserId: userId,
-          },
-        },
+      const { response, error } = await api.GET("/auth/confirm-email", {
+        params: { query: { Token: token, UserId: userId } },
       });
-      const { response, error } = res;
 
       if (!response.ok && error) {
-        toast.error(`Erro ${response.status}: ${error[0].description}`, {
-          duration: 3000,
-          position: "bottom-center",
-          onAutoClose: () => {
-            navigate({ to: "/", replace: true });
-          },
-          style: {
-            color: "white",
-            backgroundColor: "red",
-            borderColor: "red",
-          },
-        });
-        return;
+        notifyError(error);
+        setTimeout(() => navigate({ to: "/", replace: true }), 3000);
+        throw new Error("Falha ao confirmar email.");
       }
 
-      toast.success(`Email confirmado com sucesso!`, {
-          duration: 3000,
-          position: "bottom-center",
-          onAutoClose: () => {
-            navigate({ to: "/", replace: true });
-          },
-          style: {
-            color: "white",
-            backgroundColor: "green",
-            borderColor: "green",
-          },
-        });
-
+      notifySuccess("Email confirmado com sucesso!");
+      setTimeout(() => navigate({ to: "/", replace: true }), 3000);
       return true;
     },
   });
 
-  if (isLoading) 
-    return <div className="font-bold text-center animate-pulse">Confirmando email...</div>;
-  if (isError) 
-    return <div className="font-bold text-center text-red-400 dark:text-red-400">Falha ao confirmar email! Redirecionando...</div>;
-  
-  return <div className="font-bold text-center animate-pulse">Email Confirmado! Redirecionando...</div>;
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center gap-3 text-muted-foreground">
+        <Spinner className="size-8" />
+        <p className="font-semibold animate-pulse">Confirmando email...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Alert variant="destructive" className="max-w-sm">
+        <XCircle className="size-4" />
+        <AlertTitle>Falha ao confirmar email</AlertTitle>
+        <AlertDescription>Redirecionando para a página de login...</AlertDescription>
+      </Alert>
+    );
+  }
+
+  return (
+    <Alert className="max-w-sm border-green-500/40 bg-green-500/10 text-green-700 dark:text-green-400">
+      <CheckCircle className="size-4 text-green-600 dark:text-green-400" />
+      <AlertTitle>Email confirmado!</AlertTitle>
+      <AlertDescription>Redirecionando para a página de login...</AlertDescription>
+    </Alert>
+  );
 }

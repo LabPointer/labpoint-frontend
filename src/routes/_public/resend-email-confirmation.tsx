@@ -1,60 +1,40 @@
-import { ResendEmailConfirmationForm } from '#/components/ResendEmailConfirmation';
-import { useApi } from '#/lib/utils/restapi';
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ResendEmailConfirmationForm } from "#/components/ResendEmailConfirmation";
+import { api } from "#/lib/utils/restapi";
+import { notifyError, notifySuccess } from "#/lib/utils/notify";
+import { useState } from "react";
 
-export const Route = createFileRoute('/_public/resend-email-confirmation')({
+export const Route = createFileRoute("/_public/resend-email-confirmation")({
   component: RouteComponent,
-})
+});
 
 function RouteComponent() {
-  const api = useApi();
   const navigate = useNavigate();
-
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isRedirectting, setIsRedirectting] = useState(false);
-  
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
   async function handleOnSubmitForm(email: string) {
     setIsSubmitting(true);
-    
-    const res = await api.POST("/auth/resend-confirmation", {
-        body: {
-          email: email,
-        },
-      });
+    const { response, error } = await api.POST("/auth/resend-confirmation", {
+      body: { email },
+    });
+    setIsSubmitting(false);
 
-      const { response, error } = res;
+    if (!response.ok && error) {
+      notifyError(error);
+      return;
+    }
 
-      setIsSubmitting(false);
-
-      if (!response.ok && error) {
-        toast.error(`Error ao tentar enviar email de confirmação!`, {
-          duration: 3000,
-          position: "bottom-center",
-          style: {
-            color: "white",
-            backgroundColor: "red",
-            borderColor: "red",
-          },
-        });
-        return;
-      }
-
-      setIsRedirectting(true);
-      toast.success("Email de recuperação enviado com sucesso!", {
-        duration: 3000,
-        position: "bottom-center",
-        onAutoClose: () => {
-            navigate({ to: "/" });
-        },
-        style: {
-          color: "white",
-          backgroundColor: "green",
-          borderColor: "green",
-        },
-      });
+    setIsRedirecting(true);
+    notifySuccess("Email de confirmação enviado com sucesso!");
+    setTimeout(() => navigate({ to: "/" }), 3000);
   }
-  
-  return <ResendEmailConfirmationForm onSubmitForm={handleOnSubmitForm} isSubmitting={isSubmitting} isRedirectting={isRedirectting} />
+
+  return (
+    <ResendEmailConfirmationForm
+      onSubmitForm={handleOnSubmitForm}
+      isSubmitting={isSubmitting}
+      isRedirectting={isRedirecting}
+    />
+  );
 }
