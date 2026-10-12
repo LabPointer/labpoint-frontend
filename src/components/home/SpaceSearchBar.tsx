@@ -1,116 +1,84 @@
-import { useQuery } from "@tanstack/react-query";
-import { useDebounce } from "ahooks";
-import {
-  Filter,
-  SearchIcon,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-import { useApi } from "#/lib/utils/restapi";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { addDays, addYears, endOfYear, format, startOfToday, startOfTomorrow } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { CalendarIcon, Filter, SearchIcon, Users } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import type { DateRange } from "react-day-picker";
+import { useDebouncedValue } from "#/hooks/use-debounced-value";
+import { ResourceMultiSelect, ScheduleMultiSelect, SubjectMultiSelect } from "@/components/shared/entity-selects";
+import type { RemoteOption } from "@/components/shared/RemoteCombobox";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { Button } from "../ui/button";
+import { Calendar } from "../ui/calendar";
 import { Field, FieldLabel } from "../ui/field";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
-const minCapacity = [20, 50, 100, 150] as const;
+// restrições de capacidade
+const MIN_CAPACITY = 10;
+const MAX_CAPACITY = 200;
+const CAPACITY_STEP = 10;
+const DEFAULT_CAPACITY = 20;
 
 export type SpaceSearchFilters = {
   searchQuery: string;
+  minimumCapacity: number;
   resources: number[];
   subjects: number[];
-  minimumCapacity: (typeof minCapacity)[number];
+  startDate: Date;
+  endDate: Date;
+  schedules: number[];
 };
 
 type SpaceSearchBarProps = {
-  onSearch?: (filters: SpaceSearchFilters) => void;
+  onSearch: (filters: SpaceSearchFilters) => void;
 };
 
+const labelClass = "text-sm font-semibold text-neutral-800 dark:text-neutral-200";
+
 export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
-  const api = useApi();
-  const {
-    data: globalData,
-    isError,
-    isLoading,
-  } = useQuery({
-    queryKey: ["global-data"],
-    queryFn: async () => {
-      const [resourcesRes, subjectsRes] = await Promise.all([
-        api.GET("/resources"),
-        api.GET("/subjects"),
-      ]);
+  const tomorrow = useMemo(() => startOfTomorrow(), []);
+  const maxDate = useMemo(() => endOfYear(addYears(new Date(), 1)), []);
 
-      const resourcesMap = new Map<number, string>();
-      resourcesMap.set(-1, "Todos os recursos");
-      resourcesRes.data?.map((item) => resourcesMap.set(item.id || 0, item.name || "unknown"));
+  const [searchQuery, setSearchQuery] = useState("");
+  const [minimumCapacity, setMinimumCapacity] = useState(DEFAULT_CAPACITY);
+  const [resources, setResources] = useState<RemoteOption[]>([]);
+  const [subjects, setSubjects] = useState<RemoteOption[]>([]);
+  const [schedules, setSchedules] = useState<RemoteOption[]>([]);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({ from: tomorrow, to: addDays(tomorrow, 30) });
 
-      const subjectsMap = new Map<number, string>();
-      subjectsMap.set(-1, "Todas as disciplinas");
-      subjectsRes.data?.map((item) => subjectsMap.set(item.id || 0, item.name || "unknown"));
-
-      return {
-        resources: resourcesMap,
-        subjects: subjectsMap,
-      };
-    },
-  });
-
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedResource, setSelectedResource] = useState<string>("-1");
-  const [selectedSubject, setSelectedSubject] = useState<string>("-1");
-  const [minimumCapacity, setMinimumCapacity] =
-    useState<(typeof minCapacity)[number]>(20);
-
-  const currentFilters: SpaceSearchFilters = {
-    searchQuery,
-    resources:
-      selectedResource && Number(selectedResource) >= 0
-        ? [Number(selectedResource)]
-        : [],
-    subjects:
-      selectedSubject && Number(selectedSubject) >= 0
-        ? [Number(selectedSubject)]
-        : [],
-    minimumCapacity,
-  };
-
-  const debouncedFilters = useDebounce(currentFilters, { wait: 1000 });
+  const filters = useMemo<SpaceSearchFilters>(
+    () => ({
+      searchQuery,
+      minimumCapacity,
+      resources: resources.map((resource) => resource.id),
+      subjects: subjects.map((subject) => subject.id),
+      schedules: schedules.map((schedule) => schedule.id),
+      startDate: dateRange?.from ?? tomorrow,
+      endDate: dateRange?.to ?? addDays(tomorrow, 30),
+    }),
+    [searchQuery, minimumCapacity, resources, subjects, schedules, dateRange, tomorrow],
+  );
+  const debouncedFilters = useDebouncedValue(filters, 1000);
 
   useEffect(() => {
-    if (onSearch) {
-      onSearch(debouncedFilters);
-    }
-  }, [debouncedFilters]);
+    onSearch(debouncedFilters);
+  }, [debouncedFilters, onSearch]);
 
   return (
-    <div className="bg-white dark:bg-white/5 rounded-md border dark:border-violet-500/10 shadow-md hover:shadow-lg p-4 dark:shadow-violet-300/15">
+    <div className="rounded-md border bg-white p-4 shadow-md hover:shadow-lg dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15">
       <div className="flex flex-col gap-4">
         <Field className="w-full">
-          <FieldLabel
-            className="text-sm font-semibold text-neutral-800 dark:text-neutral-200"
-            htmlFor="search-spaces"
-          >
+          <FieldLabel className={labelClass} htmlFor="search-spaces">
             Pesquisar
           </FieldLabel>
           <InputGroup className="h-10">
             <InputGroupInput
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(event) => setSearchQuery(event.target.value)}
               id="search-spaces"
-              placeholder="Buscar por nome ou departamento..."
+              placeholder="Buscar por nome ou descrição..."
               className="text-sm"
+              autoComplete="off"
             />
             <InputGroupAddon align="inline-start">
               <SearchIcon className="size-4 text-muted-foreground" />
@@ -119,127 +87,101 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
         </Field>
 
         <Field className="w-full">
-          <FieldLabel
-            className="text-sm font-semibold text-neutral-800 dark:text-neutral-200"
-            htmlFor="capacity-select"
-          >
-            Capacidade minima
+          <FieldLabel className={labelClass} htmlFor="capacity-select">
+            Capacidade mínima
           </FieldLabel>
-          <Select
-            defaultValue={"20"}
-            value={String(minimumCapacity)}
-            onValueChange={(value) => {
-              setMinimumCapacity(Number(value) as typeof minimumCapacity);
-            }}
-          >
-            <SelectTrigger id="capacity-select" className="w-full h-10">
-              <SelectValue placeholder="50 lugares..." />
-            </SelectTrigger>
-            <SelectContent>
-              {minCapacity.map((val) => (
-                <SelectItem key={`${val} lugares`} value={`${val}`}>
-                  {val} lugares
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <InputGroup className="h-10">
+            <InputGroupInput
+              value={minimumCapacity}
+              onChange={(event) => setMinimumCapacity(Number(event.target.value) || 0)}
+              id="capacity-select"
+              className="text-sm"
+              type="number"
+              min={MIN_CAPACITY}
+              max={MAX_CAPACITY}
+              step={CAPACITY_STEP}
+            />
+            <InputGroupAddon align="inline-start">
+              <Users className="size-4 text-muted-foreground" />
+            </InputGroupAddon>
+          </InputGroup>
         </Field>
-        {/*Filtros avançados*/}
+
+        {/* Filtros avançados */}
         <Collapsible>
-          <CollapsibleTrigger
-            className={
-              "w-full md:w-fit border dark:border-violet-300/20 hover:dark:border-violet-400/40 rounded-md p-2"
-            }
-          >
+          <CollapsibleTrigger className="w-full rounded-md border p-2 md:w-fit dark:border-violet-300/20 hover:dark:border-violet-400/40">
             <div className="flex items-center gap-x-2">
               <Filter className="size-4" />
               <span className="text-sm font-semibold">Filtros avançados</span>
             </div>
           </CollapsibleTrigger>
-          <CollapsibleContent className={"flex flex-col gap-y-4 pt-3"}>
+          <CollapsibleContent className="flex flex-col gap-y-4 pt-3">
+            <ResourceMultiSelect
+              id="space-resources"
+              label="Equipamentos"
+              value={resources}
+              onValueChange={setResources}
+              enabledOnly
+              canReserve={false}
+            />
+
+            <SubjectMultiSelect
+              id="space-subjects"
+              label="Disciplinas"
+              value={subjects}
+              onValueChange={setSubjects}
+              enabledOnly
+            />
+
+            {/* Data de início e término */}
             <Field className="w-full">
-              <FieldLabel
-                className="text-sm font-semibold text-neutral-800 dark:text-neutral-200"
-                htmlFor="equipment-select"
-              >
-                Equipamentos
+              <FieldLabel htmlFor="date-picker-range" className={labelClass}>
+                Período
               </FieldLabel>
-              <Select
-                defaultValue={"Todos os recursos"}
-                value={selectedResource}
-                onValueChange={(value) => setSelectedResource(value || "")}
-                disabled={isLoading || isError}
-              >
-                <SelectTrigger id="equipment-select" className="w-full h-10">
-                  <SelectValue
-                    placeholder={
-                      isLoading
-                        ? "Carregando equipamentos..."
-                        : isError
-                          ? "Erro ao carregar equipamentos"
-                          : "Todos equipamentos"
-                    }
-                  >
-                    {(val: string | null) => {
-                      if (!val) return null;
-                      return globalData?.resources?.get(Number(val)) ?? val;
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {globalData?.resources &&
-                    Array.from(globalData.resources.entries()).map(
-                      ([id, name]) => (
-                        <SelectItem key={id} value={String(id)}>
-                          {name}
-                        </SelectItem>
-                      ),
-                    )}
-                </SelectContent>
-              </Select>
+              <Popover>
+                <PopoverTrigger
+                  render={
+                    <Button variant="outline" id="date-picker-range" className="justify-start px-2.5 font-normal">
+                      <CalendarIcon data-icon="inline-start" />
+                      {dateRange?.from ? (
+                        dateRange.to ? (
+                          <>
+                            {format(dateRange.from, "dd 'de' MMM, yyyy", { locale: ptBR })} -{" "}
+                            {format(dateRange.to, "dd 'de' MMM, yyyy", { locale: ptBR })}
+                          </>
+                        ) : (
+                          format(dateRange.from, "dd 'de' MMM, yyyy", { locale: ptBR })
+                        )
+                      ) : (
+                        <span>Selecione uma data</span>
+                      )}
+                    </Button>
+                  }
+                />
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="range"
+                    locale={ptBR}
+                    defaultMonth={dateRange?.from}
+                    selected={dateRange}
+                    onSelect={setDateRange}
+                    numberOfMonths={2}
+                    disabled={[{ before: tomorrow }, { after: maxDate }]}
+                    startMonth={startOfToday()}
+                    endMonth={maxDate}
+                    className="rounded-lg border"
+                  />
+                </PopoverContent>
+              </Popover>
             </Field>
 
-            <Field className="w-full">
-              <FieldLabel
-                className="text-sm font-semibold text-neutral-800 dark:text-neutral-200"
-                htmlFor="equipment-select"
-              >
-                Disciplinas
-              </FieldLabel>
-              <Select
-                defaultValue={"Todas as disciplinas"}
-                value={selectedSubject}
-                onValueChange={(value) => setSelectedSubject(value || "")}
-                disabled={isLoading || isError}
-              >
-                <SelectTrigger id="equipment-select" className="w-full h-10">
-                  <SelectValue
-                    placeholder={
-                      isLoading
-                        ? "Carregando disciplinas..."
-                        : isError
-                          ? "Erro ao carregar disciplinas"
-                          : "Todas as disciplinas"
-                    }
-                  >
-                    {(val: string | null) => {
-                      if (!val) return null;
-                      return globalData?.subjects?.get(Number(val)) ?? val;
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {globalData?.subjects &&
-                    Array.from(globalData.subjects.entries()).map(
-                      ([id, name]) => (
-                        <SelectItem key={id} value={String(id)}>
-                          {name}
-                        </SelectItem>
-                      ),
-                    )}
-                </SelectContent>
-              </Select>
-            </Field>
+            <ScheduleMultiSelect
+              id="space-schedules"
+              label="Horários"
+              value={schedules}
+              onValueChange={setSchedules}
+              enabledOnly
+            />
           </CollapsibleContent>
         </Collapsible>
       </div>

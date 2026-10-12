@@ -1,132 +1,115 @@
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { format } from "date-fns";
 import { useState } from "react";
-import { toast } from "sonner";
-import { useApi } from "#/lib/utils/restapi";
+import { useFormDialog } from "#/hooks/use-form-dialog";
+import { toApiDate, useCreateReserve } from "#/lib/queries/reserves";
+import { useSpaces } from "#/lib/queries/spaces";
+import { succeeded } from "#/lib/utils/api-result";
 import { SpaceCard } from "@/components/home/SpaceCard";
-import { type SpaceProps, SpaceReserveModal } from "@/components/home/SpaceReserveModal";
+import { type SpaceProps, type SpaceReserveFormData, SpaceReserveModal } from "@/components/home/SpaceReserveModal";
 import { SpaceSearchBar, type SpaceSearchFilters } from "@/components/home/SpaceSearchBar";
+import { QueryBoundary } from "@/components/shared/QueryBoundary";
+import { ResultsHeader } from "@/components/shared/ResultsHeader";
 
 export const Route = createFileRoute("/_private/home")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const api = useApi();
-  const navigate = useNavigate();
+  // A barra de pesquisa emite os filtros iniciais na montagem; a query só roda depois disso.
+  const [filters, setFilters] = useState<SpaceSearchFilters | null>(null);
 
-  const [queryFilters, setQueryFilters] = useState<SpaceSearchFilters>({
-    searchQuery: "",
-    resources: [],
-    subjects: [],
-    minimumCapacity: 20,
-  });
-  const [selectedSpace, setSelectedSpace] = useState<SpaceProps | null>(null);
-  const [isReserveOpen, setIsReserveOpen] = useState(false);
+  // O backend valida Capacity em 10..200 (fora disso responde 400): só enviamos quando válida.
+  const capacity = filters && filters.minimumCapacity >= 10 ? Math.min(filters.minimumCapacity, 200) : undefined;
+  // Disponibilidade é calculada por horário: sem horários escolhidos, não enviamos o período
+  // (senão o backend esconde qualquer espaço que tenha alguma reserva na janela).
+  const checkAvailability = Boolean(filters && filters.schedules.length > 0);
 
-  const {
-    data: spaces,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ["query-spaces", queryFilters],
-    queryFn: async () => {
-      const { searchQuery, resources, subjects, minimumCapacity } = queryFilters;
-      const res = await api.GET("/spaces", {
-        params: {
-          query: {
-            name: searchQuery,
-            capacity: minimumCapacity,
-            resources,
-            subjects,
-            locked: false,
-          },
-        },
-      });
-      const {response, data, error} = res;
-
-      if (!response.ok && error && response.status !== 404) {
-        toast.error(`Error ${response.status}: ${error.message}`, {
-          duration: 3000,
-          position: "bottom-center",
-          style: {
-            color: "white",
-            backgroundColor: "red",
-            borderColor: "red",
-          },
-        });
-        return;
-      }
-      if (response.status === 404) {
-        return { spaces: [] };
-      }
-
-      return data;
+  const spaces = useSpaces(
+    {
+      search: filters?.searchQuery,
+      capacity,
+      resources: filters?.resources,
+      subjects: filters?.subjects,
+      schedules: checkAvailability ? filters?.schedules : undefined,
+      startAt: checkAvailability && filters ? format(filters.startDate, "yyyy-MM-dd") : undefined,
+      endAt: checkAvailability && filters ? format(filters.endDate, "yyyy-MM-dd") : undefined,
     },
-  });
+    { enabled: filters !== null },
+  );
 
-  function handleSearch(filters: SpaceSearchFilters) {
-    setQueryFilters(filters);
-  }
+  const createReserve = useCreateReserve();
+  const reserveDialog = useFormDialog<SpaceProps>();
+  const reservingSpace = reserveDialog.target;
 
-  function handleReserveSpace(spaceProps: SpaceProps) {
-    setSelectedSpace(spaceProps);
-    setIsReserveOpen(true);
+  async function handleReserve(data: SpaceReserveFormData) {
+    if (!reservingSpace || !data.range.from) return;
+
+    const ok = await succeeded(
+      createReserve.mutateAsync({
+        spaceId: reservingSpace.id,
+        body: {
+          startAt: toApiDate(data.range.from),
+          // sem fim selecionado = reserva de um único dia
+          endAt: toApiDate(data.range.to ?? data.range.from),
+          scheduleIds: data.schedules.map((schedule) => schedule.id),
+          purpose: data.purpose,
+        },
+      }),
+    );
+    if (ok) reserveDialog.close();
   }
 
   return (
     <>
       <section className="container mb-8">
-        <SpaceSearchBar onSearch={(filters) => handleSearch(filters)} />
+        <SpaceSearchBar onSearch={setFilters} />
       </section>
-      <section className="container mb-8">
-        {selectedSpace && (
-          <SpaceReserveModal
-            {...selectedSpace}
-            open={isReserveOpen}
-            onOpenChange={setIsReserveOpen}
-          />
-        )}
-      </section>
+      {reservingSpace && (
+        <SpaceReserveModal
+          key={reserveDialog.session}
+          space={reservingSpace}
+          open={reserveDialog.isOpen}
+          onClose={reserveDialog.close}
+          onSubmit={handleReserve}
+        />
+      )}
       <section className="container">
-        <div className="flex flex-wrap justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">Laboratórios</h2>
-          <span className="text-sm font-bold">Encontrados: {spaces?.spaces.length || 0}</span>
-        </div>
-        {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">Carregando...</span>
-          </div>
-        ) : isError ? (
-          <div className="flex justify-center items-center h-64">
-            <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
-              Erro ao carregar os laboratórios.
-            </span>
-          </div>
-        ) : spaces?.spaces.length === 0 ? (
-          <div className="flex justify-center items-center h-64">
-            <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
-              Nenhum laboratório encontrado.
-            </span>
-          </div>
-        ) : (
-          <div className="w-full grid grid-cols-[repeat(auto-fit,minmax(288px,1fr))] justify-center gap-6">
-            {spaces?.spaces.map((space) => (
-              <div key={space.id} className="w-full flex justify-center p-2">
+        <ResultsHeader title="Laboratórios" count={spaces.data?.length ?? 0} />
+        <QueryBoundary
+          isPending={spaces.isPending}
+          isFetching={spaces.isFetching}
+          isError={spaces.isError}
+          error={spaces.error}
+          isEmpty={spaces.data?.length === 0}
+          loadingText="Carregando..."
+          emptyText="Nenhum laboratório encontrado."
+        >
+          <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(288px,1fr))] justify-center gap-6">
+            {spaces.data?.map((space) => (
+              <div key={space.id} className="flex w-full justify-center p-2">
                 <SpaceCard
-                  id={space.id}
+                  id={Number(space.id)}
                   name={space.name}
-                  capacity={space.capacity}
+                  capacity={Number(space.capacity)}
                   description={space.description}
-                  resources={space.resources}
-                  subjects={space.subjects}
-                  locked={space.locked ?? false}
-                  onReserve={() => handleReserveSpace({ id: space.id, name: space.name, capacity: space.capacity, subjects: space.subjects, locked: space.locked ?? false })}
+                  resources={space.resources.map((item) => ({ id: Number(item.id), name: item.name }))}
+                  subjects={space.subjects.map((item) => ({ id: Number(item.id), name: item.name }))}
+                  locked={space.locked}
+                  onReserve={() =>
+                    reserveDialog.open({
+                      id: Number(space.id),
+                      name: space.name,
+                      capacity: Number(space.capacity),
+                      subjects: space.subjects.map((item) => ({ id: Number(item.id), name: item.name })),
+                      locked: space.locked,
+                    })
+                  }
                 />
               </div>
             ))}
           </div>
-        )}
+        </QueryBoundary>
       </section>
     </>
   );

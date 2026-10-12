@@ -1,38 +1,51 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { toast } from "sonner";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import z from "zod";
 import { ResetPasswordForm } from "#/components/ResetPasswordForm";
+import { api } from "#/lib/utils/restapi";
+import { notifyError, notifySuccess } from "#/lib/utils/notify";
+import { useState } from "react";
 
 const tokenSearchSchema = z.object({
+  email: z.email("Email inválido"),
   token: z.string(),
 });
 
 export const Route = createFileRoute("/_public/reset-password")({
-  validateSearch: (search) => {
-    const { success, data } = tokenSearchSchema.safeParse(search);
-    if (!success) {
-      toast.error("Token de redefinição de senha ausente. Redirecionando para a página inicial.", {
-        duration: 3000,
-        position: "bottom-center",
-        style: {
-          color: "white",
-          backgroundColor: "red",
-          borderColor: "red",
-        },
-      });
-      
-      throw redirect({
-        to: "/",
-      });
-    }
-
-    return data;
+  validateSearch: tokenSearchSchema,
+  onError: () => {
+    throw redirect({ to: "/" });
   },
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { token } = Route.useSearch();
+  const { token, email } = Route.useSearch();
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
-  return <ResetPasswordForm token={token} />;
+  async function handleFormSubmit(newPassword: string) {
+    setIsSubmitting(true);
+    const { response, error } = await api.POST("/auth/reset-password", {
+      body: { email, token, newPassword },
+    });
+    setIsSubmitting(false);
+
+    if (!response.ok && error) {
+      notifyError(error);
+      return;
+    }
+
+    setIsRedirecting(true);
+    notifySuccess("Senha redefinida com sucesso!");
+    setTimeout(() => navigate({ to: "/" }), 3000);
+  }
+
+  return (
+    <ResetPasswordForm
+      onFormSubmitSuccess={handleFormSubmit}
+      isSubmitting={isSubmitting}
+      isRedirectting={isRedirecting}
+    />
+  );
 }

@@ -1,0 +1,87 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { useFormDialog } from "#/hooks/use-form-dialog";
+import { type Resource, useCreateResource, useEditResource, useResources } from "#/lib/queries/resources";
+import { succeeded } from "#/lib/utils/api-result";
+import { ManageResourceDialog, type ResourceFormData } from "@/components/manage-resources/ManageResourceDialog";
+import { ManageResourceSearchBar, type ResourceFilters } from "@/components/manage-resources/ManageResourceSearchBar";
+import { ManageResourceTable } from "@/components/manage-resources/ManageResourceTable";
+import { QueryBoundary } from "@/components/shared/QueryBoundary";
+import { ResultsHeader } from "@/components/shared/ResultsHeader";
+
+export const Route = createFileRoute("/_private/admin/manage-resources")({
+  component: RouteComponent,
+});
+
+const initialFilters: ResourceFilters = { search: "", canReserve: undefined, enabled: undefined };
+
+function RouteComponent() {
+  const [filters, setFilters] = useState<ResourceFilters>(initialFilters);
+  const resources = useResources({ name: filters.search, canReserve: filters.canReserve, enabled: filters.enabled });
+  const createResource = useCreateResource();
+  const editResource = useEditResource();
+  const createDialog = useFormDialog();
+  const editDialog = useFormDialog<Resource>();
+
+  async function handleCreate(data: ResourceFormData) {
+    if (await succeeded(createResource.mutateAsync(data))) createDialog.close();
+  }
+
+  async function handleEdit(data: ResourceFormData) {
+    const resource = editDialog.target;
+    if (!resource) return;
+
+    const ok = await succeeded(
+      editResource.mutateAsync({
+        id: resource.id,
+        name: data.name.length > 0 ? data.name : null,
+        canReserve: data.canReserve,
+        enabled: data.enabled,
+      }),
+    );
+    if (ok) editDialog.close();
+  }
+
+  return (
+    <>
+      {createDialog.mounted && (
+        <ManageResourceDialog
+          key={createDialog.session}
+          mode="create"
+          open={createDialog.isOpen}
+          onClose={createDialog.close}
+          onSubmit={handleCreate}
+        />
+      )}
+      {editDialog.target && (
+        <ManageResourceDialog
+          key={editDialog.session}
+          mode="edit"
+          resource={editDialog.target}
+          open={editDialog.isOpen}
+          onClose={editDialog.close}
+          onSubmit={handleEdit}
+        />
+      )}
+
+      <section className="container mb-8">
+        <ManageResourceSearchBar onSearch={setFilters} onAddNewResource={() => createDialog.open()} />
+      </section>
+
+      <section className="container">
+        <ResultsHeader title="Recursos" count={resources.data?.length ?? 0} />
+        <QueryBoundary
+          isPending={resources.isPending}
+          isFetching={resources.isFetching}
+          isError={resources.isError}
+          error={resources.error}
+          isEmpty={resources.data?.length === 0}
+          loadingText="Carregando recursos..."
+          emptyText="Nenhum recurso encontrado."
+        >
+          <ManageResourceTable resources={resources.data ?? []} onEdit={editDialog.open} />
+        </QueryBoundary>
+      </section>
+    </>
+  );
+}

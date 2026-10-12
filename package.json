@@ -14,7 +14,7 @@
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",
-    "generate:types": "openapi-typescript http://localhost:8080/v1/api-schema -o src/lib/utils/api.ts"
+    "generate:types": "openapi-typescript http://localhost:8080/openapi/v1.json -o src/lib/utils/api.ts"
   },
   "dependencies": {
     "@base-ui/react": "latest",
@@ -47,6 +47,7 @@
     "react": "latest",
     "react-day-picker": "latest",
     "react-dom": "latest",
+    "react-error-boundary": "latest",
     "react-resizable-panels": "latest",
     "recharts": "latest",
     "shadcn": "latest",
@@ -55,7 +56,8 @@
     "tailwindcss": "latest",
     "tw-animate-css": "latest",
     "vaul": "latest",
-    "zod": "latest"
+    "zod": "latest",
+    "zustand": "latest"
   },
   "devDependencies": {
     "@biomejs/biome": "latest",

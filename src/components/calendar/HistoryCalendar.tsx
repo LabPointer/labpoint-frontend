@@ -1,6 +1,6 @@
 import { getDaysInMonth, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { AgendaEventRow } from "#/components/calendar/AgendaEventRow";
 import { MonthEventChip } from "#/components/calendar/MonthEventChip";
 import { EventCalendar, type EventCalendarApi } from "#/components/reui/event-calendar/event-calendar.tsx";
@@ -14,9 +14,9 @@ import type {
 } from "#/components/reui/event-calendar/event-calendar-types.tsx";
 import { Card, CardContent } from "#/components/ui/card.tsx";
 import { Skeleton } from "#/components/ui/skeleton.tsx";
-import type { ReservationEventData, ReserveHistoryDTO } from "#/lib/types/reservation-types";
-import { apiToCalendarEvents, toYearMonth } from "#/lib/utils/reservation-utils";
-import { useApi } from "#/lib/utils/restapi";
+import { useMonthReserves } from "#/lib/queries/reserves";
+import type { ReservationEventData } from "#/lib/types/reservation-types";
+import { reservesToCalendarEvents } from "#/lib/utils/reservation-utils";
 
 // ---------------------------------------------------------------------------
 // i18n PT-BR
@@ -81,7 +81,7 @@ const PT_BR_I18N: EventCalendarI18nOverrides = {
 /**
  * Calendário de histórico de reservas.
  *
- * - Busca reservas via GET /reserve?yearMonth=YYYY-MM
+ * - Busca as reservas do mês via GET /space-reserve (StartAt/EndAt)
  * - Exibe nas views Mês e Agenda (somente)
  * - View Agenda cobre apenas o mês selecionado (dia 1 ao último)
  * - Eventos não são arrastáveis
@@ -89,83 +89,35 @@ const PT_BR_I18N: EventCalendarI18nOverrides = {
  * - Linhas da agenda têm botão "!" que abre modal com detalhes
  */
 export function HistoryCalendar() {
-  const api = useApi();
   const apiRef = useRef<EventCalendarApi<ReservationEventData> | null>(null);
 
-  // Mês atualmente visível — rastreado para buscar a API e ajustar agendaDayCount
+  // Mês atualmente visível — define a query e o agendaDayCount
   const [activeMonth, setActiveMonth] = useState<Date>(() => startOfMonth(new Date()));
-  const [, setCurrentView] = useState<CalendarView>("month");
-  const [events, setEvents] = useState<CalendarEvent<ReservationEventData>[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [initialLoaded, setInitialLoaded] = useState(false);
-
-  // ---------------------------------------------------------------------------
-  // Busca de dados
-  // ---------------------------------------------------------------------------
-  const fetchReservations = useCallback(
-    async (month: Date) => {
-      setLoading(true);
-      try {
-        const { data, error } = await api.GET("/reserve", {
-          params: { query: { yearMonth: toYearMonth(month) } },
-        });
-
-        if (error || !data) {
-          setEvents([]);
-          return;
-        }
-
-        setEvents(apiToCalendarEvents(data as ReserveHistoryDTO));
-      } catch {
-        setEvents([]);
-      } finally {
-        setLoading(false);
-        setInitialLoaded(true);
-      }
-    },
-    [api],
+  const reserves = useMonthReserves({ year: activeMonth.getFullYear(), month: activeMonth.getMonth() });
+  const events = useMemo<CalendarEvent<ReservationEventData>[]>(
+    () => reservesToCalendarEvents(reserves.data ?? []),
+    [reserves.data],
   );
 
-  // Carga inicial
-  useEffect(() => {
-    fetchReservations(activeMonth);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ---------------------------------------------------------------------------
-  // Detecta mudança de período no calendário (mês/navegação)
-  // ---------------------------------------------------------------------------
+  // Detecta mudança de mês no calendário (navegação) e ancora a agenda no dia 1
   const handleRangeChange = useCallback(
     (info: EventCalendarRangeInfo) => {
       const newMonth = startOfMonth(info.date);
-      const newMonthKey = toYearMonth(newMonth);
-      const currentKey = toYearMonth(activeMonth);
+      if (newMonth.getTime() === activeMonth.getTime()) return;
 
-      if (newMonthKey !== currentKey) {
-        setActiveMonth(newMonth);
-        fetchReservations(newMonth);
-
-        // Na agenda: posicionar sempre no dia 1 do novo mês
-        if (info.view === "agenda") {
-          requestAnimationFrame(() => {
-            apiRef.current?.goTo(newMonth);
-          });
-        }
+      setActiveMonth(newMonth);
+      if (info.view === "agenda") {
+        requestAnimationFrame(() => apiRef.current?.goTo(newMonth));
       }
     },
-    [activeMonth, fetchReservations],
+    [activeMonth],
   );
 
-  // ---------------------------------------------------------------------------
   // Ao mudar para agenda, garante âncora no dia 1 do mês
-  // ---------------------------------------------------------------------------
   const handleViewChange = useCallback(
     (view: CalendarView) => {
-      setCurrentView(view);
       if (view === "agenda") {
-        requestAnimationFrame(() => {
-          apiRef.current?.goTo(startOfMonth(activeMonth));
-        });
+        requestAnimationFrame(() => apiRef.current?.goTo(startOfMonth(activeMonth)));
       }
     },
     [activeMonth],
@@ -201,7 +153,7 @@ export function HistoryCalendar() {
   );
 
   // Skeleton na primeira carga
-  if (!initialLoaded) {
+  if (reserves.isPending) {
     return (
       <div className="w-full p-4">
         <Card className="w-full py-0">
@@ -232,7 +184,7 @@ export function HistoryCalendar() {
             views={["month", "agenda"]}
             defaultDate={activeMonth}
             agendaDayCount={agendaDayCount}
-            loading={loading}
+            loading={reserves.isFetching}
             locale={ptBR}
             i18n={PT_BR_I18N}
             weekStartsOn={0}

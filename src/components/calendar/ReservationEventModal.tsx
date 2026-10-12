@@ -6,8 +6,9 @@ import { Badge } from "#/components/ui/badge.tsx";
 import { Button } from "#/components/ui/button.tsx";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "#/components/ui/dialog.tsx";
 import { Separator } from "#/components/ui/separator.tsx";
+import { scheduleLabel } from "#/lib/queries/schedules";
 import type { ReservationEventData } from "#/lib/types/reservation-types";
-import { scheduleKeyToLabel, statusLabel, statusVariantClass } from "#/lib/utils/reservation-utils";
+import { statusLabel, statusVariantClass } from "#/lib/utils/reservation-utils";
 import { cn } from "#/lib/utils.ts";
 
 interface ReservationEventModalProps {
@@ -77,9 +78,9 @@ export function ReservationEventModal({ data }: ReservationEventModalProps) {
               <div className="flex flex-col gap-0.5">
                 <p className="text-xs font-medium text-muted-foreground">Horários</p>
                 <div className="flex flex-col gap-1">
-                  {data.schedules.map((key) => (
-                    <p key={key} className="text-sm">
-                      {scheduleKeyToLabel(key)}
+                  {data.schedules.map((schedule) => (
+                    <p key={schedule.id} className="text-sm">
+                      {scheduleLabel(schedule)}
                     </p>
                   ))}
                 </div>

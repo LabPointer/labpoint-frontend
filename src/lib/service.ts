@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const UserRole = z.enum(["OWNER", "ADMIN", "USER"]);
+export const UserRole = z.enum(["Owner", "Admin", "User"]);
 export const SpaceResources = z.enum(["Todos os equipamentos", "Notebooks", "Televisao", "Telao", "Tubos de ensaio"]);
 export type SubjectData = {
     id: number;

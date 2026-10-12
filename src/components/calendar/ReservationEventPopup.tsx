@@ -5,8 +5,9 @@ import type { ReactNode } from "react";
 import { Badge } from "#/components/ui/badge.tsx";
 import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover.tsx";
 import { Separator } from "#/components/ui/separator.tsx";
+import { scheduleLabel } from "#/lib/queries/schedules";
 import type { ReservationEventData } from "#/lib/types/reservation-types";
-import { scheduleKeyToLabel, statusLabel, statusVariantClass } from "#/lib/utils/reservation-utils";
+import { statusLabel, statusVariantClass } from "#/lib/utils/reservation-utils";
 import { cn } from "#/lib/utils.ts";
 
 interface ReservationEventPopupProps {
@@ -69,9 +70,9 @@ export function ReservationEventPopup({ data, trigger }: ReservationEventPopupPr
           <div className="flex items-start gap-2">
             <Clock className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
             <div className="flex flex-col gap-1">
-              {data.schedules.map((key) => (
-                <span key={key} className="text-xs text-foreground">
-                  {scheduleKeyToLabel(key)}
+              {data.schedules.map((schedule) => (
+                <span key={schedule.id} className="text-xs text-foreground">
+                  {scheduleLabel(schedule)}
                 </span>
               ))}
             </div>
@@ -93,11 +94,11 @@ export function ReservationEventPopup({ data, trigger }: ReservationEventPopupPr
 // Cor de fundo do header do popup, derivada do status
 function getStatusBgColor(status: ReservationEventData["status"]): string {
   const map: Record<string, string> = {
+    BOOKING: "var(--color-amber-500)",
     CONFIRMED: "var(--color-emerald-500)",
-    PENDING: "var(--color-amber-500)",
-    ABSENT: "var(--color-orange-500)",
-    LOCKED: "var(--color-blue-500)",
     CANCELED: "var(--color-rose-500)",
+    REJECTED: "var(--color-orange-500)",
+    BLOCKED: "var(--color-blue-500)",
   };
   return map[status] ?? "var(--color-slate-500)";
 }
