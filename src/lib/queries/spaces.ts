@@ -18,6 +18,7 @@ export type SpaceParams = {
   endAt?: string;
   schedules?: number[];
   limit?: number;
+  offset?: number;
 };
 
 export const spaceKeys = {
@@ -26,7 +27,7 @@ export const spaceKeys = {
 };
 
 export function useSpaces(params: SpaceParams = {}, options: { enabled?: boolean } = {}) {
-  const { search, subjects, resources, locked, capacity, startAt, endAt, schedules, limit = 30 } = params;
+  const { search, subjects, resources, locked, capacity, startAt, endAt, schedules, limit = 30, offset = 0 } = params;
 
   return useQuery({
     queryKey: spaceKeys.list({
@@ -39,6 +40,7 @@ export function useSpaces(params: SpaceParams = {}, options: { enabled?: boolean
       endAt,
       schedules,
       limit,
+      offset,
     }),
     queryFn: async ({ signal }) =>
       unwrapList(
@@ -54,7 +56,7 @@ export function useSpaces(params: SpaceParams = {}, options: { enabled?: boolean
               EndAt: endAt,
               Schedules: schedules?.length ? schedules : undefined,
               Limit: limit,
-              Offset: 0,
+              Offset: offset,
             },
           },
           signal,

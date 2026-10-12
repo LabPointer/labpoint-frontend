@@ -1,7 +1,9 @@
 import { PlusIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
+import { DEFAULT_PAGE_LIMIT } from "#/lib/utils/pagination";
 import { type FilterOption, FilterSelect } from "@/components/shared/FilterSelect";
+import { PageLimitSelect } from "@/components/shared/PageLimitSelect";
 import { SearchPanel, SearchTextField } from "@/components/shared/SearchPanel";
 import { Button } from "@/components/ui/button";
 
@@ -9,6 +11,8 @@ export type ResourceFilters = {
   search: string;
   canReserve: boolean | undefined;
   enabled: boolean | undefined;
+  /** itens por página */
+  limit: number;
 };
 
 const canReserveOptions: FilterOption<boolean | undefined>[] = [
@@ -32,8 +36,12 @@ export function ManageResourceSearchBar({ onSearch, onAddNewResource }: ManageRe
   const [search, setSearch] = useState("");
   const [canReserve, setCanReserve] = useState<boolean | undefined>(undefined);
   const [enabled, setEnabled] = useState<boolean | undefined>(undefined);
+  const [limit, setLimit] = useState(DEFAULT_PAGE_LIMIT);
 
-  const filters = useMemo<ResourceFilters>(() => ({ search, canReserve, enabled }), [search, canReserve, enabled]);
+  const filters = useMemo<ResourceFilters>(
+    () => ({ search, canReserve, enabled, limit }),
+    [search, canReserve, enabled, limit],
+  );
   const debouncedFilters = useDebouncedValue(filters, 500);
 
   useEffect(() => {
@@ -42,7 +50,15 @@ export function ManageResourceSearchBar({ onSearch, onAddNewResource }: ManageRe
 
   return (
     <SearchPanel>
-      <SearchTextField id="resource-search" placeholder="Buscar por nome..." value={search} onValueChange={setSearch} />
+      <div className="flex flex-wrap items-end gap-4">
+        <SearchTextField
+          id="resource-search"
+          placeholder="Buscar por nome..."
+          value={search}
+          onValueChange={setSearch}
+        />
+        <PageLimitSelect id="resource-limit" value={limit} onValueChange={setLimit} className="w-full sm:w-40" />
+      </div>
       <FilterSelect
         id="resource-can-reserve"
         label="Pode reservar"

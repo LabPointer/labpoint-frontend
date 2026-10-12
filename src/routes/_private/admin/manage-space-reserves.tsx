@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useFormDialog } from "#/hooks/use-form-dialog";
+import { usePagination } from "#/hooks/use-pagination";
 import {
   type AdminReserve,
   useAdminReserves,
@@ -9,6 +10,7 @@ import {
 } from "#/lib/queries/admin-reserves";
 import { toApiDate } from "#/lib/queries/reserves";
 import { succeeded } from "#/lib/utils/api-result";
+import { paginateLocal } from "#/lib/utils/pagination";
 import { CancelReserveDialog } from "@/components/history/CancelReserveDialog";
 import {
   type ManageReserveEditData,
@@ -20,6 +22,7 @@ import {
   type ReserveFilters,
 } from "@/components/manage-reserves/ManageReserveSearchBar";
 import { ManageReserveTable } from "@/components/manage-reserves/ManageReserveTable";
+import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
 
@@ -29,6 +32,7 @@ export const Route = createFileRoute("/_private/admin/manage-space-reserves")({
 
 function RouteComponent() {
   const [filters, setFilters] = useState<ReserveFilters>(initialReserveFilters);
+  const pagination = usePagination(filters);
   const reserves = useAdminReserves({
     search: filters.search,
     startAt: filters.startAt,
@@ -37,6 +41,8 @@ function RouteComponent() {
     accountIds: filters.accountIds,
     status: filters.status,
   });
+  // GET /space-reserve/admin não tem Limit/Offset: o backend devolve tudo e a página é recortada aqui.
+  const { items, hasNext } = paginateLocal(reserves.data, pagination);
   const editReserve = useEditAdminReserve();
   const cancelReserve = useCancelAdminReserve();
   const editDialog = useFormDialog<AdminReserve>();
@@ -110,18 +116,24 @@ function RouteComponent() {
       </section>
 
       <section className="container">
-        <ResultsHeader title="Reservas" count={reserves.data?.length ?? 0} />
+        <ResultsHeader title="Reservas" count={items.length} />
         <QueryBoundary
           isPending={reserves.isPending}
           isFetching={reserves.isFetching}
           isError={reserves.isError}
           error={reserves.error}
-          isEmpty={reserves.data?.length === 0}
+          isEmpty={items.length === 0}
           loadingText="Carregando reservas..."
           emptyText="Nenhuma reserva encontrada."
         >
-          <ManageReserveTable reserves={reserves.data ?? []} onEdit={editDialog.open} onCancel={cancelDialog.open} />
+          <ManageReserveTable reserves={items} onEdit={editDialog.open} onCancel={cancelDialog.open} />
         </QueryBoundary>
+        <PaginationControls
+          page={pagination.page}
+          hasNext={hasNext}
+          isFetching={reserves.isFetching}
+          onPageChange={pagination.setPage}
+        />
       </section>
     </>
   );

@@ -37,6 +37,8 @@ export type AccountParams = {
   /** `undefined` = qualquer matéria */
   subjectId?: number;
   limit?: number;
+  /** página do backend (`Page`); `undefined` = padrão do backend. Este endpoint não tem Offset. */
+  page?: number;
 };
 
 export const accountKeys = {
@@ -47,9 +49,12 @@ export const accountKeys = {
 const DEFAULT_LIMIT = 30;
 
 /** Todos os filtros (busca, cargo, status e matéria) são aplicados no servidor. */
-export function useAccounts({ search, role, enabled, subjectId, limit = DEFAULT_LIMIT }: AccountParams = {}) {
+export function useAccounts(
+  { search, role, enabled, subjectId, limit = DEFAULT_LIMIT, page }: AccountParams = {},
+  options: { enabled?: boolean } = {},
+) {
   return useQuery({
-    queryKey: accountKeys.list({ search: search || undefined, role, enabled, subjectId, limit }),
+    queryKey: accountKeys.list({ search: search || undefined, role, enabled, subjectId, limit, page }),
     queryFn: async ({ signal }) =>
       unwrapList(
         await api.GET("/account/admin", {
@@ -60,14 +65,46 @@ export function useAccounts({ search, role, enabled, subjectId, limit = DEFAULT_
               Enabled: enabled,
               SubjectId: subjectId,
               Limit: limit,
+              Page: page,
             },
           },
           signal,
         }),
         "Erro ao buscar usuários.",
       ),
+    enabled: options.enabled ?? true,
     placeholderData: keepPreviousData,
   });
+}
+
+/** Primeira página no `Page` do backend. Ajuste para 0 se o backend for 0-based. */
+const FIRST_API_PAGE = 1;
+
+/**
+ * Listagem paginada de usuários.
+ *
+ * `/account/admin` pagina por `Page` (sem Offset), então o truque do "item extra" não funciona aqui: com `Limit + 1`
+ * as páginas deixariam de se alinhar. Em vez disso, quando a página atual vem cheia, consultamos a seguinte
+ * (mesmo `Limit`) para saber se ela tem itens; o resultado fica em cache e a navegação para ela é instantânea.
+ */
+export function useAccountsPage(
+  params: Omit<AccountParams, "limit" | "page">,
+  { page, limit }: { page: number; limit: number },
+) {
+  const apiPage = page + FIRST_API_PAGE;
+  const current = useAccounts({ ...params, limit, page: apiPage });
+  const isFull = current.data?.length === limit;
+  const next = useAccounts({ ...params, limit, page: apiPage + 1 }, { enabled: isFull });
+
+  return {
+    items: current.data ?? [],
+    // `isPlaceholderData`: ignora o resultado da sondagem anterior enquanto a nova não chega
+    hasNext: isFull && !next.isPlaceholderData && (next.data?.length ?? 0) > 0,
+    isPending: current.isPending,
+    isFetching: current.isFetching,
+    isError: current.isError,
+    error: current.error,
+  };
 }
 
 export type AccountEditPayload = components["schemas"]["AdminAccountEditRequestDTO"];

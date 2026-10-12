@@ -1,11 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useFormDialog } from "#/hooks/use-form-dialog";
+import { usePagination } from "#/hooks/use-pagination";
 import { type Resource, useCreateResource, useEditResource, useResources } from "#/lib/queries/resources";
 import { succeeded } from "#/lib/utils/api-result";
+import { DEFAULT_PAGE_LIMIT, toPaged } from "#/lib/utils/pagination";
 import { ManageResourceDialog, type ResourceFormData } from "@/components/manage-resources/ManageResourceDialog";
 import { ManageResourceSearchBar, type ResourceFilters } from "@/components/manage-resources/ManageResourceSearchBar";
 import { ManageResourceTable } from "@/components/manage-resources/ManageResourceTable";
+import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
 
@@ -13,11 +16,23 @@ export const Route = createFileRoute("/_private/admin/manage-resources")({
   component: RouteComponent,
 });
 
-const initialFilters: ResourceFilters = { search: "", canReserve: undefined, enabled: undefined };
+const initialFilters: ResourceFilters = {
+  search: "",
+  canReserve: undefined,
+  enabled: undefined,
+  limit: DEFAULT_PAGE_LIMIT,
+};
 
 function RouteComponent() {
   const [filters, setFilters] = useState<ResourceFilters>(initialFilters);
-  const resources = useResources({ name: filters.search, canReserve: filters.canReserve, enabled: filters.enabled });
+  const pagination = usePagination(filters);
+  const resources = useResources({
+    name: filters.search,
+    canReserve: filters.canReserve,
+    enabled: filters.enabled,
+    ...pagination.request,
+  });
+  const { items, hasNext } = toPaged(resources.data, pagination.limit);
   const createResource = useCreateResource();
   const editResource = useEditResource();
   const createDialog = useFormDialog();
@@ -69,18 +84,24 @@ function RouteComponent() {
       </section>
 
       <section className="container">
-        <ResultsHeader title="Recursos" count={resources.data?.length ?? 0} />
+        <ResultsHeader title="Recursos" count={items.length} />
         <QueryBoundary
           isPending={resources.isPending}
           isFetching={resources.isFetching}
           isError={resources.isError}
           error={resources.error}
-          isEmpty={resources.data?.length === 0}
+          isEmpty={items.length === 0}
           loadingText="Carregando recursos..."
           emptyText="Nenhum recurso encontrado."
         >
-          <ManageResourceTable resources={resources.data ?? []} onEdit={editDialog.open} />
+          <ManageResourceTable resources={items} onEdit={editDialog.open} />
         </QueryBoundary>
+        <PaginationControls
+          page={pagination.page}
+          hasNext={hasNext}
+          isFetching={resources.isFetching}
+          onPageChange={pagination.setPage}
+        />
       </section>
     </>
   );

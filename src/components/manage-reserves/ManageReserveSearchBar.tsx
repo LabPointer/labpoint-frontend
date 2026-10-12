@@ -4,10 +4,12 @@ import type { DateRange } from "react-day-picker";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
 import { RESERVE_STATUS, toApiDate } from "#/lib/queries/reserves";
 import type { ReservationStatus } from "#/lib/types/reservation-types";
+import { DEFAULT_PAGE_LIMIT } from "#/lib/utils/pagination";
 import { statusLabel } from "#/lib/utils/reservation-utils";
 import { DateRangeField } from "@/components/reserve/DateRangeField";
 import { AccountMultiSelect, ScheduleMultiSelect } from "@/components/shared/entity-selects";
 import { type FilterOption, FilterSelect } from "@/components/shared/FilterSelect";
+import { PageLimitSelect } from "@/components/shared/PageLimitSelect";
 import type { RemoteOption } from "@/components/shared/RemoteCombobox";
 import { SearchPanel, SearchTextField } from "@/components/shared/SearchPanel";
 
@@ -22,6 +24,8 @@ export type ReserveFilters = {
   accountIds: string[];
   /** valor de EReserveStatus; `undefined` = todos os status */
   status: number | undefined;
+  /** itens por página */
+  limit: number;
 };
 
 const statusOptions: FilterOption<number | undefined>[] = [
@@ -47,6 +51,7 @@ export const initialReserveFilters = (): ReserveFilters => {
     scheduleIds: [],
     accountIds: [],
     status: undefined,
+    limit: DEFAULT_PAGE_LIMIT,
   };
 };
 
@@ -61,6 +66,7 @@ export function ManageReserveSearchBar({ onSearch }: ManageReserveSearchBarProps
   const [schedules, setSchedules] = useState<RemoteOption[]>([]);
   const [accounts, setAccounts] = useState<RemoteOption<string>[]>([]);
   const [status, setStatus] = useState<number | undefined>(undefined);
+  const [limit, setLimit] = useState(DEFAULT_PAGE_LIMIT);
 
   const filters = useMemo<ReserveFilters>(() => {
     const from = range.from ?? (defaultRange().from as Date);
@@ -72,8 +78,9 @@ export function ManageReserveSearchBar({ onSearch }: ManageReserveSearchBarProps
       scheduleIds: schedules.map((schedule) => schedule.id),
       accountIds: accounts.map((account) => account.id),
       status,
+      limit,
     };
-  }, [search, range, schedules, accounts, status]);
+  }, [search, range, schedules, accounts, status, limit]);
   const debouncedFilters = useDebouncedValue(filters, 500);
 
   useEffect(() => {
@@ -82,12 +89,15 @@ export function ManageReserveSearchBar({ onSearch }: ManageReserveSearchBarProps
 
   return (
     <SearchPanel>
-      <SearchTextField
-        id="reserve-search"
-        placeholder="Buscar pelo nome do espaço..."
-        value={search}
-        onValueChange={setSearch}
-      />
+      <div className="flex flex-wrap items-end gap-4">
+        <SearchTextField
+          id="reserve-search"
+          placeholder="Buscar pelo nome do espaço..."
+          value={search}
+          onValueChange={setSearch}
+        />
+        <PageLimitSelect id="reserve-limit" value={limit} onValueChange={setLimit} className="w-full sm:w-40" />
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <DateRangeField

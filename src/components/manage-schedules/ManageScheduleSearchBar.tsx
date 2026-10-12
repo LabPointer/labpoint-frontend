@@ -1,13 +1,17 @@
 import { PlusIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
+import { DEFAULT_PAGE_LIMIT } from "#/lib/utils/pagination";
 import { type FilterOption, FilterSelect } from "@/components/shared/FilterSelect";
+import { PageLimitSelect } from "@/components/shared/PageLimitSelect";
 import { SearchPanel } from "@/components/shared/SearchPanel";
 import { Button } from "@/components/ui/button";
 
 export type ScheduleFilters = {
   shift: number | undefined;
   enabled: boolean | undefined;
+  /** itens por página */
+  limit: number;
 };
 
 const shiftOptions: FilterOption<number | undefined>[] = [
@@ -31,8 +35,9 @@ type ManageScheduleSearchBarProps = {
 export function ManageScheduleSearchBar({ onSearch, onAddNewSchedule }: ManageScheduleSearchBarProps) {
   const [shift, setShift] = useState<number | undefined>(undefined);
   const [enabled, setEnabled] = useState<boolean | undefined>(undefined);
+  const [limit, setLimit] = useState(DEFAULT_PAGE_LIMIT);
 
-  const filters = useMemo<ScheduleFilters>(() => ({ shift, enabled }), [shift, enabled]);
+  const filters = useMemo<ScheduleFilters>(() => ({ shift, enabled, limit }), [shift, enabled, limit]);
   const debouncedFilters = useDebouncedValue(filters, 500);
 
   useEffect(() => {
@@ -57,6 +62,7 @@ export function ManageScheduleSearchBar({ onSearch, onAddNewSchedule }: ManageSc
         onValueChange={setEnabled}
         className="w-full"
       />
+      <PageLimitSelect id="schedule-limit" value={limit} onValueChange={setLimit} className="w-full" />
       <Button className="w-full shrink-0 lg:w-auto" type="button" onClick={onAddNewSchedule}>
         <PlusIcon />
         Adicionar horário

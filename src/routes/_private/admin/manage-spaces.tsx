@@ -1,40 +1,50 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useFormDialog } from "#/hooks/use-form-dialog";
+import { usePagination } from "#/hooks/use-pagination";
 import { type Space, useCreateSpace, useEditSpace, useSpaces } from "#/lib/queries/spaces";
 import { succeeded } from "#/lib/utils/api-result";
+import { DEFAULT_PAGE_LIMIT, toPaged } from "#/lib/utils/pagination";
 import { ManageSpaceDialog, type SpaceFormData } from "@/components/manage-spaces/ManageSpaceDialog";
 import { ManageSpaceSearchBar, type SpaceFilters } from "@/components/manage-spaces/ManageSpaceSearchBar";
 import { ManageSpaceTable } from "@/components/manage-spaces/ManageSpaceTable";
+import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 
 export const Route = createFileRoute("/_private/admin/manage-spaces")({
   component: RouteComponent,
 });
 
-const initialFilters: SpaceFilters = { search: "", subjectIds: [], resourceIds: [], locked: undefined };
+const initialFilters: SpaceFilters = {
+  search: "",
+  subjectIds: [],
+  resourceIds: [],
+  locked: undefined,
+  limit: DEFAULT_PAGE_LIMIT,
+};
 
 const toOption = ({ id, name }: { id: number | string; name: string }) => ({ id: Number(id), name });
 
 function RouteComponent() {
   const [filters, setFilters] = useState<SpaceFilters>(initialFilters);
+  const pagination = usePagination(filters);
   // startAt, endAt e schedules ficam `undefined`: na administração listamos todos os espaços.
   const spaces = useSpaces({
     search: filters.search,
     subjects: filters.subjectIds,
     resources: filters.resourceIds,
     locked: filters.locked,
+    ...pagination.request,
   });
+  const { items, hasNext } = toPaged(spaces.data, pagination.limit);
   const createSpace = useCreateSpace();
   const editSpace = useEditSpace();
   const createDialog = useFormDialog();
   const editDialog = useFormDialog<Space>();
 
-  const summary = useMemo(() => {
-    const list = spaces.data ?? [];
-    const inactive = list.filter((space) => space.locked).length;
-    return { total: list.length, inactive, active: list.length - inactive };
-  }, [spaces.data]);
+  // contagens da página exibida
+  const inactive = items.filter((space) => space.locked).length;
+  const summary = { total: items.length, inactive, active: items.length - inactive };
 
   async function handleCreate(data: SpaceFormData) {
     const ok = await succeeded(
@@ -105,19 +115,25 @@ function RouteComponent() {
 
       <section className="container flex flex-col gap-8">
         <h2 className="text-sm font-bold">
-          {summary.total} espaço(s) encontrado(s) · {summary.active} ativo(s) · {summary.inactive} inativo(s)
+          {summary.total} espaço(s) exibido(s) · {summary.active} ativo(s) · {summary.inactive} inativo(s)
         </h2>
         <QueryBoundary
           isPending={spaces.isPending}
           isFetching={spaces.isFetching}
           isError={spaces.isError}
           error={spaces.error}
-          isEmpty={spaces.data?.length === 0}
+          isEmpty={items.length === 0}
           loadingText="Carregando espaços..."
           emptyText="Nenhum espaço encontrado."
         >
-          <ManageSpaceTable spaces={spaces.data ?? []} onEdit={editDialog.open} />
+          <ManageSpaceTable spaces={items} onEdit={editDialog.open} />
         </QueryBoundary>
+        <PaginationControls
+          page={pagination.page}
+          hasNext={hasNext}
+          isFetching={spaces.isFetching}
+          onPageChange={pagination.setPage}
+        />
       </section>
     </>
   );
