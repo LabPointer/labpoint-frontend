@@ -7,17 +7,6 @@ import { RESERVE_STATUS, reserveKeys } from "./reserves";
 
 export type AdminReserve = components["schemas"]["AdminSpaceReserveResponseDTO"];
 
-/**
- * O backend sem o patch ainda devolve `spaces` (plural) em vez de `space`.
- * Normaliza para `space` para a tela funcionar nos dois casos; pode ser removido quando o patch estiver aplicado.
- */
-type RawAdminReserve = Omit<AdminReserve, "space"> & { space?: AdminReserve["spaces"]; spaces?: AdminReserve["spaces"] };
-
-const normalizeAdminReserve = ({ spaces, space, ...rest }: RawAdminReserve): AdminReserve => ({
-  ...rest,
-  spaces: (space ?? spaces) as AdminReserve["spaces"],
-});
-
 export type AdminReserveParams = {
   /** busca pelo nome do espaço */
   search?: string;
@@ -40,24 +29,22 @@ export function useAdminReserves(params: AdminReserveParams) {
   return useQuery({
     queryKey: adminReserveKeys.list({ search: search || undefined, startAt, endAt, scheduleIds, accountIds, status }),
     queryFn: async ({ signal }) =>
-      (
-        unwrapList(
-          await api.GET("/space-reserve/admin", {
-            params: {
-              query: {
-                SearchQuery: search || undefined,
-                StartAt: startAt,
-                EndAt: endAt,
-                ScheduleIds: scheduleIds?.length ? scheduleIds : undefined,
-                AccountIds: accountIds?.length ? accountIds : undefined,
-                Status: status,
-              },
+      unwrapList(
+        await api.GET("/space-reserve/admin", {
+          params: {
+            query: {
+              SearchQuery: search || undefined,
+              StartAt: startAt,
+              EndAt: endAt,
+              ScheduleIds: scheduleIds?.length ? scheduleIds : undefined,
+              AccountIds: accountIds?.length ? accountIds : undefined,
+              Status: status,
             },
-            signal,
-          }),
-          "Erro ao buscar reservas.",
-        ) as RawAdminReserve[]
-      ).map(normalizeAdminReserve),
+          },
+          signal,
+        }),
+        "Erro ao buscar reservas.",
+      ),
     placeholderData: keepPreviousData,
   });
 }

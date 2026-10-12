@@ -66,11 +66,11 @@ function RouteComponent() {
       editReserve.mutateAsync({
         reserveId: Number(reserve.id),
         body: {
-          status: statusChanged ? data.status! : Number(reserve.status),
+          status: statusChanged ? data.status : null,
           startAt: datesChanged ? startAt : null,
           endAt: datesChanged ? endAt : null,
           scheduleIds: schedulesChanged ? scheduleIds : null,
-        } as Parameters<typeof editReserve.mutateAsync>[0]["body"],
+        },
       }),
     );
     if (ok) editDialog.close();

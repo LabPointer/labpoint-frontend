@@ -139,6 +139,8 @@ export interface paths {
                     Role?: components["schemas"]["EAccountRole"];
                     Limit?: number | string;
                     Page?: number | string;
+                    SubjectId?: number | string;
+                    Enabled?: boolean;
                 };
                 header?: never;
                 path?: never;
@@ -203,8 +205,9 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Admin: listar usuarios
-         * @description Lista todos os usuários cadastrados no sistema.
+         * Admin: editar usuário
+         * @description Somente o Owner altera cargos. Ativar/desativar a conta exige cargo superior ao do usuário alvo
+         *     (ordem crescente: User, Admin, Owner).
          */
         patch: {
             parameters: {
@@ -241,6 +244,39 @@ export interface paths {
                 };
                 /** @description Unauthorized */
                 401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1729,6 +1765,7 @@ export interface paths {
                     ScheduleIds?: (number | string)[];
                     Status?: components["schemas"]["EReserveStatus"];
                     AccountIds?: string[];
+                    SearchQuery?: string;
                 };
                 header?: never;
                 path?: never;
@@ -1794,7 +1831,7 @@ export interface paths {
         head?: never;
         /**
          * Admin: editar reserva
-         * @description Edita status de uma reserva de espaço existente.
+         * @description Edita status, período e/ou horários de uma reserva de espaço de outro usuário (campos nulos não são alterados).
          */
         patch: {
             parameters: {
@@ -2059,7 +2096,12 @@ export interface components {
             lockAccount: null | boolean;
         };
         AdminSpaceReserveEditRequestDTO: {
-            status: components["schemas"]["EReserveStatus"];
+            status: null | components["schemas"]["EReserveStatus"];
+            /** Format: date */
+            startAt: null | string;
+            /** Format: date */
+            endAt: null | string;
+            scheduleIds: null | (number | string)[];
         };
         AdminSpaceReserveResponseDTO: {
             /** Format: int64 */

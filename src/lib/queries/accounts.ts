@@ -1,5 +1,4 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback } from "react";
 import type { components } from "#/lib/utils/api";
 import { assertOk, unwrapList } from "#/lib/utils/api-result";
 import { notifyError, notifySuccess } from "#/lib/utils/notify";
@@ -12,6 +11,17 @@ import { api } from "#/lib/utils/restapi";
  */
 export const ROLE_LABELS = ["User", "Admin", "Owner"] as const;
 
+/** Posição de um cargo na hierarquia (User < Admin < Owner). */
+export const ROLE_RANK = { User: 0, Admin: 1, Owner: 2 } as const;
+
+/** Maior cargo entre os da sessão (`["Admin"]`, `["Owner"]`...). Sem cargo = User. */
+export function highestRole(roles: readonly string[] | undefined): number {
+  return Math.max(
+    ROLE_RANK.User,
+    ...(roles ?? []).map((role) => ROLE_RANK[role as keyof typeof ROLE_RANK] ?? ROLE_RANK.User),
+  );
+}
+
 export function roleLabel(role: number | undefined) {
   return role === undefined ? "—" : (ROLE_LABELS[role] ?? "—");
 }
@@ -22,49 +32,40 @@ export type AccountParams = {
   search?: string;
   /** índice em ROLE_LABELS; `undefined` = qualquer cargo */
   role?: number;
-  /** o endpoint não possui filtro de status: aplicado no cliente */
+  /** `undefined` = qualquer status */
   enabled?: boolean;
-  /** o endpoint não possui filtro de matéria: aplicado no cliente sobre `account.subject` */
+  /** `undefined` = qualquer matéria */
   subjectId?: number;
   limit?: number;
 };
 
 export const accountKeys = {
   all: ["accounts"] as const,
-  list: (params: Pick<AccountParams, "search" | "role" | "limit">) => [...accountKeys.all, "list", params] as const,
+  list: (params: AccountParams) => [...accountKeys.all, "list", params] as const,
 };
 
-/** Limite padrão da listagem e o usado quando há filtros aplicados no cliente (status/matéria). */
 const DEFAULT_LIMIT = 30;
-const CLIENT_FILTER_LIMIT = 100;
 
-export function useAccounts({ search, role, enabled, subjectId, limit }: AccountParams = {}) {
-  // status e matéria não existem como parâmetro de /account/admin: filtramos aqui. Como o filtro roda
-  // sobre a página retornada, pedimos uma página maior para não esconder resultados.
-  const hasClientFilter = enabled !== undefined || subjectId !== undefined;
-  const effectiveLimit = limit ?? (hasClientFilter ? CLIENT_FILTER_LIMIT : DEFAULT_LIMIT);
-
-  const select = useCallback(
-    (accounts: Account[]) =>
-      accounts.filter((account) => {
-        if (enabled !== undefined && account.enabled !== enabled) return false;
-        if (subjectId !== undefined && Number(account.subject?.id) !== subjectId) return false;
-        return true;
-      }),
-    [enabled, subjectId],
-  );
-
+/** Todos os filtros (busca, cargo, status e matéria) são aplicados no servidor. */
+export function useAccounts({ search, role, enabled, subjectId, limit = DEFAULT_LIMIT }: AccountParams = {}) {
   return useQuery({
-    queryKey: accountKeys.list({ search: search || undefined, role, limit: effectiveLimit }),
+    queryKey: accountKeys.list({ search: search || undefined, role, enabled, subjectId, limit }),
     queryFn: async ({ signal }) =>
       unwrapList(
         await api.GET("/account/admin", {
-          params: { query: { SearchQuery: search || undefined, Role: role, Limit: effectiveLimit } },
+          params: {
+            query: {
+              SearchQuery: search || undefined,
+              Role: role,
+              Enabled: enabled,
+              SubjectId: subjectId,
+              Limit: limit,
+            },
+          },
           signal,
         }),
         "Erro ao buscar usuários.",
       ),
-    select,
     placeholderData: keepPreviousData,
   });
 }

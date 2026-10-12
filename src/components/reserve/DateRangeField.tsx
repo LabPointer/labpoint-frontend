@@ -93,6 +93,9 @@ export function DateRangeField({
             selected={value}
             disabled={[...(minDate ? [{ before: minDate }] : []), ...(maxDate ? [{ after: maxDate }] : [])]}
             onSelect={handleSelect}
+            // com um período já escolhido, o próximo clique começa um novo período (sem isso o clique só
+            // estendia o intervalo anterior e não era possível trocar a data)
+            resetOnSelect
             numberOfMonths={1}
           />
         </PopoverContent>

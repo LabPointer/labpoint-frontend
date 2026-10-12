@@ -17,6 +17,7 @@ type FilterSelectProps<T> = {
   value: T;
   onValueChange: (value: T) => void;
   className?: string;
+  disabled?: boolean;
 };
 
 /**
@@ -24,7 +25,15 @@ type FilterSelectProps<T> = {
  * (ex.: `undefined` para "Todos", `true`/`false`, índice do cargo), sem mapas string → valor.
  * A primeira opção é tratada como padrão quando o combobox é limpo.
  */
-export function FilterSelect<T>({ id, label, options, value, onValueChange, className }: FilterSelectProps<T>) {
+export function FilterSelect<T>({
+  id,
+  label,
+  options,
+  value,
+  onValueChange,
+  className,
+  disabled,
+}: FilterSelectProps<T>) {
   const selected = options.find((option) => Object.is(option.value, value)) ?? options[0];
 
   return (
@@ -34,6 +43,7 @@ export function FilterSelect<T>({ id, label, options, value, onValueChange, clas
       </FieldLabel>
       <Combobox
         items={options}
+        disabled={disabled}
         value={selected}
         onValueChange={(option) => onValueChange((option ?? options[0]).value)}
         itemToStringLabel={(option) => option.label}

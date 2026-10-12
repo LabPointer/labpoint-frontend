@@ -47,7 +47,7 @@
     "react": "latest",
     "react-day-picker": "latest",
     "react-dom": "latest",
-    "react-error-boundary": "^6.1.6",
+    "react-error-boundary": "latest",
     "react-resizable-panels": "latest",
     "recharts": "latest",
     "shadcn": "latest",
@@ -57,7 +57,7 @@
     "tw-animate-css": "latest",
     "vaul": "latest",
     "zod": "latest",
-    "zustand": "^5.0.15"
+    "zustand": "latest"
   },
   "devDependencies": {
     "@biomejs/biome": "latest",

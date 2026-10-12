@@ -1,6 +1,6 @@
 import { useForm, useStore } from "@tanstack/react-form";
 import z from "zod";
-import { type Account, ROLE_LABELS } from "#/lib/queries/accounts";
+import { type Account, ROLE_LABELS, ROLE_RANK } from "#/lib/queries/accounts";
 import { BooleanField } from "@/components/shared/BooleanField";
 import { SubjectSelect } from "@/components/shared/entity-selects";
 import { FilterSelect } from "@/components/shared/FilterSelect";
@@ -20,6 +20,8 @@ export type ManageEditUserData = {
 
 export type ManageEditUserDialogProps = {
   account: Account;
+  /** Cargo de quem está editando (índice em ROLE_LABELS). Define o que o formulário permite alterar. */
+  viewerRole: number;
   open: boolean;
   onClose: () => void;
   onSubmit: (data: ManageEditUserData) => Promise<void>;
@@ -39,7 +41,12 @@ const roleOptions = ROLE_LABELS.map((label, index) => ({ label, value: index }))
  * Os valores iniciais vêm da conta selecionada. Para o formulário refletir outra conta,
  * o pai deve remontar o componente (`key`) a cada abertura.
  */
-export function ManageEditUserDialog({ account, open, onClose, onSubmit }: ManageEditUserDialogProps) {
+export function ManageEditUserDialog({ account, viewerRole, open, onClose, onSubmit }: ManageEditUserDialogProps) {
+  // Regras (também validadas no backend): só o Owner altera cargos; ativar/desativar a conta exige
+  // cargo superior ao do usuário editado.
+  const canChangeRole = viewerRole === ROLE_RANK.Owner;
+  const canToggleStatus = viewerRole > account.role;
+
   const { subject } = account;
   const defaultValues = {
     username: account.username,
@@ -118,13 +125,19 @@ export function ManageEditUserDialog({ account, open, onClose, onSubmit }: Manag
 
       <form.Field name="role">
         {(field) => (
-          <FilterSelect
-            id="edit-user-role"
-            label="Cargo"
-            options={roleOptions}
-            value={field.state.value}
-            onValueChange={field.handleChange}
-          />
+          <div className="flex flex-col gap-1">
+            <FilterSelect
+              id="edit-user-role"
+              label="Cargo"
+              options={roleOptions}
+              value={field.state.value}
+              onValueChange={field.handleChange}
+              disabled={!canChangeRole}
+            />
+            {!canChangeRole && (
+              <p className="text-xs text-muted-foreground">Somente o proprietário (Owner) pode alterar cargos.</p>
+            )}
+          </div>
         )}
       </form.Field>
 
@@ -149,6 +162,8 @@ export function ManageEditUserDialog({ account, open, onClose, onSubmit }: Manag
             onCheckedChange={field.handleChange}
             trueLabel="Ativa"
             falseLabel="Inativa"
+            disabled={!canToggleStatus}
+            disabledReason="Você não pode alterar o status de um usuário com cargo igual ou superior ao seu."
           />
         )}
       </form.Field>

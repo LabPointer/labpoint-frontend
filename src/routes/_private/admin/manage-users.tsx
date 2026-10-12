@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { useState } from "react";
 import { useFormDialog } from "#/hooks/use-form-dialog";
-import { type Account, useAccounts, useEditAccount } from "#/lib/queries/accounts";
+import { type Account, highestRole, useAccounts, useEditAccount } from "#/lib/queries/accounts";
 import { succeeded } from "#/lib/utils/api-result";
 import { type ManageEditUserData, ManageEditUserDialog } from "@/components/manage-users/ManageEditUserDialog";
 import { ManageUserSearchBar, type UserFilters } from "@/components/manage-users/ManageUserSearchBar";
@@ -19,6 +19,8 @@ function RouteComponent() {
   const [filters, setFilters] = useState<UserFilters>(initialFilters);
   const accounts = useAccounts(filters);
   const editAccount = useEditAccount();
+  const { sessionInfo } = useRouteContext({ from: "__root__" });
+  const viewerRole = highestRole(sessionInfo?.roles);
 
   const editDialog = useFormDialog<Account>();
 
@@ -50,6 +52,7 @@ function RouteComponent() {
         <ManageEditUserDialog
           key={editDialog.session}
           account={editDialog.target}
+          viewerRole={viewerRole}
           open={editDialog.isOpen}
           onClose={editDialog.close}
           onSubmit={handleEditSubmit}
