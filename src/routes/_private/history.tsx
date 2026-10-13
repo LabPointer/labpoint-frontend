@@ -1,51 +1,39 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useFormDialog } from "#/hooks/use-form-dialog";
+import { usePagination } from "#/hooks/use-pagination";
 import {
   type Reserve,
-  type ReserveTab,
   reserveTab,
   toApiDate,
   useCancelReserve,
   useEditReserve,
-  useMonthReserves,
+  useRangeReserves,
 } from "#/lib/queries/reserves";
 import { succeeded } from "#/lib/utils/api-result";
-import { currentMonthYear, type MonthYear } from "#/lib/utils/month-year";
+import { paginateLocal } from "#/lib/utils/pagination";
 import { CancelReserveDialog } from "@/components/history/CancelReserveDialog";
 import { HistoryCard } from "@/components/history/HistoryCard";
 import { type HistoryEditFormData, HistoryEditModal } from "@/components/history/HistoryEditModal";
-import { MonthYearPicker } from "@/components/history/MonthYearPicker";
+import { HistorySearchBar, type HistoryFilters, initialHistoryFilters } from "@/components/history/HistorySearchBar";
+import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ResultsHeader } from "@/components/shared/ResultsHeader";
 
 export const Route = createFileRoute("/_private/history")({
   component: RouteComponent,
 });
 
-const tabs: { value: ReserveTab; label: string }[] = [
-  { value: "next", label: "Próximas" },
-  { value: "concluded", label: "Concluídas" },
-  { value: "canceled", label: "Canceladas e recusadas" },
-];
-
 function RouteComponent() {
-  const [monthYear, setMonthYear] = useState<MonthYear>(currentMonthYear);
-  const reserves = useMonthReserves(monthYear);
+  const [filters, setFilters] = useState<HistoryFilters>(initialHistoryFilters);
+  const pagination = usePagination(filters);
+  const reserves = useRangeReserves({ startAt: filters.startAt, endAt: filters.endAt, status: filters.status });
+  // GET /space-reserve não tem Limit/Offset: o backend devolve o período todo e a página é recortada aqui.
+  const { items, hasNext } = paginateLocal(reserves.data, pagination);
   const editReserve = useEditReserve();
   const cancelReserve = useCancelReserve();
   const editDialog = useFormDialog<Reserve>();
   const cancelDialog = useFormDialog<Reserve>();
-
-  // uma única passada separa as reservas nas três abas (mais recentes primeiro nas concluídas/canceladas)
-  const grouped = useMemo(() => {
-    const result: Record<ReserveTab, Reserve[]> = { next: [], concluded: [], canceled: [] };
-    for (const reserve of reserves.data ?? []) result[reserveTab(reserve)].push(reserve);
-    result.next.sort((a, b) => a.dateFrom.localeCompare(b.dateFrom));
-    result.concluded.sort((a, b) => b.dateFrom.localeCompare(a.dateFrom));
-    result.canceled.sort((a, b) => b.dateFrom.localeCompare(a.dateFrom));
-    return result;
-  }, [reserves.data]);
 
   async function handleEdit(data: HistoryEditFormData) {
     const reserve = editDialog.target;
@@ -92,46 +80,40 @@ function RouteComponent() {
         />
       )}
 
-      <section className="container flex flex-col items-center gap-6">
-        <MonthYearPicker value={monthYear} onChange={setMonthYear} />
-        <Tabs defaultValue="next" className="w-full items-center gap-y-10">
-          <TabsList className="border bg-white/10 shadow-md hover:shadow-lg dark:border-violet-400/20 dark:shadow-violet-300/20">
-            {tabs.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value}>
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+      <section className="container mb-8">
+        <HistorySearchBar onSearch={setFilters} />
+      </section>
 
-          {tabs.map((tab) => (
-            <TabsContent key={tab.value} value={tab.value} className="flex w-full">
-              <div className="w-full">
-                <QueryBoundary
-                  isPending={reserves.isPending}
-                  isFetching={reserves.isFetching}
-                  isError={reserves.isError}
-                  error={reserves.error}
-                  isEmpty={grouped[tab.value].length === 0}
-                  loadingText="Carregando..."
-                  emptyText="Nenhum histórico encontrado."
-                >
-                  <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(288px,1fr))] justify-center gap-6">
-                    {grouped[tab.value].map((reserve) => (
-                      <div key={reserve.id} className="flex w-full justify-center p-2">
-                        <HistoryCard
-                          reserve={reserve}
-                          showCTA={tab.value === "next"}
-                          onEdit={editDialog.open}
-                          onCancel={cancelDialog.open}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </QueryBoundary>
+      <section className="container">
+        <ResultsHeader title="Reservas" count={items.length} />
+        <QueryBoundary
+          isPending={reserves.isPending}
+          isFetching={reserves.isFetching}
+          isError={reserves.isError}
+          error={reserves.error}
+          isEmpty={items.length === 0}
+          loadingText="Carregando..."
+          emptyText="Nenhum histórico encontrado."
+        >
+          <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(288px,1fr))] justify-center gap-6">
+            {items.map((reserve) => (
+              <div key={reserve.id} className="flex w-full justify-center p-2">
+                <HistoryCard
+                  reserve={reserve}
+                  showCTA={reserveTab(reserve) === "next"}
+                  onEdit={editDialog.open}
+                  onCancel={cancelDialog.open}
+                />
               </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+            ))}
+          </div>
+        </QueryBoundary>
+        <PaginationControls
+          page={pagination.page}
+          hasNext={hasNext}
+          isFetching={reserves.isFetching}
+          onPageChange={pagination.setPage}
+        />
       </section>
     </>
   );

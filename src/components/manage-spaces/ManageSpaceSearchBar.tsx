@@ -70,7 +70,6 @@ export function ManageSpaceSearchBar({ onSearch, onAddNewSpace }: ManageSpaceSea
         <ResourceMultiSelect
           id="space-resources"
           label="Recursos"
-          canReserve={false}
           value={resources}
           onValueChange={setResources}
         />

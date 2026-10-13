@@ -18,7 +18,6 @@ export const Route = createFileRoute("/_private/admin/manage-resources")({
 
 const initialFilters: ResourceFilters = {
   search: "",
-  canReserve: undefined,
   enabled: undefined,
   limit: DEFAULT_PAGE_LIMIT,
 };
@@ -28,7 +27,6 @@ function RouteComponent() {
   const pagination = usePagination(filters);
   const resources = useResources({
     name: filters.search,
-    canReserve: filters.canReserve,
     enabled: filters.enabled,
     ...pagination.request,
   });
@@ -50,7 +48,6 @@ function RouteComponent() {
       editResource.mutateAsync({
         id: resource.id,
         name: data.name.length > 0 ? data.name : null,
-        canReserve: data.canReserve,
         enabled: data.enabled,
       }),
     );

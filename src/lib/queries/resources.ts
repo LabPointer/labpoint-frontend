@@ -5,7 +5,7 @@ import { notifyError, notifySuccess } from "#/lib/utils/notify";
 import { api } from "#/lib/utils/restapi";
 
 export type Resource = components["schemas"]["ResourceResponseDTO"];
-export type ResourceParams = { name?: string; canReserve?: boolean; enabled?: boolean; limit?: number; offset?: number };
+export type ResourceParams = { name?: string; enabled?: boolean; limit?: number; offset?: number };
 
 export const resourceKeys = {
   all: ["resources"] as const,
@@ -13,15 +13,15 @@ export const resourceKeys = {
 };
 
 export function useResources(params: ResourceParams = {}, options: { enabled?: boolean } = {}) {
-  const { name, canReserve, enabled, limit = 30, offset = 0 } = params;
+  const { name, enabled, limit = 30, offset = 0 } = params;
 
   return useQuery({
-    queryKey: resourceKeys.list({ name: name || undefined, canReserve, enabled, limit, offset }),
+    queryKey: resourceKeys.list({ name: name || undefined, enabled, limit, offset }),
     queryFn: async ({ signal }) =>
       unwrapList(
         await api.GET("/resource", {
           params: {
-            query: { Name: name || undefined, CanReserve: canReserve, Enabled: enabled, Limit: limit, Offset: offset },
+            query: { Name: name || undefined, Enabled: enabled, Limit: limit, Offset: offset },
           },
           signal,
         }),

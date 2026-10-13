@@ -9,17 +9,10 @@ import { Button } from "@/components/ui/button";
 
 export type ResourceFilters = {
   search: string;
-  canReserve: boolean | undefined;
   enabled: boolean | undefined;
   /** itens por página */
   limit: number;
 };
-
-const canReserveOptions: FilterOption<boolean | undefined>[] = [
-  { label: "Todos", value: undefined },
-  { label: "Sim", value: true },
-  { label: "Não", value: false },
-];
 
 const statusOptions: FilterOption<boolean | undefined>[] = [
   { label: "Todos os status", value: undefined },
@@ -34,13 +27,12 @@ type ManageResourceSearchBarProps = {
 
 export function ManageResourceSearchBar({ onSearch, onAddNewResource }: ManageResourceSearchBarProps) {
   const [search, setSearch] = useState("");
-  const [canReserve, setCanReserve] = useState<boolean | undefined>(undefined);
   const [enabled, setEnabled] = useState<boolean | undefined>(undefined);
   const [limit, setLimit] = useState(DEFAULT_PAGE_LIMIT);
 
   const filters = useMemo<ResourceFilters>(
-    () => ({ search, canReserve, enabled, limit }),
-    [search, canReserve, enabled, limit],
+    () => ({ search, enabled, limit }),
+    [search, enabled, limit],
   );
   const debouncedFilters = useDebouncedValue(filters, 500);
 
@@ -59,14 +51,6 @@ export function ManageResourceSearchBar({ onSearch, onAddNewResource }: ManageRe
         />
         <PageLimitSelect id="resource-limit" value={limit} onValueChange={setLimit} className="w-full sm:w-40" />
       </div>
-      <FilterSelect
-        id="resource-can-reserve"
-        label="Pode reservar"
-        options={canReserveOptions}
-        value={canReserve}
-        onValueChange={setCanReserve}
-        className="w-full"
-      />
       <FilterSelect
         id="resource-status"
         label="Status"

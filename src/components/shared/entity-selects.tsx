@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
 import { useAccounts } from "#/lib/queries/accounts";
 import { useResources } from "#/lib/queries/resources";
-import { scheduleLabel, sortSchedules, useSchedules } from "#/lib/queries/schedules";
+import { SCHEDULE_OPTIONS_LIMIT, scheduleLabel, sortSchedules, useSchedules } from "#/lib/queries/schedules";
 import { useSubjects } from "#/lib/queries/subjects";
 import { RemoteCombobox, RemoteMultiCombobox, type RemoteOption } from "./RemoteCombobox";
 
@@ -109,14 +109,12 @@ export function ResourceMultiSelect({
   value,
   onValueChange,
   enabledOnly = false,
-  canReserve,
   className,
-}: MultiSelectProps & { canReserve?: boolean }) {
+}: MultiSelectProps) {
   const { search, setText } = useRemoteSearch();
   const query = useResources({
     name: search,
     enabled: enabledOnly ? true : undefined,
-    canReserve,
     limit: OPTIONS_LIMIT,
   });
   const options = useMemo(() => (query.data ?? []).map(toOption), [query.data]);
@@ -144,7 +142,7 @@ type ScheduleMultiSelectProps = Pick<MultiSelectProps, "id" | "value" | "onValue
   enabledOnly?: boolean;
 };
 
-/** Horários: poucos itens, carregados de uma vez (`/schedule`) e filtrados localmente. */
+/** Horários: poucos itens, até 50 carregados de uma vez (`/schedule`) e filtrados localmente. */
 export function ScheduleMultiSelect({
   id,
   label = "Horários",
@@ -153,7 +151,7 @@ export function ScheduleMultiSelect({
   enabledOnly = false,
   className,
 }: ScheduleMultiSelectProps) {
-  const query = useSchedules({ enabled: enabledOnly ? true : undefined });
+  const query = useSchedules({ enabled: enabledOnly ? true : undefined, limit: SCHEDULE_OPTIONS_LIMIT });
   const options = useMemo<RemoteOption[]>(
     () =>
       sortSchedules(query.data ?? []).map((schedule) => ({ id: Number(schedule.id), name: scheduleLabel(schedule) })),

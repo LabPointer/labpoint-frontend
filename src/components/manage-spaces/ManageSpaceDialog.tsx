@@ -159,7 +159,6 @@ export function ManageSpaceDialog({ mode, space, open, onClose, onSubmit }: Mana
             id={`${mode}-space-resources`}
             label="Recursos"
             // só recursos que NÃO podem ser reservados (equipamentos fixos) são vinculados ao espaço
-            canReserve={false}
             enabledOnly
             value={field.state.value}
             onValueChange={field.handleChange}

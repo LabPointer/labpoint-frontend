@@ -41,6 +41,8 @@ export const toApiDate = (date: Date) => format(date, "yyyy-MM-dd");
 export const reserveKeys = {
   all: ["reserves"] as const,
   month: (year: number, month: number) => [...reserveKeys.all, "month", year, month] as const,
+  range: (startAt: string, endAt: string, status: number | undefined) =>
+    [...reserveKeys.all, "range", startAt, endAt, status] as const,
   existingSchedules: (spaceId: number, startAt: string, endAt: string) =>
     [...reserveKeys.all, "existing-schedules", spaceId, startAt, endAt] as const,
 };
@@ -74,6 +76,34 @@ export function useMonthReserves({ year, month }: { year: number; month: number 
       // mas o corpo real é SpaceReserveResponseDTO[].
       unwrapList(
         await api.GET("/space-reserve", { params: { query: { StartAt: startAt, EndAt: endAt } }, signal }),
+        "Erro ao buscar reservas.",
+      ) as unknown as Reserve[],
+    select,
+    placeholderData: keepPreviousData,
+  });
+}
+
+/**
+ * Reservas do usuário que tocam o período `startAt`–`endAt` (yyyy-MM-dd), opcionalmente de um único status.
+ * Mesma estratégia de `useMonthReserves`: janela maior no backend (que filtra por contenção) e sobreposição filtrada aqui.
+ */
+export function useRangeReserves({ startAt, endAt, status }: { startAt: string; endAt: string; status?: number }) {
+  const windowStart = toApiDate(addDays(parseISO(startAt), -MAX_RESERVE_DAYS));
+  const windowEnd = toApiDate(addDays(parseISO(endAt), MAX_RESERVE_DAYS));
+
+  const select = useCallback(
+    (reserves: Reserve[]) => reserves.filter((reserve) => reserve.dateFrom <= endAt && reserve.dateTo >= startAt),
+    [startAt, endAt],
+  );
+
+  return useQuery({
+    queryKey: reserveKeys.range(startAt, endAt, status),
+    queryFn: async ({ signal }) =>
+      unwrapList(
+        await api.GET("/space-reserve", {
+          params: { query: { StartAt: windowStart, EndAt: windowEnd, Status: status } },
+          signal,
+        }),
         "Erro ao buscar reservas.",
       ) as unknown as Reserve[],
     select,

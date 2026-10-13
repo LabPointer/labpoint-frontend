@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import type { DateRange } from "react-day-picker";
 import { useExistingSchedules } from "#/lib/queries/reserves";
-import { scheduleLabel, sortSchedules, useSchedules } from "#/lib/queries/schedules";
+import { SCHEDULE_OPTIONS_LIMIT, scheduleLabel, sortSchedules, useSchedules } from "#/lib/queries/schedules";
 import { RemoteMultiCombobox, type RemoteOption } from "@/components/shared/RemoteCombobox";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -30,7 +30,7 @@ export function ReserveScheduleField({
   ownScheduleIds = [],
   errors,
 }: ReserveScheduleFieldProps) {
-  const schedules = useSchedules({ enabled: true });
+  const schedules = useSchedules({ enabled: true, limit: SCHEDULE_OPTIONS_LIMIT });
   const existing = useExistingSchedules(spaceId, range);
 
   const options = useMemo<RemoteOption[]>(() => {

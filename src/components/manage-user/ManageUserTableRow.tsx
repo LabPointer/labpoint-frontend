@@ -9,7 +9,7 @@ import { Pencil } from "lucide-react";
 
 export type ManageUserTableRowProps = {
   props: UserSearchFilters;
-  onEdit: (data: { id: number; name: string; canReserve: boolean; enabled: boolean }) => void;
+  onEdit: (data: { id: number; name: string; enabled: boolean }) => void;
 };
 
 const roleRecord: Record<number, string> = {

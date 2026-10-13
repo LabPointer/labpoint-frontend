@@ -2,13 +2,12 @@ import { addYears, endOfMonth, endOfYear, startOfMonth } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
-import { RESERVE_STATUS, toApiDate } from "#/lib/queries/reserves";
-import type { ReservationStatus } from "#/lib/types/reservation-types";
+import { toApiDate } from "#/lib/queries/reserves";
 import { DEFAULT_PAGE_LIMIT } from "#/lib/utils/pagination";
-import { statusLabel } from "#/lib/utils/reservation-utils";
+import { reserveStatusFilterOptions } from "#/lib/utils/reservation-utils";
 import { DateRangeField } from "@/components/reserve/DateRangeField";
 import { AccountMultiSelect, ScheduleMultiSelect } from "@/components/shared/entity-selects";
-import { type FilterOption, FilterSelect } from "@/components/shared/FilterSelect";
+import { FilterSelect } from "@/components/shared/FilterSelect";
 import { PageLimitSelect } from "@/components/shared/PageLimitSelect";
 import type { RemoteOption } from "@/components/shared/RemoteCombobox";
 import { SearchPanel, SearchTextField } from "@/components/shared/SearchPanel";
@@ -27,14 +26,6 @@ export type ReserveFilters = {
   /** itens por página */
   limit: number;
 };
-
-const statusOptions: FilterOption<number | undefined>[] = [
-  { label: "Todos os status", value: undefined },
-  ...(Object.keys(RESERVE_STATUS) as ReservationStatus[]).map((key) => ({
-    label: statusLabel(key),
-    value: RESERVE_STATUS[key],
-  })),
-];
 
 /** O backend exige um período: por padrão, o mês atual. */
 const defaultRange = (): DateRange => {
@@ -126,7 +117,7 @@ export function ManageReserveSearchBar({ onSearch }: ManageReserveSearchBarProps
         <FilterSelect
           id="reserve-status-filter"
           label="Status"
-          options={statusOptions}
+          options={reserveStatusFilterOptions}
           value={status}
           onValueChange={setStatus}
         />

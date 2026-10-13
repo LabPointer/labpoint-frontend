@@ -139,7 +139,6 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
               value={resources}
               onValueChange={setResources}
               enabledOnly
-              canReserve={false}
             />
 
             <SubjectMultiSelect

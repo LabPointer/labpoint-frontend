@@ -4,7 +4,7 @@ import { useFormDialog } from "#/hooks/use-form-dialog";
 import { usePagination } from "#/hooks/use-pagination";
 import { type Schedule, useCreateSchedule, useEditSchedule, useSchedules } from "#/lib/queries/schedules";
 import { succeeded } from "#/lib/utils/api-result";
-import { DEFAULT_PAGE_LIMIT, paginateLocal } from "#/lib/utils/pagination";
+import { DEFAULT_PAGE_LIMIT, toPaged } from "#/lib/utils/pagination";
 import { ManageScheduleDialog, type ScheduleFormData } from "@/components/manage-schedules/ManageScheduleDialog";
 import { ManageScheduleSearchBar, type ScheduleFilters } from "@/components/manage-schedules/ManageScheduleSearchBar";
 import { ManageScheduleTable } from "@/components/manage-schedules/ManageScheduleTable";
@@ -16,14 +16,25 @@ export const Route = createFileRoute("/_private/admin/manage-schedules")({
   component: RouteComponent,
 });
 
-const initialFilters: ScheduleFilters = { shift: undefined, enabled: undefined, limit: DEFAULT_PAGE_LIMIT };
+const initialFilters: ScheduleFilters = {
+  shift: undefined,
+  enabled: undefined,
+  startAt: undefined,
+  endAt: undefined,
+  limit: DEFAULT_PAGE_LIMIT,
+};
 
 function RouteComponent() {
   const [filters, setFilters] = useState<ScheduleFilters>(initialFilters);
   const pagination = usePagination(filters);
-  const schedules = useSchedules({ shift: filters.shift, enabled: filters.enabled });
-  // GET /schedule não tem Limit/Offset: o backend devolve tudo e a página é recortada aqui.
-  const { items, hasNext } = paginateLocal(schedules.data, pagination);
+  const schedules = useSchedules({
+    shift: filters.shift,
+    enabled: filters.enabled,
+    startAt: filters.startAt,
+    endAt: filters.endAt,
+    ...pagination.request,
+  });
+  const { items, hasNext } = toPaged(schedules.data, pagination.limit);
   const createSchedule = useCreateSchedule();
   const editSchedule = useEditSchedule();
   const createDialog = useFormDialog();
