@@ -20,6 +20,12 @@ export function currentMonthYear(): MonthYear {
 	return { month: now.getMonth(), year: now.getFullYear() };
 }
 
+/** Último mês encerrado (o mês anterior ao atual, virando o ano em janeiro). */
+export function previousMonthYear(): MonthYear {
+	const { month, year } = currentMonthYear();
+	return month === 0 ? { month: 11, year: year - 1 } : { month: month - 1, year };
+}
+
 export function compareMonthYear(a: MonthYear, b: MonthYear): number {
 	return a.year * 12 + a.month - (b.year * 12 + b.month);
 }

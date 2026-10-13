@@ -618,6 +618,65 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Relatório mensal
+         * @description Retorna o relatório de ocupação e ociosidade de um mês já encerrado (do mês anterior para trás).
+         *     Reservas canceladas, recusadas e bloqueadas não entram. Reservas pendentes cuja data de início já passou
+         *     contam como ausentes; pendentes que ainda não chegaram ao dia da reserva ficam de fora.
+         *     O resultado é gravado na primeira consulta de cada mês; use <c>Refresh=true</c> para recalcular.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    Year?: number | string;
+                    Month?: number | string;
+                    Refresh?: boolean;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReportResponseDTO"];
+                        "application/json": components["schemas"]["ReportResponseDTO"];
+                        "text/json": components["schemas"]["ReportResponseDTO"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/resource": {
         parameters: {
             query?: never;
@@ -2122,6 +2181,7 @@ export interface components {
         EmailRequestDTO: {
             email: string;
         };
+        EReportReserveStatus: number;
         EReserveStatus: number;
         ErroResponseDTO: {
             message: string;
@@ -2147,6 +2207,79 @@ export interface components {
             email: string;
             token: string;
             newPassword: string;
+        };
+        ReportRankingDTO: {
+            highestDemand: null | components["schemas"]["ReportSpaceStatDTO"];
+            lowestDemand: null | components["schemas"]["ReportSpaceStatDTO"];
+            mostIdle: null | components["schemas"]["ReportSpaceStatDTO"];
+        };
+        ReportReserveDTO: {
+            /** Format: int64 */
+            id: number | string;
+            spaceName: string;
+            userName: string;
+            /** Format: date */
+            dateFrom: string;
+            /** Format: date */
+            dateTo: string;
+            status: components["schemas"]["EReportReserveStatus"];
+        };
+        ReportResponseDTO: {
+            /** Format: int32 */
+            year: number | string;
+            /** Format: int32 */
+            month: number | string;
+            /** Format: date-time */
+            generatedAt: string;
+            summary: components["schemas"]["ReportSummaryDTO"];
+            ranking: components["schemas"]["ReportRankingDTO"];
+            users: components["schemas"]["ReportUsersDTO"];
+            reserves: components["schemas"]["ReportReserveDTO"][];
+        };
+        ReportSpaceStatDTO: {
+            /** Format: int64 */
+            spaceId: number | string;
+            name: string;
+            /** Format: double */
+            occupancyRate: number | string;
+            /** Format: int32 */
+            totalReserves: number | string;
+            /** Format: int32 */
+            confirmedReserves: number | string;
+            /** Format: int32 */
+            absentReserves: number | string;
+            /** Format: double */
+            idleRate: number | string;
+        };
+        ReportSummaryDTO: {
+            /** Format: double */
+            averageOccupancyRate: number | string;
+            /** Format: double */
+            idleRate: number | string;
+            /** Format: int32 */
+            totalReserves: number | string;
+            /** Format: int32 */
+            confirmedReserves: number | string;
+            /** Format: int32 */
+            absentReserves: number | string;
+            mostDisputedSpace: null | components["schemas"]["ReportSpaceStatDTO"];
+        };
+        ReportUsersDTO: {
+            mostReserves: null | components["schemas"]["ReportUserStatDTO"];
+            mostIdle: null | components["schemas"]["ReportUserStatDTO"];
+        };
+        ReportUserStatDTO: {
+            accountId: string;
+            name: string;
+            registration: string;
+            /** Format: int32 */
+            totalReserves: number | string;
+            /** Format: int32 */
+            confirmedReserves: number | string;
+            /** Format: int32 */
+            absentReserves: number | string;
+            /** Format: double */
+            idleRate: number | string;
         };
         ResourceCreateRequestDTO: {
             name: string;
