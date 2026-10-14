@@ -5,7 +5,7 @@ import { notifyError, notifySuccess } from "#/lib/utils/notify";
 import { api } from "#/lib/utils/restapi";
 
 export type Subject = components["schemas"]["SubjectResponseDTO"];
-export type SubjectParams = { name?: string; enabled?: boolean; limit?: number };
+export type SubjectParams = { name?: string; enabled?: boolean; limit?: number; offset?: number };
 
 export const subjectKeys = {
   all: ["subjects"] as const,
@@ -13,14 +13,14 @@ export const subjectKeys = {
 };
 
 export function useSubjects(params: SubjectParams = {}, options: { enabled?: boolean } = {}) {
-  const { name, enabled, limit = 30 } = params;
+  const { name, enabled, limit = 30, offset = 0 } = params;
 
   return useQuery({
-    queryKey: subjectKeys.list({ name: name || undefined, enabled, limit }),
+    queryKey: subjectKeys.list({ name: name || undefined, enabled, limit, offset }),
     queryFn: async ({ signal }) =>
       unwrapList(
         await api.GET("/subject", {
-          params: { query: { Name: name || undefined, Enabled: enabled, Limit: limit, Offset: 0 } },
+          params: { query: { Name: name || undefined, Enabled: enabled, Limit: limit, Offset: offset } },
           signal,
         }),
         "Erro ao buscar matérias.",

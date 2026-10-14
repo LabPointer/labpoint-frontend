@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
 import { ROLE_LABELS } from "#/lib/queries/accounts";
+import { DEFAULT_PAGE_LIMIT } from "#/lib/utils/pagination";
 import { SubjectSelect } from "@/components/shared/entity-selects";
 import { type FilterOption, FilterSelect } from "@/components/shared/FilterSelect";
+import { PageLimitSelect } from "@/components/shared/PageLimitSelect";
 import type { RemoteOption } from "@/components/shared/RemoteCombobox";
 import { SearchPanel, SearchTextField } from "@/components/shared/SearchPanel";
 
@@ -14,6 +16,8 @@ export type UserFilters = {
   subjectId: number | undefined;
   /** `undefined` = qualquer status */
   enabled: boolean | undefined;
+  /** itens por página */
+  limit: number;
 };
 
 const roleOptions: FilterOption<number | undefined>[] = [
@@ -36,10 +40,11 @@ export function ManageUserSearchBar({ onSearch }: ManageUserSearchBarProps) {
   const [role, setRole] = useState<number | undefined>(undefined);
   const [subject, setSubject] = useState<RemoteOption | undefined>(undefined);
   const [enabled, setEnabled] = useState<boolean | undefined>(undefined);
+  const [limit, setLimit] = useState(DEFAULT_PAGE_LIMIT);
 
   const filters = useMemo<UserFilters>(
-    () => ({ search, role, subjectId: subject?.id, enabled }),
-    [search, role, subject?.id, enabled],
+    () => ({ search, role, subjectId: subject?.id, enabled, limit }),
+    [search, role, subject?.id, enabled, limit],
   );
   const debouncedFilters = useDebouncedValue(filters, 500);
 
@@ -49,12 +54,15 @@ export function ManageUserSearchBar({ onSearch }: ManageUserSearchBarProps) {
 
   return (
     <SearchPanel>
-      <SearchTextField
-        id="user-search"
-        placeholder="Buscar por nome, matrícula ou e-mail..."
-        value={search}
-        onValueChange={setSearch}
-      />
+      <div className="flex flex-wrap items-end gap-4">
+        <SearchTextField
+          id="user-search"
+          placeholder="Buscar por nome, matrícula ou e-mail..."
+          value={search}
+          onValueChange={setSearch}
+        />
+        <PageLimitSelect id="user-limit" value={limit} onValueChange={setLimit} className="w-full sm:w-40" />
+      </div>
 
       <div className="grid gap-4 md:grid-cols-3">
         <FilterSelect id="user-role" label="Cargo" options={roleOptions} value={role} onValueChange={setRole} />

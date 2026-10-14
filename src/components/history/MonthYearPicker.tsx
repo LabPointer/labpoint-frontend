@@ -18,6 +18,8 @@ type MonthYearPickerProps = {
 	value?: MonthYear;
 	defaultValue?: MonthYear;
 	onChange?: (value: MonthYear) => void;
+	/** Último mês selecionável (também limita o ano máximo da lista). */
+	maxMonth?: MonthYear;
 	minYear?: number;
 	maxYear?: number;
 	placeholder?: string;
@@ -30,6 +32,7 @@ export function MonthYearPicker({
 	value,
 	defaultValue,
 	onChange,
+	maxMonth,
 	minYear,
 	maxYear,
 	placeholder = "Selecione o mês e o ano",
@@ -39,7 +42,7 @@ export function MonthYearPicker({
 }: MonthYearPickerProps) {
 	const today = currentMonthYear();
 	const resolvedMinYear = minYear ?? today.year - 10;
-	const resolvedMaxYear = maxYear ?? today.year + 2;
+	const resolvedMaxYear = maxYear ?? maxMonth?.year ?? today.year + 2;
 	const years = useMemo(
 		() =>
 			Array.from(
@@ -97,6 +100,7 @@ export function MonthYearPicker({
 					viewYear={viewYear}
 					years={years}
 					selected={selected}
+					maxMonth={maxMonth}
 					onViewYearChange={setViewYear}
 					onSelectMonth={handleSelect}
 				/>

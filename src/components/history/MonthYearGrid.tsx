@@ -8,12 +8,14 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { isSameMonthYear, MONTH_LABELS, type MonthYear } from "../../lib/utils/month-year";
+import { compareMonthYear, isSameMonthYear, MONTH_LABELS, type MonthYear } from "../../lib/utils/month-year";
 
 type MonthYearGridProps = {
 	viewYear: number;
 	years: number[];
 	selected?: MonthYear;
+	/** Último mês selecionável: os seguintes ficam desabilitados. */
+	maxMonth?: MonthYear;
 	rangeStart?: MonthYear;
 	rangeEnd?: MonthYear;
 	hoverMonth?: MonthYear;
@@ -26,6 +28,7 @@ export function MonthYearGrid({
 	viewYear,
 	years,
 	selected,
+	maxMonth,
 	rangeStart,
 	rangeEnd,
 	hoverMonth,
@@ -87,6 +90,7 @@ export function MonthYearGrid({
 					const isRangeStart = isSameMonthYear(rangeStart, candidate);
 					const isRangeEnd = isSameMonthYear(previewEnd, candidate);
 					const inRange = isInPreviewRange(candidate, rangeStart, previewEnd);
+					const isDisabled = maxMonth ? compareMonthYear(candidate, maxMonth) > 0 : false;
 
 					return (
 						<Button
@@ -96,6 +100,7 @@ export function MonthYearGrid({
 								isSelected || isRangeStart || isRangeEnd ? "default" : "ghost"
 							}
 							size="sm"
+							disabled={isDisabled}
 							className={cn(
 								"h-9 justify-center text-xs font-medium",
 								inRange &&

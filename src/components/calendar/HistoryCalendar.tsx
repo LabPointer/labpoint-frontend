@@ -3,6 +3,7 @@ import { ptBR } from "date-fns/locale";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { AgendaEventRow } from "#/components/calendar/AgendaEventRow";
 import { MonthEventChip } from "#/components/calendar/MonthEventChip";
+import { StatusFilterButton } from "#/components/calendar/StatusFilterButton";
 import { EventCalendar, type EventCalendarApi } from "#/components/reui/event-calendar/event-calendar.tsx";
 import { EventCalendarContent } from "#/components/reui/event-calendar/event-calendar-content.tsx";
 import type { EventCalendarI18nOverrides } from "#/components/reui/event-calendar/event-calendar-i18n.tsx";
@@ -15,8 +16,8 @@ import type {
 import { Card, CardContent } from "#/components/ui/card.tsx";
 import { Skeleton } from "#/components/ui/skeleton.tsx";
 import { useMonthReserves } from "#/lib/queries/reserves";
-import type { ReservationEventData } from "#/lib/types/reservation-types";
-import { reservesToCalendarEvents } from "#/lib/utils/reservation-utils";
+import type { ReservationEventData, ReservationStatus } from "#/lib/types/reservation-types";
+import { RESERVE_STATUS_LIST, reservesToCalendarEvents } from "#/lib/utils/reservation-utils";
 
 // ---------------------------------------------------------------------------
 // i18n PT-BR
@@ -94,9 +95,14 @@ export function HistoryCalendar() {
   // Mês atualmente visível — define a query e o agendaDayCount
   const [activeMonth, setActiveMonth] = useState<Date>(() => startOfMonth(new Date()));
   const reserves = useMonthReserves({ year: activeMonth.getFullYear(), month: activeMonth.getMonth() });
+  // Filtro de status aplicado no cliente: os dados do mês continuam em cache ao alternar os status
+  const [visibleStatuses, setVisibleStatuses] = useState<ReservationStatus[]>(() => [...RESERVE_STATUS_LIST]);
   const events = useMemo<CalendarEvent<ReservationEventData>[]>(
-    () => reservesToCalendarEvents(reserves.data ?? []),
-    [reserves.data],
+    () =>
+      reservesToCalendarEvents(reserves.data ?? []).filter(
+        (event) => event.data && visibleStatuses.includes(event.data.status),
+      ),
+    [reserves.data, visibleStatuses],
   );
 
   // Detecta mudança de mês no calendário (navegação) e ancora a agenda no dia 1
@@ -200,8 +206,9 @@ export function HistoryCalendar() {
             {/* Barra de navegação — sem botões de Settings e New Event */}
             <div className="flex flex-wrap items-center gap-2 pe-2">
               <EventCalendarNav className="min-w-0 flex-1" />
-              {/* EventCalendarToolbar vazio: mantém o layout sem adicionar botões */}
-              <EventCalendarToolbar />
+              <EventCalendarToolbar>
+                <StatusFilterButton value={visibleStatuses} onChange={setVisibleStatuses} />
+              </EventCalendarToolbar>
             </div>
             <EventCalendarContent />
           </EventCalendar>

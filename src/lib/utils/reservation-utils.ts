@@ -1,6 +1,6 @@
 import { addDays, parseISO } from "date-fns";
 import type { CalendarEvent } from "#/components/reui/event-calendar/event-calendar-types.tsx";
-import { type Reserve, statusFromNumber } from "#/lib/queries/reserves";
+import { RESERVE_STATUS, type Reserve, statusFromNumber } from "#/lib/queries/reserves";
 import { sortSchedules } from "#/lib/queries/schedules";
 import type { ReservationEventData, ReservationStatus } from "#/lib/types/reservation-types";
 
@@ -35,6 +35,15 @@ const STATUS_LABEL_MAP: Record<ReservationStatus, string> = {
 export function statusLabel(status: ReservationStatus): string {
   return STATUS_LABEL_MAP[status] ?? status;
 }
+
+/** Todos os status, na ordem em que aparecem nos filtros. */
+export const RESERVE_STATUS_LIST: ReservationStatus[] = ["BOOKING", "CONFIRMED", "CANCELED", "REJECTED", "BLOCKED"];
+
+/** Opções de um filtro de status único (`undefined` = todos), com o valor numérico de `EReserveStatus`. */
+export const reserveStatusFilterOptions: { label: string; value: number | undefined }[] = [
+  { label: "Todos os status", value: undefined },
+  ...RESERVE_STATUS_LIST.map((key) => ({ label: STATUS_LABEL_MAP[key], value: RESERVE_STATUS[key] })),
+];
 
 // ---------------------------------------------------------------------------
 // Status → classe de variante para badge/botão

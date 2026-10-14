@@ -5,7 +5,22 @@ import { notifyError, notifySuccess } from "#/lib/utils/notify";
 import { api } from "#/lib/utils/restapi";
 
 export type Schedule = components["schemas"]["ScheduleResponseDTO"];
-export type ScheduleParams = { shift?: number; enabled?: boolean };
+export type ScheduleParams = {
+  shift?: number;
+  enabled?: boolean;
+  /** "HH:mm": horários que começam a partir dessa hora */
+  startAt?: string;
+  /** "HH:mm": horários que terminam até essa hora */
+  endAt?: string;
+  limit?: number;
+  offset?: number;
+};
+
+/**
+ * Quantidade de horários carregados pelos comboboxes/seletores (o backend limita a 10 por padrão).
+ * Há poucos horários cadastrados, então 50 cobre a lista inteira.
+ */
+export const SCHEDULE_OPTIONS_LIMIT = 50;
 
 export const scheduleKeys = {
   all: ["schedules"] as const,
@@ -28,13 +43,16 @@ export function sortSchedules<T extends Pick<Schedule, "shift" | "startAt">>(sch
 }
 
 export function useSchedules(params: ScheduleParams = {}, options: { enabled?: boolean } = {}) {
-  const { shift, enabled } = params;
+  const { shift, enabled, startAt, endAt, limit = SCHEDULE_OPTIONS_LIMIT, offset = 0 } = params;
 
   return useQuery({
-    queryKey: scheduleKeys.list({ shift, enabled }),
+    queryKey: scheduleKeys.list({ shift, enabled, startAt, endAt, limit, offset }),
     queryFn: async ({ signal }) =>
       unwrapList(
-        await api.GET("/schedule", { params: { query: { shift, Enabled: enabled } }, signal }),
+        await api.GET("/schedule", {
+          params: { query: { shift, Enabled: enabled, StartAt: startAt, EndAt: endAt, Limit: limit, Offset: offset } },
+          signal,
+        }),
         "Erro ao buscar horários.",
       ),
     enabled: options.enabled ?? true,

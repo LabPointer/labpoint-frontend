@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 
 export type ResourceFormData = {
   name: string;
-  canReserve: boolean;
   enabled: boolean;
 };
 
@@ -24,11 +23,10 @@ const nameRule = z.string().max(100, "Nome deve ter no máximo 100 caracteres.")
 
 const createSchema = z.object({
   name: nameRule.min(1, "Nome é obrigatório."),
-  canReserve: z.boolean(),
   enabled: z.boolean(),
 });
 
-const editSchema = z.object({ name: nameRule, canReserve: z.boolean(), enabled: z.boolean() });
+const editSchema = z.object({ name: nameRule, enabled: z.boolean() });
 
 /** Dialog único de criação/edição. O pai deve remontá-lo (`key`) a cada abertura. */
 export function ManageResourceDialog({ mode, resource, open, onClose, onSubmit }: ManageResourceDialogProps) {
@@ -37,7 +35,6 @@ export function ManageResourceDialog({ mode, resource, open, onClose, onSubmit }
   const form = useForm({
     defaultValues: {
       name: "",
-      canReserve: resource?.canReserve ?? false,
       enabled: resource?.enabled ?? true,
     },
     validators: { onSubmit: isEdit ? editSchema : createSchema },
@@ -87,17 +84,6 @@ export function ManageResourceDialog({ mode, resource, open, onClose, onSubmit }
             </Field>
           );
         }}
-      </form.Field>
-
-      <form.Field name="canReserve">
-        {(field) => (
-          <BooleanField
-            label="Reservável"
-            description="Recurso pode ser reservado."
-            checked={field.state.value}
-            onCheckedChange={field.handleChange}
-          />
-        )}
       </form.Field>
 
       <form.Field name="enabled">

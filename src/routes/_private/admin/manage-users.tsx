@@ -1,11 +1,14 @@
 import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { useState } from "react";
 import { useFormDialog } from "#/hooks/use-form-dialog";
-import { type Account, highestRole, useAccounts, useEditAccount } from "#/lib/queries/accounts";
+import { usePagination } from "#/hooks/use-pagination";
+import { type Account, highestRole, useAccountsPage, useEditAccount } from "#/lib/queries/accounts";
 import { succeeded } from "#/lib/utils/api-result";
+import { DEFAULT_PAGE_LIMIT } from "#/lib/utils/pagination";
 import { type ManageEditUserData, ManageEditUserDialog } from "@/components/manage-users/ManageEditUserDialog";
 import { ManageUserSearchBar, type UserFilters } from "@/components/manage-users/ManageUserSearchBar";
 import { ManageUserTable } from "@/components/manage-users/ManageUserTable";
+import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
 
@@ -13,11 +16,21 @@ export const Route = createFileRoute("/_private/admin/manage-users")({
   component: RouteComponent,
 });
 
-const initialFilters: UserFilters = { search: "", role: undefined, subjectId: undefined, enabled: undefined };
+const initialFilters: UserFilters = {
+  search: "",
+  role: undefined,
+  subjectId: undefined,
+  enabled: undefined,
+  limit: DEFAULT_PAGE_LIMIT,
+};
 
 function RouteComponent() {
   const [filters, setFilters] = useState<UserFilters>(initialFilters);
-  const accounts = useAccounts(filters);
+  const pagination = usePagination(filters);
+  const accounts = useAccountsPage(
+    { search: filters.search, role: filters.role, subjectId: filters.subjectId, enabled: filters.enabled },
+    pagination,
+  );
   const editAccount = useEditAccount();
   const { sessionInfo } = useRouteContext({ from: "__root__" });
   const viewerRole = highestRole(sessionInfo?.roles);
@@ -64,18 +77,24 @@ function RouteComponent() {
       </section>
 
       <section className="container">
-        <ResultsHeader title="Usuários" count={accounts.data?.length ?? 0} />
+        <ResultsHeader title="Usuários" count={accounts.items.length} />
         <QueryBoundary
           isPending={accounts.isPending}
           isFetching={accounts.isFetching}
           isError={accounts.isError}
           error={accounts.error}
-          isEmpty={accounts.data?.length === 0}
+          isEmpty={accounts.items.length === 0}
           loadingText="Carregando usuários..."
           emptyText="Nenhum usuário encontrado."
         >
-          <ManageUserTable accounts={accounts.data ?? []} onEdit={editDialog.open} />
+          <ManageUserTable accounts={accounts.items} onEdit={editDialog.open} />
         </QueryBoundary>
+        <PaginationControls
+          page={pagination.page}
+          hasNext={accounts.hasNext}
+          isFetching={accounts.isFetching}
+          onPageChange={pagination.setPage}
+        />
       </section>
     </>
   );

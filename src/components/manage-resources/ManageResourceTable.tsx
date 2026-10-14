@@ -17,7 +17,6 @@ export function ManageResourceTable({ resources, onEdit }: ManageResourceTablePr
       <TableHeader>
         <TableRow>
           <TableHead className="w-25">Nome</TableHead>
-          <TableHead className="text-center">Reservável</TableHead>
           <TableHead className="text-center">Status</TableHead>
           <TableHead className="text-right">Ações</TableHead>
         </TableRow>
@@ -41,9 +40,6 @@ const ManageResourceRow = memo(function ManageResourceRow({
   return (
     <TableRow>
       <TableCell className="w-25 font-bold">{resource.name}</TableCell>
-      <TableCell className="text-center">
-        <StatusBadge active={resource.canReserve} activeLabel="Sim" inactiveLabel="Não" />
-      </TableCell>
       <TableCell className="text-center">
         <StatusBadge active={resource.enabled} />
       </TableCell>

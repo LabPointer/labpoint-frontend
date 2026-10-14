@@ -4,7 +4,9 @@ import { CalendarIcon, Filter, SearchIcon, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
+import { DEFAULT_PAGE_LIMIT } from "#/lib/utils/pagination";
 import { ResourceMultiSelect, ScheduleMultiSelect, SubjectMultiSelect } from "@/components/shared/entity-selects";
+import { PageLimitSelect } from "@/components/shared/PageLimitSelect";
 import type { RemoteOption } from "@/components/shared/RemoteCombobox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
@@ -27,6 +29,8 @@ export type SpaceSearchFilters = {
   startDate: Date;
   endDate: Date;
   schedules: number[];
+  /** itens por página */
+  limit: number;
 };
 
 type SpaceSearchBarProps = {
@@ -44,6 +48,7 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
   const [resources, setResources] = useState<RemoteOption[]>([]);
   const [subjects, setSubjects] = useState<RemoteOption[]>([]);
   const [schedules, setSchedules] = useState<RemoteOption[]>([]);
+  const [limit, setLimit] = useState(DEFAULT_PAGE_LIMIT);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({ from: tomorrow, to: addDays(tomorrow, 30) });
 
   const filters = useMemo<SpaceSearchFilters>(
@@ -55,8 +60,9 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
       schedules: schedules.map((schedule) => schedule.id),
       startDate: dateRange?.from ?? tomorrow,
       endDate: dateRange?.to ?? addDays(tomorrow, 30),
+      limit,
     }),
-    [searchQuery, minimumCapacity, resources, subjects, schedules, dateRange, tomorrow],
+    [searchQuery, minimumCapacity, resources, subjects, schedules, dateRange, tomorrow, limit],
   );
   const debouncedFilters = useDebouncedValue(filters, 1000);
 
@@ -86,26 +92,37 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
           </InputGroup>
         </Field>
 
-        <Field className="w-full">
-          <FieldLabel className={labelClass} htmlFor="capacity-select">
-            Capacidade mínima
-          </FieldLabel>
-          <InputGroup className="h-10">
-            <InputGroupInput
-              value={minimumCapacity}
-              onChange={(event) => setMinimumCapacity(Number(event.target.value) || 0)}
-              id="capacity-select"
-              className="text-sm"
-              type="number"
-              min={MIN_CAPACITY}
-              max={MAX_CAPACITY}
-              step={CAPACITY_STEP}
-            />
-            <InputGroupAddon align="inline-start">
-              <Users className="size-4 text-muted-foreground" />
-            </InputGroupAddon>
-          </InputGroup>
-        </Field>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Field className="w-full">
+            <FieldLabel className={labelClass} htmlFor="capacity-select">
+              Capacidade mínima
+            </FieldLabel>
+            <InputGroup className="h-10">
+              <InputGroupInput
+                value={minimumCapacity}
+                onChange={(event) => setMinimumCapacity(Number(event.target.value) || 0)}
+                id="capacity-select"
+                className="text-sm"
+                type="number"
+                min={MIN_CAPACITY}
+                max={MAX_CAPACITY}
+                step={CAPACITY_STEP}
+              />
+              <InputGroupAddon align="inline-start">
+                <Users className="size-4 text-muted-foreground" />
+              </InputGroupAddon>
+            </InputGroup>
+          </Field>
+
+          <PageLimitSelect
+            id="space-limit"
+            value={limit}
+            onValueChange={setLimit}
+            className="w-full"
+            labelClassName={labelClass}
+            selectClassName="[&_select]:h-10"
+          />
+        </div>
 
         {/* Filtros avançados */}
         <Collapsible>
@@ -122,7 +139,6 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
               value={resources}
               onValueChange={setResources}
               enabledOnly
-              canReserve={false}
             />
 
             <SubjectMultiSelect

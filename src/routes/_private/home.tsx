@@ -2,12 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { useState } from "react";
 import { useFormDialog } from "#/hooks/use-form-dialog";
+import { usePagination } from "#/hooks/use-pagination";
 import { toApiDate, useCreateReserve } from "#/lib/queries/reserves";
 import { useSpaces } from "#/lib/queries/spaces";
 import { succeeded } from "#/lib/utils/api-result";
+import { toPaged } from "#/lib/utils/pagination";
 import { SpaceCard } from "@/components/home/SpaceCard";
 import { type SpaceProps, type SpaceReserveFormData, SpaceReserveModal } from "@/components/home/SpaceReserveModal";
 import { SpaceSearchBar, type SpaceSearchFilters } from "@/components/home/SpaceSearchBar";
+import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
 
@@ -18,6 +21,7 @@ export const Route = createFileRoute("/_private/home")({
 function RouteComponent() {
   // A barra de pesquisa emite os filtros iniciais na montagem; a query só roda depois disso.
   const [filters, setFilters] = useState<SpaceSearchFilters | null>(null);
+  const pagination = usePagination(filters);
 
   // O backend valida Capacity em 10..200 (fora disso responde 400): só enviamos quando válida.
   const capacity = filters && filters.minimumCapacity >= 10 ? Math.min(filters.minimumCapacity, 200) : undefined;
@@ -34,9 +38,11 @@ function RouteComponent() {
       schedules: checkAvailability ? filters?.schedules : undefined,
       startAt: checkAvailability && filters ? format(filters.startDate, "yyyy-MM-dd") : undefined,
       endAt: checkAvailability && filters ? format(filters.endDate, "yyyy-MM-dd") : undefined,
+      ...pagination.request,
     },
     { enabled: filters !== null },
   );
+  const { items, hasNext } = toPaged(spaces.data, pagination.limit);
 
   const createReserve = useCreateReserve();
   const reserveDialog = useFormDialog<SpaceProps>();
@@ -75,18 +81,18 @@ function RouteComponent() {
         />
       )}
       <section className="container">
-        <ResultsHeader title="Laboratórios" count={spaces.data?.length ?? 0} />
+        <ResultsHeader title="Laboratórios" count={items.length} />
         <QueryBoundary
           isPending={spaces.isPending}
           isFetching={spaces.isFetching}
           isError={spaces.isError}
           error={spaces.error}
-          isEmpty={spaces.data?.length === 0}
+          isEmpty={items.length === 0}
           loadingText="Carregando..."
           emptyText="Nenhum laboratório encontrado."
         >
           <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(288px,1fr))] justify-center gap-6">
-            {spaces.data?.map((space) => (
+            {items.map((space) => (
               <div key={space.id} className="flex w-full justify-center p-2">
                 <SpaceCard
                   id={Number(space.id)}
@@ -110,6 +116,12 @@ function RouteComponent() {
             ))}
           </div>
         </QueryBoundary>
+        <PaginationControls
+          page={pagination.page}
+          hasNext={hasNext}
+          isFetching={spaces.isFetching}
+          onPageChange={pagination.setPage}
+        />
       </section>
     </>
   );
