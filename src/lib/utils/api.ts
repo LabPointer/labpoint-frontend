@@ -138,7 +138,7 @@ export interface paths {
                     SearchQuery?: string;
                     Role?: components["schemas"]["EAccountRole"];
                     Limit?: number | string;
-                    Page?: number | string;
+                    Offset?: number | string;
                     SubjectId?: number | string;
                     Enabled?: boolean;
                 };
@@ -630,7 +630,7 @@ export interface paths {
          * @description Retorna o relatório de ocupação e ociosidade de um mês já encerrado (do mês anterior para trás).
          *     Reservas canceladas, recusadas e bloqueadas não entram. Reservas pendentes cuja data de início já passou
          *     contam como ausentes; pendentes que ainda não chegaram ao dia da reserva ficam de fora.
-         *     O resultado é gravado na primeira consulta de cada mês; use <c>Refresh=true</c> para recalcular.
+         *     O resultado é gravado na primeira consulta de cada mês; use `Refresh=true` para recalcular.
          */
         get: {
             parameters: {
@@ -1110,9 +1110,7 @@ export interface paths {
                 query?: {
                     shift?: components["schemas"]["EShift"];
                     Enabled?: boolean;
-                    /** Format: time */
                     StartAt?: string;
-                    /** Format: time */
                     EndAt?: string;
                     Limit?: number | string;
                     Offset?: number | string;
@@ -1132,6 +1130,17 @@ export interface paths {
                         "text/plain": components["schemas"]["ScheduleResponseDTO"][];
                         "application/json": components["schemas"]["ScheduleResponseDTO"][];
                         "text/json": components["schemas"]["ScheduleResponseDTO"][];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
                     };
                 };
                 /** @description Not Found */
@@ -2208,11 +2217,6 @@ export interface components {
             detail?: null | string;
             instance?: null | string;
         };
-        ResetPasswordRequestDTO: {
-            email: string;
-            token: string;
-            newPassword: string;
-        };
         ReportRankingDTO: {
             highestDemand: null | components["schemas"]["ReportSpaceStatDTO"];
             lowestDemand: null | components["schemas"]["ReportSpaceStatDTO"];
@@ -2285,6 +2289,11 @@ export interface components {
             absentReserves: number | string;
             /** Format: double */
             idleRate: number | string;
+        };
+        ResetPasswordRequestDTO: {
+            email: string;
+            token: string;
+            newPassword: string;
         };
         ResourceCreateRequestDTO: {
             name: string;
