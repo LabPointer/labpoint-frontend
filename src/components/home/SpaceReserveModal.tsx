@@ -9,6 +9,8 @@ import type { RemoteOption } from "@/components/shared/RemoteCombobox";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupText, InputGroupTextarea } from "@/components/ui/input-group";
+import { useRouteContext } from "@tanstack/react-router";
+import { BooleanField } from "../shared/BooleanField";
 
 type ListData = {
   id: string | number;
@@ -27,6 +29,7 @@ export type SpaceReserveFormData = {
   range: DateRange;
   schedules: RemoteOption[];
   purpose: string;
+  lock: boolean;
 };
 
 type SpaceReserveModalProps = {
@@ -47,6 +50,7 @@ const formSchema = z.object({
       "A data da reserva deve começar a partir de amanhã.",
     ),
   schedules: z.array(z.object({ id: z.number(), name: z.string() })).min(1, "Selecione pelo menos um horário."),
+  lock: z.boolean(),
   purpose: z
     .string()
     .trim()
@@ -56,16 +60,24 @@ const formSchema = z.object({
 
 /** Dialog de nova reserva. O pai deve remontá-lo (`key`) a cada abertura. */
 export function SpaceReserveModal({ space, open, onClose, onSubmit }: SpaceReserveModalProps) {
+  const { sessionInfo } = useRouteContext({ from: "__root__" });
+
   const form = useForm({
     defaultValues: {
       range: undefined as DateRange | undefined,
       schedules: [] as RemoteOption[],
+      lock: false,
       purpose: "",
     },
     validators: { onSubmit: formSchema },
     onSubmit: async ({ value }) => {
       if (!value.range?.from) return;
-      await onSubmit({ range: value.range, schedules: value.schedules, purpose: value.purpose.trim() });
+      await onSubmit({
+        range: value.range,
+        schedules: value.schedules,
+        purpose: value.purpose.trim(),
+        lock: value.lock,
+      });
     },
   });
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
@@ -131,6 +143,23 @@ export function SpaceReserveModal({ space, open, onClose, onSubmit }: SpaceReser
           </form.Field>
         )}
       </form.Subscribe>
+
+      {(sessionInfo?.roles.includes("Owner") || sessionInfo?.roles.includes("Admin")) && (
+        <form.Field name="lock">
+          {(field) => (
+            <BooleanField
+              label="Bloquear espaço"
+              description="Espaços bloqueados não podem ser reservados."
+              checked={field.state.value}
+              onCheckedChange={field.handleChange}
+              trueLabel="Bloqueado"
+              falseLabel="Disponível"
+              disabled={!(sessionInfo?.roles.includes("Owner") || sessionInfo?.roles.includes("Admin"))}
+              disabledReason="Você não pode bloquear a reserva de um espaço com cargo igual ou superior ao seu."
+            />
+          )}
+        </form.Field>
+      )}
 
       <form.Field name="purpose">
         {(field) => {

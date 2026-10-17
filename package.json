@@ -66,11 +66,11 @@
     "@tailwindcss/typography": "latest",
     "@tanstack/devtools-vite": "latest",
     "@tanstack/router-cli": "latest",
-    "@types/node": "^26.6.2",
+    "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@vitejs/plugin-react": "latest",
-    "typescript": "^7.0.2",
+    "typescript": "latest",
     "vite": "latest"
   },
   "overrides": {

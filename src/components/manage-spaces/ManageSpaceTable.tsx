@@ -98,7 +98,7 @@ function InfoButton({ label, onClick }: { label: string; onClick: () => void }) 
   return (
     <Button type="button" variant="outline" size="sm" onClick={onClick}>
       <Info className="size-4" />
-      {label}
+      <span className="text-sm font-medium">{label}</span>
     </Button>
   );
 }

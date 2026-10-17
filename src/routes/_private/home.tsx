@@ -60,6 +60,7 @@ function RouteComponent() {
           endAt: toApiDate(data.range.to ?? data.range.from),
           scheduleIds: data.schedules.map((schedule) => schedule.id),
           purpose: data.purpose,
+          lock: data.lock,
         },
       }),
     );
