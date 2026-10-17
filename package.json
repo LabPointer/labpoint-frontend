@@ -14,7 +14,7 @@
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",
-    "generate:types": "openapi-typescript http://localhost:8080/openapi/v1.json -o src/lib/utils/api.ts"
+    "generate:types": "npx openapi-typescript http://localhost:8080/openapi/v1.json -o src/lib/utils/api.ts"
   },
   "dependencies": {
     "@base-ui/react": "latest",
@@ -66,12 +66,11 @@
     "@tailwindcss/typography": "latest",
     "@tanstack/devtools-vite": "latest",
     "@tanstack/router-cli": "latest",
-    "@types/node": "^26.6.2",
+    "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@vitejs/plugin-react": "latest",
-    "openapi-typescript": "latest",
-    "typescript": "^6.0.3",
+    "typescript": "latest",
     "vite": "latest"
   },
   "overrides": {

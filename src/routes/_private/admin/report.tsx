@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRefreshReport, useReport } from "#/lib/queries/report";
 import { formatMonthYear, type MonthYear, previousMonthYear } from "#/lib/utils/month-year";
 import { notifyError, notifySuccess } from "#/lib/utils/notify";
+import { ApiError } from "#/lib/types/error-types";
 import { emptyReportData } from "#/lib/utils/report";
 import { ReportRankingCard } from "@/components/report/ReportRankingCard";
 import { ReportReservesTable } from "@/components/report/ReportReservesTable";
@@ -41,7 +42,7 @@ function RouteComponent() {
       exportReportPdf(report.data);
       notifySuccess("Relatório exportado em PDF!");
     } catch (error) {
-      notifyError(error);
+      notifyError(error instanceof ApiError ? error : undefined);
     } finally {
       setIsExporting(false);
     }

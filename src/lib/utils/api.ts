@@ -332,9 +332,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["IdentityError"][];
-                        "application/json": components["schemas"]["IdentityError"][];
-                        "text/json": components["schemas"]["IdentityError"][];
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
                     };
                 };
             };
@@ -449,9 +449,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["ProblemDetails"];
-                        "application/json": components["schemas"]["ProblemDetails"];
-                        "text/json": components["schemas"]["ProblemDetails"];
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
                     };
                 };
                 /** @description Forbidden */
@@ -460,9 +460,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["ProblemDetails"];
-                        "application/json": components["schemas"]["ProblemDetails"];
-                        "text/json": components["schemas"]["ProblemDetails"];
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
                     };
                 };
             };
@@ -605,9 +605,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["IdentityError"][];
-                        "application/json": components["schemas"]["IdentityError"][];
-                        "text/json": components["schemas"]["IdentityError"][];
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
                     };
                 };
             };
@@ -2205,18 +2205,6 @@ export interface components {
             logout: boolean;
         };
         EShift: number;
-        IdentityError: {
-            code?: string;
-            description?: string;
-        };
-        ProblemDetails: {
-            type?: null | string;
-            title?: null | string;
-            /** Format: int32 */
-            status?: null | number | string;
-            detail?: null | string;
-            instance?: null | string;
-        };
         ReportRankingDTO: {
             highestDemand: null | components["schemas"]["ReportSpaceStatDTO"];
             lowestDemand: null | components["schemas"]["ReportSpaceStatDTO"];
@@ -2399,6 +2387,7 @@ export interface components {
             /** Format: date */
             endAt: string;
             scheduleIds: (number | string)[];
+            lock: boolean;
             purpose: string;
         };
         SpaceReserveEditRequestDTO: {
@@ -2484,9 +2473,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "text/plain": components["schemas"]["IdentityError"][];
-                    "application/json": components["schemas"]["IdentityError"][];
-                    "text/json": components["schemas"]["IdentityError"][];
+                    "text/plain": components["schemas"]["ErroResponseDTO"];
+                    "application/json": components["schemas"]["ErroResponseDTO"];
+                    "text/json": components["schemas"]["ErroResponseDTO"];
                 };
             };
         };

@@ -32,7 +32,7 @@ export type ReserveTab = "next" | "concluded" | "canceled";
  */
 export function reserveTab(reserve: Reserve, today = startOfToday()): ReserveTab {
   const status = statusFromNumber(reserve.status);
-  if (status === "CANCELED" || status === "REJECTED" || status === "BLOCKED") return "canceled";
+  if (status === "CANCELED" || status === "REJECTED") return "canceled";
   return parseISO(reserve.dateTo) < today ? "concluded" : "next";
 }
 
