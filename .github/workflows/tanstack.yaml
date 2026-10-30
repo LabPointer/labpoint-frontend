@@ -1,0 +1,24 @@
+name: NODEJS CI/CD Pipeline
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout do código
+      uses: actions/checkout@v7
+    
+    - name: Configurar nodejs
+      uses: actions/setup-node@v7
+      with:
+        node-version: '26.x'
+
+    - name: Instalar dependências
+      run: npm install
+
+    - name: Compilar o projeto
+      run: npm run build
