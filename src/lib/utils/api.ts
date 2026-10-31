@@ -626,17 +626,22 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Relatório mensal
-         * @description Retorna o relatório de ocupação e ociosidade de um mês já encerrado (do mês anterior para trás).
+         * Relatório de um período de meses
+         * @description Retorna o relatório de ocupação e ociosidade de um mês ou de uma sequência de meses já encerrados
+         *     (do mês anterior ao atual para trás). Informe `FromYear`/`FromMonth` e, para mais de um mês,
+         *     também `ToYear`/`ToMonth`; sem o fim, o período é só o mês inicial.
          *     Reservas canceladas, recusadas e bloqueadas não entram. Reservas pendentes cuja data de início já passou
          *     contam como ausentes; pendentes que ainda não chegaram ao dia da reserva ficam de fora.
-         *     O resultado é gravado na primeira consulta de cada mês; use `Refresh=true` para recalcular.
+         *     Quando há empate nos rankings (espaços ou usuários), todos os empatados são retornados.
+         *     O resultado é gravado na primeira consulta de cada período; use `Refresh=true` para recalcular.
          */
         get: {
             parameters: {
                 query?: {
-                    Year?: number | string;
-                    Month?: number | string;
+                    FromYear?: number | string;
+                    FromMonth?: number | string;
+                    ToYear?: number | string;
+                    ToMonth?: number | string;
                     Refresh?: boolean;
                 };
                 header?: never;
@@ -2206,9 +2211,9 @@ export interface components {
         };
         EShift: number;
         ReportRankingDTO: {
-            highestDemand: null | components["schemas"]["ReportSpaceStatDTO"];
-            lowestDemand: null | components["schemas"]["ReportSpaceStatDTO"];
-            mostIdle: null | components["schemas"]["ReportSpaceStatDTO"];
+            highestDemand: components["schemas"]["ReportSpaceStatDTO"][];
+            lowestDemand: components["schemas"]["ReportSpaceStatDTO"][];
+            mostIdle: components["schemas"]["ReportSpaceStatDTO"][];
         };
         ReportReserveDTO: {
             /** Format: int64 */
@@ -2223,9 +2228,13 @@ export interface components {
         };
         ReportResponseDTO: {
             /** Format: int32 */
-            year: number | string;
+            fromYear: number | string;
             /** Format: int32 */
-            month: number | string;
+            fromMonth: number | string;
+            /** Format: int32 */
+            toYear: number | string;
+            /** Format: int32 */
+            toMonth: number | string;
             /** Format: date-time */
             generatedAt: string;
             summary: components["schemas"]["ReportSummaryDTO"];
@@ -2259,11 +2268,11 @@ export interface components {
             confirmedReserves: number | string;
             /** Format: int32 */
             absentReserves: number | string;
-            mostDisputedSpace: null | components["schemas"]["ReportSpaceStatDTO"];
+            mostDisputedSpaces: components["schemas"]["ReportSpaceStatDTO"][];
         };
         ReportUsersDTO: {
-            mostReserves: null | components["schemas"]["ReportUserStatDTO"];
-            mostIdle: null | components["schemas"]["ReportUserStatDTO"];
+            mostReserves: components["schemas"]["ReportUserStatDTO"][];
+            mostIdle: components["schemas"]["ReportUserStatDTO"][];
         };
         ReportUserStatDTO: {
             accountId: string;
