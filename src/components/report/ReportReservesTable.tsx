@@ -25,9 +25,12 @@ const statusClasses: Record<ReportReserveStatus, string> = {
 type ReportReservesTableProps = { report: ReportData; mode: ReportMode };
 
 export function ReportReservesTable({ report, mode }: ReportReservesTableProps) {
-  // A paginação só existe na tela (o PDF leva todas as linhas). Volta à página 1 a cada mês novo.
-  const { month, year } = report.period;
-  const filters = useMemo(() => ({ limit: PAGE_SIZE, month, year }), [month, year]);
+  // A paginação só existe na tela (o PDF leva todas as linhas). Volta à página 1 a cada período novo.
+  const { from, to } = report.period;
+  const filters = useMemo(
+    () => ({ limit: PAGE_SIZE, fromMonth: from.month, fromYear: from.year, toMonth: to.month, toYear: to.year }),
+    [from.month, from.year, to.month, to.year],
+  );
   const pagination = usePagination(filters);
   const { items, hasNext } = paginateLocal(report.reserves, pagination);
   const hasData = mode === "data";
@@ -40,7 +43,7 @@ export function ReportReservesTable({ report, mode }: ReportReservesTableProps) 
             <TableIcon className="size-5" />
           </SectionIcon>
           <div>
-            <h2 className="text-lg font-bold leading-tight">Reservas do mês</h2>
+            <h2 className="text-lg font-bold leading-tight">Reservas do período</h2>
             <p className="text-sm text-muted-foreground">Confirmadas e ausentes, sem canceladas nem bloqueios.</p>
           </div>
         </div>

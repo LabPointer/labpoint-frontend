@@ -1,14 +1,16 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import { formatMonthYear } from "#/lib/utils/month-year";
+import { formatMonthYearPeriod } from "#/lib/utils/month-year";
 import {
   formatPercent,
   formatReportDate,
   formatReportDateTime,
   initials,
+  limitList,
   pluralize,
   type ReportData,
   type ReportReserveStatus,
+  type ReportSpaceStat,
   type ReportUserStat,
   reportFileName,
 } from "#/lib/utils/report";
@@ -17,7 +19,10 @@ import {
  * PDF do relatório, desenhado direto com jsPDF (texto vetorial, selecionável e nítido).
  * Não usa captura da tela (html2canvas): ela não entende as cores oklch() do Tailwind v4 e gera imagem borrada.
  *
- * Quando `report.isPreview` é true (mês sem reservas) o PDF mantém toda a estrutura com blocos cinza no lugar
+ * Os rankings podem ter empates (vários espaços ou usuários com o mesmo valor): todos aparecem, e as seções
+ * quebram de página sozinhas quando a lista é longa.
+ *
+ * Quando `report.isPreview` é true (período sem reservas) o PDF mantém toda a estrutura com blocos cinza no lugar
  * dos números e a marca "PRÉVIA", espelhando o esqueleto mostrado na tela.
  */
 
@@ -48,6 +53,10 @@ const PAGE_H = 297;
 const MARGIN = 14;
 const CONTENT_W = PAGE_W - MARGIN * 2;
 const SECTION_GAP = 8;
+/** Limite inferior do conteúdo: abaixo dele ficam a margem e o rodapé de cada página. */
+const BOTTOM = PAGE_H - 18;
+/** Quantos laboratórios empatados têm o nome listado no cartão de resumo (o resto vira "e mais N"). */
+const MAX_DISPUTED_NAMES = 3;
 
 const STATUS_LABEL: Record<ReportReserveStatus, string> = { CONFIRMED: "Confirmada", ABSENT: "Ausente" };
 
@@ -121,7 +130,7 @@ function drawHeader(doc: jsPDF, report: ReportData) {
 
   font(doc, 10.5);
   ink(doc, COLOR.violet200);
-  doc.text(formatMonthYear(report.period), MARGIN, 27.5);
+  doc.text(formatMonthYearPeriod(report.period), MARGIN, 27.5);
 
   const right = PAGE_W - MARGIN;
   if (report.isPreview) {
@@ -130,7 +139,7 @@ function drawHeader(doc: jsPDF, report: ReportData) {
     doc.text("PRÉVIA", right, 14, { align: "right" });
     font(doc, 7.5);
     ink(doc, COLOR.violet200);
-    doc.text("Nenhuma reserva contabilizada no mês", right, 19.5, { align: "right" });
+    doc.text("Nenhuma reserva contabilizada no período", right, 19.5, { align: "right" });
   } else {
     font(doc, 8);
     ink(doc, COLOR.violet200);
@@ -149,8 +158,19 @@ function drawKpis(doc: jsPDF, report: ReportData, y: number) {
   const preview = report.isPreview;
   const gap = 4;
   const w = (CONTENT_W - gap * 2) / 3;
-  const h = 27;
-  const disputed = summary.mostDisputedSpace;
+  const disputed = summary.mostDisputedSpaces;
+  const tied = disputed.length > 1;
+
+  // Empate: um nome por linha (até MAX_DISPUTED_NAMES) e, se sobrar, uma linha "e mais N".
+  const { visible, hidden } = limitList(disputed, MAX_DISPUTED_NAMES);
+  const tiedLines = [
+    ...visible.map((space) => ({ text: space.name, muted: false })),
+    ...(hidden > 0
+      ? [{ text: `e mais ${hidden} ${hidden === 1 ? "laboratório empatado" : "laboratórios empatados"}`, muted: true }]
+      : []),
+  ];
+  const lineHeight = 5;
+  const h = tied ? 14 + tiedLines.length * lineHeight + 5 : 27;
 
   const kpis = [
     {
@@ -159,6 +179,7 @@ function drawKpis(doc: jsPDF, report: ReportData, y: number) {
       caption: "Horários reservados sobre a capacidade",
       color: COLOR.ink,
       size: 18,
+      lines: null as typeof tiedLines | null,
     },
     {
       label: "Taxa de ociosidade / no-show",
@@ -166,13 +187,17 @@ function drawKpis(doc: jsPDF, report: ReportData, y: number) {
       caption: `${pluralize(summary.absentReserves, "reserva ausente", "reservas ausentes")} de ${summary.totalReserves}`,
       color: COLOR.rose600,
       size: 18,
+      lines: null,
     },
     {
-      label: "Laboratório mais disputado",
-      value: preview ? null : (disputed?.name ?? "—"),
-      caption: disputed ? `${formatPercent(disputed.occupancyRate)} de ocupação` : "Nenhum espaço com reservas no mês",
+      label: tied ? "Laboratórios mais disputados" : "Laboratório mais disputado",
+      value: preview ? null : (disputed[0]?.name ?? "—"),
+      caption: !disputed.length
+        ? "Nenhum espaço com reservas no período"
+        : `${formatPercent(disputed[0].occupancyRate)} de ocupação${tied ? " cada" : ""}`,
       color: COLOR.violet600,
       size: 14,
+      lines: tied ? tiedLines : null,
     },
   ];
 
@@ -190,6 +215,19 @@ function drawKpis(doc: jsPDF, report: ReportData, y: number) {
       return;
     }
 
+    if (kpi.lines) {
+      kpi.lines.forEach((line, lineIndex) => {
+        font(doc, line.muted ? 7.5 : 10.5, line.muted ? "normal" : "bold");
+        ink(doc, line.muted ? COLOR.muted : kpi.color);
+        doc.text(fit(doc, line.text, w - 8), x + 4, y + 14 + lineIndex * lineHeight);
+      });
+
+      font(doc, 7);
+      ink(doc, COLOR.muted);
+      doc.text(fit(doc, kpi.caption, w - 8), x + 4, y + 14 + kpi.lines.length * lineHeight);
+      return;
+    }
+
     font(doc, kpi.size, "bold");
     ink(doc, kpi.color);
     doc.text(fit(doc, kpi.value, w - 8), x + 4, y + 17);
@@ -202,46 +240,105 @@ function drawKpis(doc: jsPDF, report: ReportData, y: number) {
   return y + h;
 }
 
+/** Abre uma página nova quando `needed` mm não cabem mais na atual; devolve o `y` a usar. */
+function ensureSpace(doc: jsPDF, y: number, needed: number) {
+  if (y + needed <= BOTTOM) return y;
+  doc.addPage();
+  return MARGIN;
+}
+
+type RankingEntry = {
+  tag: string;
+  color: RGB;
+  name?: string;
+  percent: number;
+  text: string;
+  empty: string;
+  previewWidth: number;
+  /** primeira linha de cada ranking (ganha um respiro maior em cima) */
+  groupStart: boolean;
+};
+
 function drawRanking(doc: jsPDF, report: ReportData, y: number) {
   const { ranking } = report;
   const preview = report.isPreview;
+  const ROW_STEP = 13;
+  const GROUP_STEP = 16;
 
-  sectionTitle(doc, "Ranking de utilização por sala", `Percentual de ocupação em ${formatMonthYear(report.period)}`, y);
+  // evita título solto no fim da página
+  y = ensureSpace(doc, y, 18 + 8);
+  sectionTitle(
+    doc,
+    "Ranking de utilização por sala",
+    `Percentual de ocupação em ${formatMonthYearPeriod(report.period)}`,
+    y,
+  );
 
-  const rows = [
+  const groups: {
+    tag: string;
+    color: RGB;
+    stats: ReportSpaceStat[];
+    percent: (stat: ReportSpaceStat) => number;
+    text: (stat: ReportSpaceStat) => string;
+    empty: string;
+    previewWidth: number;
+  }[] = [
     {
       tag: "Alta demanda",
       color: COLOR.violet600,
-      name: ranking.highestDemand?.name,
-      percent: ranking.highestDemand?.occupancyRate ?? 0,
-      text: ranking.highestDemand ? `${formatPercent(ranking.highestDemand.occupancyRate)} de ocupação` : "",
-      empty: "Nenhum espaço teve reservas no mês",
+      stats: ranking.highestDemand,
+      percent: (stat) => stat.occupancyRate,
+      text: (stat) => `${formatPercent(stat.occupancyRate)} de ocupação`,
+      empty: "Nenhum espaço teve reservas no período",
       previewWidth: 0.78,
     },
     {
       tag: "Menor demanda",
       color: COLOR.amber500,
-      name: ranking.lowestDemand?.name,
-      percent: ranking.lowestDemand?.occupancyRate ?? 0,
-      text: ranking.lowestDemand ? `${formatPercent(ranking.lowestDemand.occupancyRate)} de ocupação` : "",
-      empty: "É preciso ao menos dois espaços para comparar",
+      stats: ranking.lowestDemand,
+      percent: (stat) => stat.occupancyRate,
+      text: (stat) => `${formatPercent(stat.occupancyRate)} de ocupação`,
+      empty: "É preciso ao menos dois espaços com demandas diferentes para comparar",
       previewWidth: 0.42,
     },
     {
       tag: "Mais ociosidade",
       color: COLOR.rose500,
-      name: ranking.mostIdle?.name,
-      percent: ranking.mostIdle?.idleRate ?? 0,
-      text: ranking.mostIdle
-        ? `${formatPercent(ranking.mostIdle.idleRate)} ausentes · ${pluralize(ranking.mostIdle.absentReserves, "ausência", "ausências")} em ${ranking.mostIdle.totalReserves}`
-        : "",
-      empty: "Nenhuma ausência registrada no mês",
+      stats: ranking.mostIdle,
+      percent: (stat) => stat.idleRate,
+      text: (stat) =>
+        `${formatPercent(stat.idleRate)} ausentes · ${pluralize(stat.absentReserves, "ausência", "ausências")} em ${stat.totalReserves}`,
+      empty: "Nenhuma ausência registrada no período",
       previewWidth: 0.26,
     },
   ];
 
+  // Cada espaço empatado vira uma linha com a própria barra; ranking sem ninguém vira uma linha de aviso.
+  const entries = groups.flatMap<RankingEntry>((group) => {
+    const base = { tag: group.tag, color: group.color, empty: group.empty, previewWidth: group.previewWidth };
+    if (preview || group.stats.length === 0) return [{ ...base, percent: 0, text: "", groupStart: true }];
+
+    return group.stats.map((stat, index) => ({
+      ...base,
+      name: stat.name,
+      percent: group.percent(stat),
+      text: group.text(stat),
+      groupStart: index === 0,
+    }));
+  });
+
   let rowY = y + 18;
-  for (const row of rows) {
+  entries.forEach((row, index) => {
+    if (index > 0) {
+      rowY += row.groupStart ? GROUP_STEP : ROW_STEP;
+
+      // Ranking longo: a linha (texto + barra, ~6 mm abaixo da base) que não cabe continua na página seguinte.
+      if (rowY + 6 > BOTTOM) {
+        doc.addPage();
+        rowY = MARGIN + 4;
+      }
+    }
+
     const barY = rowY + 2.2;
 
     if (preview) {
@@ -279,32 +376,39 @@ function drawRanking(doc: jsPDF, report: ReportData, y: number) {
       const width = Math.max(3, (Math.min(row.percent, 100) / 100) * CONTENT_W);
       doc.roundedRect(MARGIN, barY, width, 3, 1.5, 1.5, "F");
     }
+  });
 
-    rowY += 13;
-  }
-
-  return rowY - 6;
+  return rowY + 7;
 }
 
-function drawUsers(doc: jsPDF, report: ReportData, y: number) {
+type UserNumbers = { value: string; label: string; detail: string };
+
+type UserCardConfig = {
+  title: string;
+  /** Título no plural, usado quando há empate. */
+  titlePlural: string;
+  users: ReportUserStat[];
+  color: RGB;
+  background: RGB;
+  numbers: (user: ReportUserStat) => UserNumbers;
+  empty: string;
+};
+
+function drawUsers(doc: jsPDF, report: ReportData, startY: number) {
   const { users } = report;
   const preview = report.isPreview;
   const gap = 4;
   const w = (CONTENT_W - gap) / 2;
-  const h = 27;
+  // Altura do cartão = cabeçalho + uma faixa por usuário + respiro (1 usuário = 28 mm).
+  const HEAD = 10;
+  const ROW = 16;
+  const PAD = 2;
 
-  type Numbers = { value: string; label: string; detail: string };
-  const cards: {
-    title: string;
-    user: ReportUserStat | null;
-    color: RGB;
-    background: RGB;
-    numbers: (user: ReportUserStat) => Numbers;
-    empty: string;
-  }[] = [
+  const cards: UserCardConfig[] = [
     {
       title: "Usuário com mais reservas",
-      user: users.mostReserves,
+      titlePlural: "Usuários com mais reservas",
+      users: users.mostReserves,
       color: COLOR.violet700,
       background: COLOR.violet100,
       numbers: (u) => ({
@@ -312,11 +416,12 @@ function drawUsers(doc: jsPDF, report: ReportData, y: number) {
         label: u.totalReserves === 1 ? "reserva" : "reservas",
         detail: u.absentReserves > 0 ? pluralize(u.absentReserves, "ausência", "ausências") : "sem ausências",
       }),
-      empty: "Nenhuma reserva no mês",
+      empty: "Nenhuma reserva no período",
     },
     {
       title: "Usuário mais ocioso",
-      user: users.mostIdle,
+      titlePlural: "Usuários mais ociosos",
+      users: users.mostIdle,
       color: COLOR.rose600,
       background: COLOR.rose100,
       numbers: (u) => ({
@@ -324,40 +429,16 @@ function drawUsers(doc: jsPDF, report: ReportData, y: number) {
         label: u.absentReserves === 1 ? "ausência" : "ausências",
         detail: `${formatPercent(u.idleRate)} de ${pluralize(u.totalReserves, "reserva", "reservas")}`,
       }),
-      empty: "Nenhuma ausência registrada no mês",
+      empty: "Nenhuma ausência registrada no período",
     },
   ];
 
-  cards.forEach((entry, index) => {
-    const x = MARGIN + index * (w + gap);
-    card(doc, x, y, w, h, preview);
-
-    font(doc, 8);
-    ink(doc, COLOR.muted);
-    doc.text(entry.title, x + 4, y + 7);
-
-    const cx = x + 10;
-    const cy = y + 17;
-
-    if (preview) {
-      fill(doc, COLOR.skeleton);
-      doc.circle(cx, cy, 4.5, "F");
-      skeletonBar(doc, x + 18, y + 13.5, 40, 3.2);
-      skeletonBar(doc, x + 18, y + 19, 26, 2.6);
-      skeletonBar(doc, x + w - 18, y + 12.5, 14, 6);
-      return;
-    }
-
-    const user = entry.user;
-    if (!user) {
-      font(doc, 9);
-      ink(doc, COLOR.muted);
-      doc.text(entry.empty, x + 4, y + 18);
-      return;
-    }
-
+  /** Um usuário dentro do cartão: avatar, nome/matrícula à esquerda e os números à direita. */
+  function drawUserRow(entry: UserCardConfig, user: ReportUserStat, x: number, top: number) {
     const { value, label, detail } = entry.numbers(user);
     const right = x + w - 4;
+    const cx = x + 10;
+    const cy = top + 6.5;
 
     fill(doc, entry.background);
     doc.circle(cx, cy, 4.5, "F");
@@ -367,24 +448,104 @@ function drawUsers(doc: jsPDF, report: ReportData, y: number) {
 
     font(doc, 16, "bold");
     ink(doc, entry.color);
-    doc.text(value, right, y + 15.5, { align: "right" });
+    doc.text(value, right, top + 5.5, { align: "right" });
     const numberWidth = doc.getTextWidth(value);
 
     font(doc, 7);
     ink(doc, COLOR.muted);
-    doc.text(label, right, y + 19.5, { align: "right" });
-    doc.text(detail, right, y + 23.2, { align: "right" });
+    doc.text(label, right, top + 9.5, { align: "right" });
+    doc.text(detail, right, top + 13, { align: "right" });
     const rightBlock = Math.max(numberWidth, doc.getTextWidth(detail));
 
     font(doc, 10, "bold");
     ink(doc, COLOR.ink);
-    doc.text(fit(doc, user.name, w - 18 - rightBlock - 8), x + 18, y + 16);
+    doc.text(fit(doc, user.name, w - 18 - rightBlock - 8), x + 18, top + 6);
     font(doc, 7.5);
     ink(doc, COLOR.muted);
-    doc.text(`Matrícula ${user.registration}`, x + 18, y + 21);
-  });
+    doc.text(`Matrícula ${user.registration}`, x + 18, top + 11);
+  }
 
-  return y + h;
+  // Usuários empatados ficam um embaixo do outro no mesmo cartão; os dois cartões têm a mesma altura.
+  // Se a lista não couber na página, os cartões continuam na seguinte.
+  const total = Math.max(1, ...cards.map((c) => c.users.length));
+  let y = startY;
+  let offset = 0;
+
+  while (offset < total) {
+    const remaining = total - offset;
+    let fitRows = Math.floor((BOTTOM - y - HEAD - PAD) / ROW);
+
+    if (fitRows < Math.min(remaining, 2)) {
+      doc.addPage();
+      y = MARGIN;
+      fitRows = Math.floor((BOTTOM - y - HEAD - PAD) / ROW);
+    }
+
+    const count = Math.min(remaining, fitRows);
+    const height = HEAD + count * ROW + PAD;
+    const continuation = offset > 0;
+
+    cards.forEach((entry, index) => {
+      // Na continuação, o cartão cuja lista já terminou na página anterior não é repetido vazio.
+      if (continuation && entry.users.length <= offset) return;
+
+      const x = MARGIN + index * (w + gap);
+      card(doc, x, y, w, height, preview);
+
+      const multiple = entry.users.length > 1;
+      font(doc, 8);
+      ink(doc, COLOR.muted);
+      const title = multiple ? entry.titlePlural : entry.title;
+      doc.text(continuation ? `${title} (continuação)` : title, x + 4, y + 7);
+
+      if (multiple && !continuation) {
+        font(doc, 7, "bold");
+        ink(doc, entry.color);
+        doc.text(`${entry.users.length} empatados`, x + w - 4, y + 7, { align: "right" });
+      }
+
+      if (preview) {
+        const cx = x + 10;
+        const cy = y + 17;
+        fill(doc, COLOR.skeleton);
+        doc.circle(cx, cy, 4.5, "F");
+        skeletonBar(doc, x + 18, y + 13.5, 40, 3.2);
+        skeletonBar(doc, x + 18, y + 19, 26, 2.6);
+        skeletonBar(doc, x + w - 18, y + 12.5, 14, 6);
+        return;
+      }
+
+      if (entry.users.length === 0) {
+        font(doc, 9);
+        ink(doc, COLOR.muted);
+        doc.text(entry.empty, x + 4, y + 18);
+        return;
+      }
+
+      for (let row = 0; row < count; row++) {
+        const user = entry.users[offset + row];
+        if (!user) break;
+
+        const top = y + HEAD + row * ROW;
+        if (row > 0) {
+          stroke(doc, COLOR.line);
+          doc.setLineWidth(0.2);
+          doc.line(x + 4, top - 1.2, x + w - 4, top - 1.2);
+        }
+        drawUserRow(entry, user, x, top);
+      }
+    });
+
+    y += height;
+    offset += count;
+
+    if (offset < total) {
+      doc.addPage();
+      y = MARGIN;
+    }
+  }
+
+  return y;
 }
 
 function drawTable(doc: jsPDF, report: ReportData, startY: number) {
@@ -397,7 +558,7 @@ function drawTable(doc: jsPDF, report: ReportData, startY: number) {
     y = MARGIN;
   }
 
-  sectionTitle(doc, "Reservas do mês", "Confirmadas e ausentes, sem canceladas nem bloqueios.", y);
+  sectionTitle(doc, "Reservas do período", "Confirmadas e ausentes, sem canceladas nem bloqueios.", y);
   if (!preview) {
     font(doc, 8, "bold");
     ink(doc, COLOR.ink);
@@ -466,7 +627,7 @@ function drawFooters(doc: jsPDF, report: ReportData) {
 
     font(doc, 7.5);
     ink(doc, COLOR.muted);
-    doc.text(`Labpoint · Relatório de ocupação · ${formatMonthYear(report.period)}`, MARGIN, PAGE_H - 9);
+    doc.text(`Labpoint · Relatório de ocupação · ${formatMonthYearPeriod(report.period)}`, MARGIN, PAGE_H - 9);
     doc.text(`Página ${page} de ${pages}`, PAGE_W - MARGIN, PAGE_H - 9, { align: "right" });
   }
 }
@@ -479,8 +640,8 @@ function drawFooters(doc: jsPDF, report: ReportData) {
 export function buildReportPdf(report: ReportData) {
   const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
   doc.setProperties({
-    title: `Relatório de ocupação - ${formatMonthYear(report.period)}`,
-    subject: report.isPreview ? "Prévia (sem reservas no mês)" : "Ocupação e ociosidade dos espaços",
+    title: `Relatório de ocupação - ${formatMonthYearPeriod(report.period)}`,
+    subject: report.isPreview ? "Prévia (sem reservas no período)" : "Ocupação e ociosidade dos espaços",
     creator: "Labpoint",
   });
 

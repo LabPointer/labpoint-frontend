@@ -1,9 +1,16 @@
 import { BarChart3Icon } from "lucide-react";
-import { formatMonthYear } from "#/lib/utils/month-year";
+import { formatMonthYearPeriod } from "#/lib/utils/month-year";
 import { formatPercent, pluralize, type ReportData, type ReportSpaceStat } from "#/lib/utils/report";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { PercentBar, type ReportMode, ReportSkeleton, reportCardClass, SectionIcon } from "./report-ui";
+import {
+  CollapsibleList,
+  PercentBar,
+  type ReportMode,
+  ReportSkeleton,
+  reportCardClass,
+  SectionIcon,
+} from "./report-ui";
 
 type ReportRankingCardProps = { report: ReportData; mode: ReportMode };
 
@@ -12,7 +19,8 @@ type RowConfig = {
   tag: string;
   tagClass: string;
   barClass: string;
-  stat: ReportSpaceStat | null;
+  /** Todos os espaços empatados nesse ranking (vazio = ninguém se enquadra). */
+  stats: ReportSpaceStat[];
   /** valor da barra e do texto à direita */
   value: (stat: ReportSpaceStat) => number;
   valueText: (stat: ReportSpaceStat) => string;
@@ -30,10 +38,10 @@ export function ReportRankingCard({ report, mode }: ReportRankingCardProps) {
       tag: "Alta demanda",
       tagClass: "text-violet-600 dark:text-violet-400",
       barClass: "bg-violet-600 dark:bg-violet-500",
-      stat: ranking.highestDemand,
+      stats: ranking.highestDemand,
       value: (stat) => stat.occupancyRate,
       valueText: (stat) => `${formatPercent(stat.occupancyRate)} de ocupação`,
-      emptyText: "Nenhum espaço teve reservas no mês",
+      emptyText: "Nenhum espaço teve reservas no período",
       previewWidth: 78,
     },
     {
@@ -41,10 +49,10 @@ export function ReportRankingCard({ report, mode }: ReportRankingCardProps) {
       tag: "Menor demanda",
       tagClass: "text-amber-600 dark:text-amber-400",
       barClass: "bg-amber-500",
-      stat: ranking.lowestDemand,
+      stats: ranking.lowestDemand,
       value: (stat) => stat.occupancyRate,
       valueText: (stat) => `${formatPercent(stat.occupancyRate)} de ocupação`,
-      emptyText: "É preciso ao menos dois espaços para comparar",
+      emptyText: "É preciso ao menos dois espaços com demandas diferentes para comparar",
       previewWidth: 42,
     },
     {
@@ -52,11 +60,11 @@ export function ReportRankingCard({ report, mode }: ReportRankingCardProps) {
       tag: "Mais ociosidade",
       tagClass: "text-rose-600 dark:text-rose-400",
       barClass: "bg-rose-500",
-      stat: ranking.mostIdle,
+      stats: ranking.mostIdle,
       value: (stat) => stat.idleRate,
       valueText: (stat) =>
         `${formatPercent(stat.idleRate)} ausentes · ${pluralize(stat.absentReserves, "ausência", "ausências")} em ${stat.totalReserves}`,
-      emptyText: "Nenhuma ausência registrada no mês",
+      emptyText: "Nenhuma ausência registrada no período",
       previewWidth: 26,
     },
   ];
@@ -69,7 +77,9 @@ export function ReportRankingCard({ report, mode }: ReportRankingCardProps) {
         </SectionIcon>
         <div>
           <h2 className="text-lg font-bold leading-tight">Ranking de utilização por sala</h2>
-          <p className="text-sm text-muted-foreground">Percentual de ocupação em {formatMonthYear(report.period)}</p>
+          <p className="text-sm text-muted-foreground">
+            Percentual de ocupação em {formatMonthYearPeriod(report.period)}
+          </p>
         </div>
       </div>
 
@@ -82,9 +92,10 @@ export function ReportRankingCard({ report, mode }: ReportRankingCardProps) {
   );
 }
 
-function RankingRow({ row, mode }: { row: RowConfig; mode: ReportMode }) {
-  const { stat } = row;
+/** Quantos espaços empatados aparecem antes do botão "Ver mais". */
+const VISIBLE_TIES = 3;
 
+function RankingRow({ row, mode }: { row: RowConfig; mode: ReportMode }) {
   if (mode !== "data") {
     return (
       <div className="flex flex-col gap-2">
@@ -103,19 +114,39 @@ function RankingRow({ row, mode }: { row: RowConfig; mode: ReportMode }) {
     );
   }
 
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <p className="min-w-0 truncate text-sm font-semibold" title={stat?.name}>
-          {stat ? stat.name : <span className="text-muted-foreground">—</span>}{" "}
-          <span className={cn("text-xs font-medium", row.tagClass)}>({row.tag})</span>
-        </p>
-        <p className="text-sm text-muted-foreground">{stat ? row.valueText(stat) : row.emptyText}</p>
+  if (row.stats.length === 0) {
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <p className="min-w-0 truncate text-sm font-semibold">
+            <span className="text-muted-foreground">—</span>{" "}
+            <span className={cn("text-xs font-medium", row.tagClass)}>({row.tag})</span>
+          </p>
+          <p className="text-sm text-muted-foreground">{row.emptyText}</p>
+        </div>
+        <PercentBar value={0} colorClass={row.barClass} label={`${row.tag}: sem dados`} />
       </div>
-      <PercentBar
-        value={stat ? row.value(stat) : 0}
-        colorClass={row.barClass}
-        label={`${row.tag}: ${stat?.name ?? "sem dados"}`}
+    );
+  }
+
+  // Empate: cada espaço ganha a própria linha e a própria barra (todas com o mesmo percentual).
+  return (
+    <div className="flex flex-col gap-4">
+      <CollapsibleList
+        items={row.stats}
+        limit={VISIBLE_TIES}
+        noun={row.stats.length - VISIBLE_TIES === 1 ? "espaço empatado" : "espaços empatados"}
+        renderItem={(stat) => (
+          <div key={stat.spaceId} className="flex flex-col gap-2">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <p className="min-w-0 truncate text-sm font-semibold" title={stat.name}>
+                {stat.name} <span className={cn("text-xs font-medium", row.tagClass)}>({row.tag})</span>
+              </p>
+              <p className="text-sm text-muted-foreground">{row.valueText(stat)}</p>
+            </div>
+            <PercentBar value={row.value(stat)} colorClass={row.barClass} label={`${row.tag}: ${stat.name}`} />
+          </div>
+        )}
       />
     </div>
   );

@@ -2,9 +2,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { EyeIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useRefreshReport, useReport } from "#/lib/queries/report";
-import { formatMonthYear, type MonthYear, previousMonthYear } from "#/lib/utils/month-year";
-import { notifyError, notifySuccess } from "#/lib/utils/notify";
 import { ApiError } from "#/lib/types/error-types";
+import {
+  formatMonthYearPeriod,
+  type MonthYearPeriod,
+  previousMonthYear,
+  singleMonthPeriod,
+} from "#/lib/utils/month-year";
+import { notifyError, notifySuccess } from "#/lib/utils/notify";
 import { emptyReportData } from "#/lib/utils/report";
 import { ReportRankingCard } from "@/components/report/ReportRankingCard";
 import { ReportReservesTable } from "@/components/report/ReportReservesTable";
@@ -22,7 +27,7 @@ export const Route = createFileRoute("/_private/admin/report")({
 function RouteComponent() {
   // Só meses encerrados: o atual e os futuros ainda mudam (confirmações, cancelamentos, novas reservas).
   const maxMonth = useMemo(previousMonthYear, []);
-  const [period, setPeriod] = useState<MonthYear>(maxMonth);
+  const [period, setPeriod] = useState<MonthYearPeriod>(() => singleMonthPeriod(maxMonth));
   const [isExporting, setIsExporting] = useState(false);
 
   const report = useReport(period);
@@ -83,8 +88,9 @@ function RouteComponent() {
             >
               <EyeIcon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
               <p>
-                <strong>Prévia do relatório.</strong> Não há reservas contabilizadas em {formatMonthYear(period)}, então
-                os indicadores aparecem como esqueleto. O PDF exportado mantém essa estrutura e leva a marca “PRÉVIA”.
+                <strong>Prévia do relatório.</strong> Não há reservas contabilizadas em {formatMonthYearPeriod(period)},
+                então os indicadores aparecem como esqueleto. O PDF exportado mantém essa estrutura e leva a marca
+                “PRÉVIA”.
               </p>
             </div>
           )}

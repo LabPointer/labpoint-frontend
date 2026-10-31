@@ -1,4 +1,7 @@
-import type { CSSProperties, ReactNode } from "react";
+import { ChevronDownIcon } from "lucide-react";
+import { type CSSProperties, type ReactNode, useState } from "react";
+import { limitList } from "#/lib/utils/report";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -56,5 +59,44 @@ export function PercentBar({ value, colorClass, label }: { value: number; colorC
         style={{ width: `${width}%` }}
       />
     </div>
+  );
+}
+
+/**
+ * Lista de empate: mostra os primeiros `limit` itens e um botão para ver o resto
+ * (num empate grande, como todo mundo com 1 reserva, a lista poderia ocupar a tela inteira).
+ */
+export function CollapsibleList<T>({
+  items,
+  limit,
+  noun,
+  renderItem,
+}: {
+  items: readonly T[];
+  limit: number;
+  /** Plural usado no botão: "Ver mais 4 salas". */
+  noun: string;
+  renderItem: (item: T, index: number) => ReactNode;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const { visible, hidden } = limitList(items, expanded ? items.length : limit);
+
+  return (
+    <>
+      {visible.map(renderItem)}
+      {items.length > limit && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="self-center text-muted-foreground"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((current) => !current)}
+        >
+          <ChevronDownIcon className={cn("transition-transform", expanded && "rotate-180")} />
+          {expanded ? "Mostrar menos" : `Ver mais ${hidden} ${noun}`}
+        </Button>
+      )}
+    </>
   );
 }

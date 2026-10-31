@@ -11,6 +11,12 @@ export type MonthYearRange = {
 	to?: MonthYear;
 };
 
+/** Período já completo: de um mês ao outro, ambos inclusos (`from` e `to` iguais = um mês só). */
+export type MonthYearPeriod = {
+	from: MonthYear;
+	to: MonthYear;
+};
+
 export const MONTH_LABELS = Array.from({ length: 12 }, (_, month) =>
 	capitalize(format(new Date(2000, month, 1), "MMMM", { locale: ptBR })),
 );
@@ -37,6 +43,25 @@ export function isSameMonthYear(a?: MonthYear, b?: MonthYear): boolean {
 export function formatMonthYear(value?: MonthYear, placeholder = "Mês e ano") {
 	if (!value) return placeholder;
 	return `${MONTH_LABELS[value.month]} de ${value.year}`;
+}
+
+/** Período de um mês só. */
+export function singleMonthPeriod(value: MonthYear): MonthYearPeriod {
+	return { from: value, to: value };
+}
+
+export function isSinglePeriod({ from, to }: MonthYearPeriod): boolean {
+	return isSameMonthYear(from, to);
+}
+
+/**
+ * "Setembro de 2026" (um mês) · "Julho – Setembro de 2026" (mesmo ano) ·
+ * "Novembro de 2025 – Fevereiro de 2026" (anos diferentes).
+ */
+export function formatMonthYearPeriod({ from, to }: MonthYearPeriod): string {
+	if (isSameMonthYear(from, to)) return formatMonthYear(from);
+	if (from.year === to.year) return `${MONTH_LABELS[from.month]} – ${formatMonthYear(to)}`;
+	return `${formatMonthYear(from)} – ${formatMonthYear(to)}`;
 }
 
 export function normalizeRange(range: MonthYearRange): MonthYearRange {

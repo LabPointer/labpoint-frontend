@@ -1,17 +1,17 @@
 import { DownloadIcon, FileBarChartIcon, RefreshCwIcon } from "lucide-react";
-import type { MonthYear } from "#/lib/utils/month-year";
+import type { MonthYear, MonthYearPeriod } from "#/lib/utils/month-year";
 import { formatReportDateTime } from "#/lib/utils/report";
-import { MonthYearPicker } from "@/components/history/MonthYearPicker";
+import { MonthYearRangePicker } from "@/components/history/MonthYearRangePicker";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { reportCardClass } from "./report-ui";
 
 type ReportToolbarProps = {
-  period: MonthYear;
+  period: MonthYearPeriod;
   /** Último mês selecionável (o mês anterior ao atual). */
   maxMonth: MonthYear;
-  onPeriodChange: (period: MonthYear) => void;
+  onPeriodChange: (period: MonthYearPeriod) => void;
   generatedAt: string | null;
   canExport: boolean;
   isExporting: boolean;
@@ -50,7 +50,16 @@ export function ReportToolbar({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <MonthYearPicker value={period} onChange={onPeriodChange} maxMonth={maxMonth} id="report-month" />
+          <MonthYearRangePicker
+            value={period}
+            onChange={(range) => {
+              if (range.from && range.to) onPeriodChange({ from: range.from, to: range.to });
+            }}
+            maxMonth={maxMonth}
+            label={null}
+            placeholder="Selecione o período"
+            id="report-period"
+          />
           <Button
             type="button"
             variant="outline"
@@ -58,8 +67,8 @@ export function ReportToolbar({
             className="size-10"
             disabled={!canRefresh || isRefreshing}
             onClick={onRefresh}
-            aria-label="Recalcular relatório do mês"
-            title="Recalcular relatório do mês"
+            aria-label="Recalcular relatório do período"
+            title="Recalcular relatório do período"
           >
             <RefreshCwIcon className={isRefreshing ? "animate-spin" : undefined} />
           </Button>
