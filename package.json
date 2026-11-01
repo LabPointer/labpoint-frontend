@@ -45,6 +45,7 @@
     "jspdf-autotable": "latest",
     "lucide-react": "latest",
     "next-themes": "latest",
+    "nitro": "^3.0.261029-rc",
     "openapi-fetch": "latest",
     "react": "latest",
     "react-day-picker": "latest",
@@ -70,7 +71,7 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@vitejs/plugin-react": "latest",
-    "typescript": "latest",
+    "typescript": "^6.0.3",
     "vite": "latest"
   },
   "overrides": {
