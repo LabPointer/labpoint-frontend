@@ -2,9 +2,12 @@ import createClient, { type Middleware } from "openapi-fetch";
 import type { components, paths } from "./api";
 
 const getBaseUrl = () => {
+  
   if (typeof window !== "undefined") {
-    return `${window.location.protocol}//${window.location.hostname}:8080`;
+    //return `${window.location.protocol}//${window.location.hostname}:8080`;
+    return "https://labpoint-backend.onrender.com";
   }
+  
   return "http://localhost:8080";
 };
 
