@@ -41,6 +41,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       {
         title: "Labpoint",
       },
+      {
+        name: "description",
+        content:
+          "Labpoint é um sistema de agendamento de laboratórios feito para o SENAI Roberto Mange que organiza a disposição das aulas e ajuda professores a planejar as atividades de acordo com as necessidades das disciplinas.",
+      },
     ],
     links: [
       {
