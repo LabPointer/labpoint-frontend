@@ -5,15 +5,26 @@ import {
   Building,
   Building2,
   Calendar,
+  ChevronsUpDown,
   Clock,
   FileText,
   FlaskConical,
   History,
   Home,
   LogOut,
+  UserRound,
   Users,
 } from "lucide-react";
 import { api } from "#/lib/utils/restapi";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -123,9 +134,26 @@ function NavLinks({ routes }: { routes: PageRoute[] }) {
   );
 }
 
+function UserIdentity({ username, roles }: { username: string; roles: string }) {
+  return (
+    <div className="flex min-w-0 items-center gap-3">
+      <Avatar size="lg">
+        <AvatarImage src="https://github.com/shadcn.png" />
+        <AvatarFallback>LP</AvatarFallback>
+      </Avatar>
+      <div className="flex min-w-0 flex-col justify-center text-left">
+        <span className="truncate text-sm font-semibold text-foreground">{username}</span>
+        <span className="truncate text-xs text-[color:var(--sea-ink-soft)]">{roles}</span>
+      </div>
+    </div>
+  );
+}
+
 export function AppSidebar() {
   const { sessionInfo } = useRouteContext({ from: "__root__" });
   const router = useRouter();
+  const username = sessionInfo?.username || "Não definido";
+  const roles = sessionInfo?.roles.join(", ") || "Não definido";
 
   async function handleLogout() {
     await api.POST("/auth/sign-out");
@@ -169,24 +197,45 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border/70 px-5 py-4">
-        <div className="flex items-center gap-3">
-          <Avatar size="lg">
-            <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>LP</AvatarFallback>
-          </Avatar>
+      <SidebarFooter className="border-t border-sidebar-border/70 px-3 py-3">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <SidebarMenuButton
+                    size="lg"
+                    aria-label="Menu do usuário"
+                    className="h-14 gap-3 rounded-xl px-2 data-popup-open:bg-sidebar-accent"
+                  />
+                }
+              >
+                <UserIdentity username={username} roles={roles} />
+                <ChevronsUpDown className="ml-auto size-4 shrink-0 opacity-60" />
+              </DropdownMenuTrigger>
 
-          <div className="flex flex-col justify-center min-w-0">
-            <span className="truncate text-sm font-semibold">{sessionInfo?.username || "Nao definido"}</span>
-            <span className="truncate text-xs text-[color:var(--sea-ink-soft)]">
-              {sessionInfo?.roles.join(", ") || "Nao definido"}
-            </span>
-          </div>
-
-          <Button onClick={handleLogout} variant={"destructive"} size={"icon-lg"} className="ml-auto">
-            <LogOut className="size-4" />
-          </Button>
-        </div>
+              <DropdownMenuContent side="top" align="end" sideOffset={8} className="min-w-56">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="p-0 font-normal">
+                    <div className="px-1.5 py-1.5">
+                      <UserIdentity username={username} roles={roles} />
+                    </div>
+                  </DropdownMenuLabel>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.navigate({ to: "/profile" })}>
+                  <UserRound />
+                  Perfil
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+                  <LogOut />
+                  Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   );

@@ -1,6 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
 import type { components } from "#/lib/utils/api";
-import { assertOk, unwrapList } from "#/lib/utils/api-result";
+import { assertOk, unwrap, unwrapList } from "#/lib/utils/api-result";
 import { notifyError, notifySuccess } from "#/lib/utils/notify";
 import { api } from "#/lib/utils/restapi";
 
@@ -44,7 +45,38 @@ export type AccountParams = {
 export const accountKeys = {
   all: ["accounts"] as const,
   list: (params: AccountParams) => [...accountKeys.all, "list", params] as const,
+  me: () => [...accountKeys.all, "me"] as const,
 };
+
+/** Conta do usuário autenticado (`/account/@me`). */
+export function useMe() {
+  return useQuery({
+    queryKey: accountKeys.me(),
+    queryFn: async ({ signal }) => unwrap(await api.GET("/account/@me", { signal }), "Erro ao carregar seu perfil."),
+  });
+}
+
+export type MyAccountEditPayload = Partial<components["schemas"]["AccountEditRequestDTO"]>;
+
+/**
+ * Edita a própria conta. O backend regrava o cookie `auth-info`; `router.invalidate()` faz o `__root__`
+ * reler a sessão para o nome no sidebar refletir a mudança sem novo login.
+ */
+export function useEditMyAccount() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: async ({ username = null, subjectId = null }: MyAccountEditPayload) =>
+      unwrap(await api.PATCH("/account/edit", { body: { username, subjectId } }), "Erro ao atualizar perfil."),
+    onSuccess: async (account) => {
+      notifySuccess("Perfil atualizado com sucesso!");
+      queryClient.setQueryData(accountKeys.me(), account);
+      await router.invalidate();
+    },
+    onError: notifyError,
+  });
+}
 
 const DEFAULT_LIMIT = 30;
 

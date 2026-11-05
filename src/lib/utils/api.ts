@@ -71,7 +71,8 @@ export interface paths {
         head?: never;
         /**
          * Editar conta
-         * @description Edita as informações da conta do usuário autenticado, incluindo nome de usuário.
+         * @description Edita a conta do usuário autenticado: nome de usuário e/ou matéria associada (campos nulos são ignorados).
+         *     Regrava o cookie auth-info com os dados atualizados e devolve a conta.
          */
         patch: {
             parameters: {
@@ -88,12 +89,16 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description No Content */
-                204: {
+                /** @description OK */
+                200: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "text/plain": components["schemas"]["AccountResponseDTO"];
+                        "application/json": components["schemas"]["AccountResponseDTO"];
+                        "text/json": components["schemas"]["AccountResponseDTO"];
+                    };
                 };
                 /** @description Bad Request */
                 400: {
@@ -2153,7 +2158,9 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         AccountEditRequestDTO: {
-            username: string;
+            username: null | string;
+            /** Format: int64 */
+            subjectId: null | number | string;
         };
         AccountResponseDTO: {
             id: string;

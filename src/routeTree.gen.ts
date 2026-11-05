@@ -15,6 +15,7 @@ import { Route as PrivateAdminRouteRouteImport } from './routes/_private/admin/r
 import { Route as PrivateCalendarRouteImport } from './routes/_private/calendar'
 import { Route as PrivateHistoryRouteImport } from './routes/_private/history'
 import { Route as PrivateHomeRouteImport } from './routes/_private/home'
+import { Route as PrivateProfileRouteImport } from './routes/_private/profile'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicConfirmEmailRouteImport } from './routes/_public/confirm-email'
 import { Route as PublicForgetPasswordRouteImport } from './routes/_public/forget-password'
@@ -55,6 +56,11 @@ const PrivateHistoryRoute = PrivateHistoryRouteImport.update({
 const PrivateHomeRoute = PrivateHomeRouteImport.update({
   id: '/home',
   path: '/home',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
+const PrivateProfileRoute = PrivateProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => PrivateRouteRoute,
 } as any)
 const PublicIndexRoute = PublicIndexRouteImport.update({
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof PrivateCalendarRoute
   '/history': typeof PrivateHistoryRoute
   '/home': typeof PrivateHomeRoute
+  '/profile': typeof PrivateProfileRoute
   '/confirm-email': typeof PublicConfirmEmailRoute
   '/forget-password': typeof PublicForgetPasswordRoute
   '/resend-email-confirmation': typeof PublicResendEmailConfirmationRoute
@@ -154,6 +161,7 @@ export interface FileRoutesByTo {
   '/calendar': typeof PrivateCalendarRoute
   '/history': typeof PrivateHistoryRoute
   '/home': typeof PrivateHomeRoute
+  '/profile': typeof PrivateProfileRoute
   '/confirm-email': typeof PublicConfirmEmailRoute
   '/forget-password': typeof PublicForgetPasswordRoute
   '/resend-email-confirmation': typeof PublicResendEmailConfirmationRoute
@@ -175,6 +183,7 @@ export interface FileRoutesById {
   '/_private/calendar': typeof PrivateCalendarRoute
   '/_private/history': typeof PrivateHistoryRoute
   '/_private/home': typeof PrivateHomeRoute
+  '/_private/profile': typeof PrivateProfileRoute
   '/_public/confirm-email': typeof PublicConfirmEmailRoute
   '/_public/forget-password': typeof PublicForgetPasswordRoute
   '/_public/resend-email-confirmation': typeof PublicResendEmailConfirmationRoute
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/history'
     | '/home'
+    | '/profile'
     | '/confirm-email'
     | '/forget-password'
     | '/resend-email-confirmation'
@@ -216,6 +226,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/history'
     | '/home'
+    | '/profile'
     | '/confirm-email'
     | '/forget-password'
     | '/resend-email-confirmation'
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
     | '/_private/calendar'
     | '/_private/history'
     | '/_private/home'
+    | '/_private/profile'
     | '/_public/confirm-email'
     | '/_public/forget-password'
     | '/_public/resend-email-confirmation'
@@ -298,6 +310,13 @@ declare module '@tanstack/react-router' {
       path: '/home'
       fullPath: '/home'
       preLoaderRoute: typeof PrivateHomeRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
+    '/_private/profile': {
+      id: '/_private/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof PrivateProfileRouteImport
       parentRoute: typeof PrivateRouteRoute
     }
     '/_public/': {
@@ -422,6 +441,7 @@ interface PrivateRouteRouteChildren {
   PrivateCalendarRoute: typeof PrivateCalendarRoute
   PrivateHistoryRoute: typeof PrivateHistoryRoute
   PrivateHomeRoute: typeof PrivateHomeRoute
+  PrivateProfileRoute: typeof PrivateProfileRoute
 }
 
 const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
@@ -429,6 +449,7 @@ const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
   PrivateCalendarRoute: PrivateCalendarRoute,
   PrivateHistoryRoute: PrivateHistoryRoute,
   PrivateHomeRoute: PrivateHomeRoute,
+  PrivateProfileRoute: PrivateProfileRoute,
 }
 
 const PrivateRouteRouteWithChildren = PrivateRouteRoute._addFileChildren(
