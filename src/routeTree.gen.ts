@@ -11,8 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PrivateRouteRouteImport } from './routes/_private/route'
 import { Route as PublicRouteRouteImport } from './routes/_public/route'
+import { Route as UsageRouteImport } from './routes/usage'
 import { Route as PrivateAdminRouteRouteImport } from './routes/_private/admin/route'
 import { Route as PrivateCalendarRouteImport } from './routes/_private/calendar'
+import { Route as PrivateCheckOutRouteImport } from './routes/_private/check-out'
 import { Route as PrivateProfileRouteImport } from './routes/_private/profile'
 import { Route as PrivateResourceHistoryRouteImport } from './routes/_private/resource-history'
 import { Route as PrivateResourceReserveRouteImport } from './routes/_private/resource-reserve'
@@ -24,6 +26,7 @@ import { Route as PublicForgetPasswordRouteImport } from './routes/_public/forge
 import { Route as PublicResendEmailConfirmationRouteImport } from './routes/_public/resend-email-confirmation'
 import { Route as PublicResetPasswordRouteImport } from './routes/_public/reset-password'
 import { Route as PublicSignUpRouteImport } from './routes/_public/sign-up'
+import { Route as PrivateAdminManageCheckOutRouteImport } from './routes/_private/admin/manage-check-out'
 import { Route as PrivateAdminManageResourceReservesRouteImport } from './routes/_private/admin/manage-resource-reserves'
 import { Route as PrivateAdminManageResourcesRouteImport } from './routes/_private/admin/manage-resources'
 import { Route as PrivateAdminManageSchedulesRouteImport } from './routes/_private/admin/manage-schedules'
@@ -42,6 +45,11 @@ const PublicRouteRoute = PublicRouteRouteImport.update({
   id: '/_public',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UsageRoute = UsageRouteImport.update({
+  id: '/usage',
+  path: '/usage',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivateAdminRouteRoute = PrivateAdminRouteRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -50,6 +58,11 @@ const PrivateAdminRouteRoute = PrivateAdminRouteRouteImport.update({
 const PrivateCalendarRoute = PrivateCalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
+const PrivateCheckOutRoute = PrivateCheckOutRouteImport.update({
+  id: '/check-out',
+  path: '/check-out',
   getParentRoute: () => PrivateRouteRoute,
 } as any)
 const PrivateProfileRoute = PrivateProfileRouteImport.update({
@@ -108,6 +121,12 @@ const PublicSignUpRoute = PublicSignUpRouteImport.update({
   path: '/sign-up',
   getParentRoute: () => PublicRouteRoute,
 } as any)
+const PrivateAdminManageCheckOutRoute =
+  PrivateAdminManageCheckOutRouteImport.update({
+    id: '/manage-check-out',
+    path: '/manage-check-out',
+    getParentRoute: () => PrivateAdminRouteRoute,
+  } as any)
 const PrivateAdminManageResourceReservesRoute =
   PrivateAdminManageResourceReservesRouteImport.update({
     id: '/manage-resource-reserves',
@@ -163,8 +182,10 @@ const PrivateAdminSpaceReportRoute = PrivateAdminSpaceReportRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
+  '/usage': typeof UsageRoute
   '/admin': typeof PrivateAdminRouteRouteWithChildren
   '/calendar': typeof PrivateCalendarRoute
+  '/check-out': typeof PrivateCheckOutRoute
   '/profile': typeof PrivateProfileRoute
   '/resource-history': typeof PrivateResourceHistoryRoute
   '/resource-reserve': typeof PrivateResourceReserveRoute
@@ -175,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/resend-email-confirmation': typeof PublicResendEmailConfirmationRoute
   '/reset-password': typeof PublicResetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
+  '/admin/manage-check-out': typeof PrivateAdminManageCheckOutRoute
   '/admin/manage-resource-reserves': typeof PrivateAdminManageResourceReservesRoute
   '/admin/manage-resources': typeof PrivateAdminManageResourcesRoute
   '/admin/manage-schedules': typeof PrivateAdminManageSchedulesRoute
@@ -187,8 +209,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
+  '/usage': typeof UsageRoute
   '/admin': typeof PrivateAdminRouteRouteWithChildren
   '/calendar': typeof PrivateCalendarRoute
+  '/check-out': typeof PrivateCheckOutRoute
   '/profile': typeof PrivateProfileRoute
   '/resource-history': typeof PrivateResourceHistoryRoute
   '/resource-reserve': typeof PrivateResourceReserveRoute
@@ -199,6 +223,7 @@ export interface FileRoutesByTo {
   '/resend-email-confirmation': typeof PublicResendEmailConfirmationRoute
   '/reset-password': typeof PublicResetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
+  '/admin/manage-check-out': typeof PrivateAdminManageCheckOutRoute
   '/admin/manage-resource-reserves': typeof PrivateAdminManageResourceReservesRoute
   '/admin/manage-resources': typeof PrivateAdminManageResourcesRoute
   '/admin/manage-schedules': typeof PrivateAdminManageSchedulesRoute
@@ -213,8 +238,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_private': typeof PrivateRouteRouteWithChildren
   '/_public': typeof PublicRouteRouteWithChildren
+  '/usage': typeof UsageRoute
   '/_private/admin': typeof PrivateAdminRouteRouteWithChildren
   '/_private/calendar': typeof PrivateCalendarRoute
+  '/_private/check-out': typeof PrivateCheckOutRoute
   '/_private/profile': typeof PrivateProfileRoute
   '/_private/resource-history': typeof PrivateResourceHistoryRoute
   '/_private/resource-reserve': typeof PrivateResourceReserveRoute
@@ -226,6 +253,7 @@ export interface FileRoutesById {
   '/_public/reset-password': typeof PublicResetPasswordRoute
   '/_public/sign-up': typeof PublicSignUpRoute
   '/_public/': typeof PublicIndexRoute
+  '/_private/admin/manage-check-out': typeof PrivateAdminManageCheckOutRoute
   '/_private/admin/manage-resource-reserves': typeof PrivateAdminManageResourceReservesRoute
   '/_private/admin/manage-resources': typeof PrivateAdminManageResourcesRoute
   '/_private/admin/manage-schedules': typeof PrivateAdminManageSchedulesRoute
@@ -240,8 +268,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/usage'
     | '/admin'
     | '/calendar'
+    | '/check-out'
     | '/profile'
     | '/resource-history'
     | '/resource-reserve'
@@ -252,6 +282,7 @@ export interface FileRouteTypes {
     | '/resend-email-confirmation'
     | '/reset-password'
     | '/sign-up'
+    | '/admin/manage-check-out'
     | '/admin/manage-resource-reserves'
     | '/admin/manage-resources'
     | '/admin/manage-schedules'
@@ -264,8 +295,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/usage'
     | '/admin'
     | '/calendar'
+    | '/check-out'
     | '/profile'
     | '/resource-history'
     | '/resource-reserve'
@@ -276,6 +309,7 @@ export interface FileRouteTypes {
     | '/resend-email-confirmation'
     | '/reset-password'
     | '/sign-up'
+    | '/admin/manage-check-out'
     | '/admin/manage-resource-reserves'
     | '/admin/manage-resources'
     | '/admin/manage-schedules'
@@ -289,8 +323,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_private'
     | '/_public'
+    | '/usage'
     | '/_private/admin'
     | '/_private/calendar'
+    | '/_private/check-out'
     | '/_private/profile'
     | '/_private/resource-history'
     | '/_private/resource-reserve'
@@ -302,6 +338,7 @@ export interface FileRouteTypes {
     | '/_public/reset-password'
     | '/_public/sign-up'
     | '/_public/'
+    | '/_private/admin/manage-check-out'
     | '/_private/admin/manage-resource-reserves'
     | '/_private/admin/manage-resources'
     | '/_private/admin/manage-schedules'
@@ -316,6 +353,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   PrivateRouteRoute: typeof PrivateRouteRouteWithChildren
   PublicRouteRoute: typeof PublicRouteRouteWithChildren
+  UsageRoute: typeof UsageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -334,6 +372,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/usage': {
+      id: '/usage'
+      path: '/usage'
+      fullPath: '/usage'
+      preLoaderRoute: typeof UsageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_private/admin': {
       id: '/_private/admin'
       path: '/admin'
@@ -346,6 +391,13 @@ declare module '@tanstack/react-router' {
       path: '/calendar'
       fullPath: '/calendar'
       preLoaderRoute: typeof PrivateCalendarRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
+    '/_private/check-out': {
+      id: '/_private/check-out'
+      path: '/check-out'
+      fullPath: '/check-out'
+      preLoaderRoute: typeof PrivateCheckOutRouteImport
       parentRoute: typeof PrivateRouteRoute
     }
     '/_private/profile': {
@@ -425,6 +477,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicSignUpRouteImport
       parentRoute: typeof PublicRouteRoute
     }
+    '/_private/admin/manage-check-out': {
+      id: '/_private/admin/manage-check-out'
+      path: '/manage-check-out'
+      fullPath: '/admin/manage-check-out'
+      preLoaderRoute: typeof PrivateAdminManageCheckOutRouteImport
+      parentRoute: typeof PrivateAdminRouteRoute
+    }
     '/_private/admin/manage-resource-reserves': {
       id: '/_private/admin/manage-resource-reserves'
       path: '/manage-resource-reserves'
@@ -492,6 +551,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface PrivateAdminRouteRouteChildren {
+  PrivateAdminManageCheckOutRoute: typeof PrivateAdminManageCheckOutRoute
   PrivateAdminManageResourceReservesRoute: typeof PrivateAdminManageResourceReservesRoute
   PrivateAdminManageResourcesRoute: typeof PrivateAdminManageResourcesRoute
   PrivateAdminManageSchedulesRoute: typeof PrivateAdminManageSchedulesRoute
@@ -504,6 +564,7 @@ interface PrivateAdminRouteRouteChildren {
 }
 
 const PrivateAdminRouteRouteChildren: PrivateAdminRouteRouteChildren = {
+  PrivateAdminManageCheckOutRoute: PrivateAdminManageCheckOutRoute,
   PrivateAdminManageResourceReservesRoute:
     PrivateAdminManageResourceReservesRoute,
   PrivateAdminManageResourcesRoute: PrivateAdminManageResourcesRoute,
@@ -522,6 +583,7 @@ const PrivateAdminRouteRouteWithChildren =
 interface PrivateRouteRouteChildren {
   PrivateAdminRouteRoute: typeof PrivateAdminRouteRouteWithChildren
   PrivateCalendarRoute: typeof PrivateCalendarRoute
+  PrivateCheckOutRoute: typeof PrivateCheckOutRoute
   PrivateProfileRoute: typeof PrivateProfileRoute
   PrivateResourceHistoryRoute: typeof PrivateResourceHistoryRoute
   PrivateResourceReserveRoute: typeof PrivateResourceReserveRoute
@@ -532,6 +594,7 @@ interface PrivateRouteRouteChildren {
 const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
   PrivateAdminRouteRoute: PrivateAdminRouteRouteWithChildren,
   PrivateCalendarRoute: PrivateCalendarRoute,
+  PrivateCheckOutRoute: PrivateCheckOutRoute,
   PrivateProfileRoute: PrivateProfileRoute,
   PrivateResourceHistoryRoute: PrivateResourceHistoryRoute,
   PrivateResourceReserveRoute: PrivateResourceReserveRoute,
@@ -568,6 +631,7 @@ const PublicRouteRouteWithChildren = PublicRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   PrivateRouteRoute: PrivateRouteRouteWithChildren,
   PublicRouteRoute: PublicRouteRouteWithChildren,
+  UsageRoute: UsageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

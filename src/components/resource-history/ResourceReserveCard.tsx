@@ -1,10 +1,11 @@
 import { format, parseISO, startOfToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Building2, Calendar, Clock, Package, Pencil, X } from "lucide-react";
+import { Building2, Calendar, Clock, FileText, Package, Pencil, X } from "lucide-react";
 import { memo, useMemo } from "react";
 import { statusFromNumber } from "#/lib/queries/reserves";
 import { isActiveReserveStatus, type ResourceReserve } from "#/lib/queries/resource-reserves";
 import { hhmm, shiftLabels, sortSchedules } from "#/lib/queries/schedules";
+import { reportCount } from "#/lib/queries/usage";
 import { statusLabel, statusVariantClass } from "#/lib/utils/reservation-utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,8 @@ type ResourceReserveCardProps = {
   reserve: ResourceReserve;
   onEdit: (reserve: ResourceReserve) => void;
   onCancel: (reserve: ResourceReserve) => void;
+  /** Abre o relatório de uso (só aparece depois de algum check-in). */
+  onReport?: (reserve: ResourceReserve) => void;
 };
 
 const fmtDate = (date: string) => format(parseISO(date), "dd/MM/yyyy", { locale: ptBR });
@@ -28,8 +31,10 @@ export const ResourceReserveCard = memo(function ResourceReserveCard({
   reserve,
   onEdit,
   onCancel,
+  onReport,
 }: ResourceReserveCardProps) {
   const status = statusFromNumber(reserve.status);
+  const reports = reportCount(reserve.usage);
   const showCTA = canChangeResourceReserve(reserve);
 
   const groups = useMemo(() => {
@@ -99,6 +104,13 @@ export const ResourceReserveCard = memo(function ResourceReserveCard({
           <span className="text-sm font-semibold">Propósito:</span> {reserve.purpose}
         </p>
       </CardContent>
+
+      {reports > 0 && onReport && (
+        <Button variant="outline" size="sm" className="w-full gap-2" onClick={() => onReport(reserve)}>
+          <FileText className="size-4" />
+          Ver relatório de uso ({reports})
+        </Button>
+      )}
 
       {showCTA && (
         <CardFooter className="grid grid-cols-2 gap-3 border-0 bg-transparent">

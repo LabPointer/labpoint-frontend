@@ -6,11 +6,14 @@ import { useFormDialog } from "#/hooks/use-form-dialog";
 import { statusFromNumber } from "#/lib/queries/reserves";
 import { type AdminResourceReserve, isActiveReserveStatus } from "#/lib/queries/resource-reserves";
 import { scheduleLabel, sortSchedules } from "#/lib/queries/schedules";
+import { reportCount } from "#/lib/queries/usage";
 import { statusLabel, statusVariantClass } from "#/lib/utils/reservation-utils";
 import { InfoDialog } from "@/components/shared/InfoDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ReportButton } from "@/components/manage-reserves/ManageReserveTable";
+import { UsageSessionsDialog } from "@/components/usage/UsageSessionsDialog";
 import { cn } from "@/lib/utils";
 
 type ManageResourceReserveTableProps = {
@@ -23,7 +26,9 @@ const fmtDate = (date: string) => format(parseISO(date), "dd/MM/yyyy", { locale:
 
 export function ManageResourceReserveTable({ reserves, onEdit, onCancel }: ManageResourceReserveTableProps) {
   const schedulesDialog = useFormDialog<AdminResourceReserve>();
+  const reportDialog = useFormDialog<AdminResourceReserve>();
   const target = schedulesDialog.target;
+  const reportTarget = reportDialog.target;
 
   return (
     <>
@@ -44,6 +49,23 @@ export function ManageResourceReserveTable({ reserves, onEdit, onCancel }: Manag
         </InfoDialog>
       )}
 
+      {reportTarget && (
+        <UsageSessionsDialog
+          key={reportDialog.session}
+          kind="resource"
+          reserveId={Number(reportTarget.id)}
+          title={`Relatório de uso · ${reportTarget.resource.name}`}
+          description={
+            reportTarget.spaceReserve
+              ? `Recurso vinculado à sala ${reportTarget.spaceReserve.spaceName}: o uso é registrado no check-in da sala.`
+              : `Check-in, check-out e controle de notebooks da reserva de ${reportTarget.account.username}.`
+          }
+          open={reportDialog.isOpen}
+          onClose={reportDialog.close}
+          editable
+        />
+      )}
+
       <Table className="w-full border bg-white p-4 shadow-md hover:shadow-lg dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15">
         <TableCaption>Lista de reservas de recurso.</TableCaption>
         <TableHeader>
@@ -55,6 +77,7 @@ export function ManageResourceReserveTable({ reserves, onEdit, onCancel }: Manag
             <TableHead className="text-center">Período</TableHead>
             <TableHead className="text-center">Horários</TableHead>
             <TableHead className="text-center">Status</TableHead>
+            <TableHead className="text-center">Relatório</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -66,6 +89,7 @@ export function ManageResourceReserveTable({ reserves, onEdit, onCancel }: Manag
               onEdit={onEdit}
               onCancel={onCancel}
               onSchedules={schedulesDialog.open}
+              onReport={reportDialog.open}
             />
           ))}
         </TableBody>
@@ -79,11 +103,13 @@ const ManageResourceReserveRow = memo(function ManageResourceReserveRow({
   onEdit,
   onCancel,
   onSchedules,
+  onReport,
 }: {
   reserve: AdminResourceReserve;
   onEdit: (reserve: AdminResourceReserve) => void;
   onCancel: (reserve: AdminResourceReserve) => void;
   onSchedules: (reserve: AdminResourceReserve) => void;
+  onReport: (reserve: AdminResourceReserve) => void;
 }) {
   const status = statusFromNumber(reserve.status);
 
@@ -121,6 +147,9 @@ const ManageResourceReserveRow = memo(function ManageResourceReserveRow({
         >
           {statusLabel(status)}
         </Badge>
+      </TableCell>
+      <TableCell className="text-center">
+        <ReportButton count={reportCount(reserve.usage)} onClick={() => onReport(reserve)} />
       </TableCell>
       <TableCell className="text-right">
         <div className="flex items-center justify-end gap-x-2">

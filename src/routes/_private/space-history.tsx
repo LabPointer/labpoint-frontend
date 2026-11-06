@@ -20,6 +20,7 @@ import { sameResources } from "@/components/reserve/ReserveResourcesField";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
+import { UsageSessionsDialog } from "@/components/usage/UsageSessionsDialog";
 
 export const Route = createFileRoute("/_private/space-history")({
   component: RouteComponent,
@@ -35,6 +36,7 @@ function RouteComponent() {
   const cancelReserve = useCancelReserve();
   const editDialog = useFormDialog<Reserve>();
   const cancelDialog = useFormDialog<Reserve>();
+  const reportDialog = useFormDialog<Reserve>();
 
   async function handleEdit(data: HistoryEditFormData) {
     const reserve = editDialog.target;
@@ -91,6 +93,18 @@ function RouteComponent() {
         />
       )}
 
+      {reportDialog.target && (
+        <UsageSessionsDialog
+          key={reportDialog.session}
+          kind="space"
+          reserveId={Number(reportDialog.target.id)}
+          title={`Relatório de uso · ${reportDialog.target.space.name}`}
+          description="O que foi registrado no check-in e no check-out de cada turno."
+          open={reportDialog.isOpen}
+          onClose={reportDialog.close}
+        />
+      )}
+
       <section className="container mb-8">
         <HistorySearchBar onSearch={setFilters} />
       </section>
@@ -114,6 +128,7 @@ function RouteComponent() {
                   showCTA={reserveTab(reserve) === "next"}
                   onEdit={editDialog.open}
                   onCancel={cancelDialog.open}
+                  onReport={reportDialog.open}
                 />
               </div>
             ))}

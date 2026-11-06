@@ -1,10 +1,11 @@
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, Clock, Package, Pencil, Users, X } from "lucide-react";
+import { Calendar, Clock, FileText, Package, Pencil, Users, X } from "lucide-react";
 import { memo, useMemo } from "react";
 import { type Reserve, statusFromNumber } from "#/lib/queries/reserves";
 import { isActiveReserveStatus } from "#/lib/queries/resource-reserves";
 import { hhmm, shiftLabels, sortSchedules } from "#/lib/queries/schedules";
+import { reportCount } from "#/lib/queries/usage";
 import { statusLabel, statusVariantClass } from "#/lib/utils/reservation-utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,11 +18,20 @@ export interface HistoryCardProps {
   showCTA: boolean;
   onEdit?: (reserve: Reserve) => void;
   onCancel?: (reserve: Reserve) => void;
+  /** Abre o relatório de uso (só aparece depois de algum check-in). */
+  onReport?: (reserve: Reserve) => void;
 }
 
 const fmtDate = (date: string) => format(parseISO(date), "dd/MM/yyyy", { locale: ptBR });
 
-export const HistoryCard = memo(function HistoryCard({ reserve, showCTA, onEdit, onCancel }: HistoryCardProps) {
+export const HistoryCard = memo(function HistoryCard({
+  reserve,
+  showCTA,
+  onEdit,
+  onCancel,
+  onReport,
+}: HistoryCardProps) {
+  const reports = reportCount(reserve.usage);
   const status = statusFromNumber(reserve.status);
 
   // horários agrupados por turno, em ordem: [[turno, ["07:30 às 08:30", ...]], ...]
@@ -98,6 +108,13 @@ export const HistoryCard = memo(function HistoryCard({ reserve, showCTA, onEdit,
           <span className="text-sm font-semibold">Propósito:</span> {reserve.purpose || "Propósito não informado"}
         </p>
       </CardContent>
+
+      {reports > 0 && onReport && (
+        <Button variant="outline" size="sm" className="w-full gap-2" onClick={() => onReport(reserve)}>
+          <FileText className="size-4" />
+          Ver relatório de uso ({reports})
+        </Button>
+      )}
 
       {showCTA && (
         <CardFooter className="grid grid-cols-2 gap-3 border-0 bg-transparent">

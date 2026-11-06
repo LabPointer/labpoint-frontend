@@ -6,6 +6,8 @@ import {
   Building2,
   Calendar,
   ChevronsUpDown,
+  ClipboardCheck,
+  ClipboardList,
   Clock,
   FileBarChart,
   FileText,
@@ -77,6 +79,11 @@ const userRoutes: PageRoute[] = [
     label: "Histórico de recursos",
     icon: <PackageSearch className="size-4" />,
   },
+  {
+    to: "/check-out",
+    label: "Check-out",
+    icon: <ClipboardCheck className="size-4" />,
+  },
 ];
 
 const adminRoutes: PageRoute[] = [
@@ -114,6 +121,11 @@ const adminRoutes: PageRoute[] = [
     to: "/admin/manage-resource-reserves",
     label: "Gerenciar reserva de recursos",
     icon: <PackageCheck className="size-4" />,
+  },
+  {
+    to: "/admin/manage-check-out",
+    label: "Gerenciar check-out",
+    icon: <ClipboardList className="size-4" />,
   },
 ];
 

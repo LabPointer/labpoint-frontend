@@ -21,6 +21,7 @@ import { ResourceSearchBar, type ResourceSearchFilters } from "@/components/reso
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
+import { UsageSessionsDialog } from "@/components/usage/UsageSessionsDialog";
 
 export const Route = createFileRoute("/_private/resource-history")({
   component: RouteComponent,
@@ -47,6 +48,7 @@ function RouteComponent() {
   const cancelReserve = useCancelResourceReserve();
   const editDialog = useFormDialog<ResourceReserve>();
   const cancelDialog = useFormDialog<ResourceReserve>();
+  const reportDialog = useFormDialog<ResourceReserve>();
 
   async function handleEdit(data: ResourceReserveEditFormData) {
     const reserve = editDialog.target;
@@ -112,6 +114,22 @@ function RouteComponent() {
         />
       )}
 
+      {reportDialog.target && (
+        <UsageSessionsDialog
+          key={reportDialog.session}
+          kind="resource"
+          reserveId={Number(reportDialog.target.id)}
+          title={`Relatório de uso · ${reportDialog.target.resource.name}`}
+          description={
+            reportDialog.target.spaceReserve
+              ? `Registrado no check-in da sala ${reportDialog.target.spaceReserve.spaceName}.`
+              : "O que foi registrado no check-in e no check-out de cada turno."
+          }
+          open={reportDialog.isOpen}
+          onClose={reportDialog.close}
+        />
+      )}
+
       <section className="container mb-8">
         <ResourceSearchBar
           onSearch={setFilters}
@@ -135,7 +153,12 @@ function RouteComponent() {
           <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(288px,1fr))] justify-center gap-6">
             {items.map((reserve) => (
               <div key={reserve.id} className="flex w-full justify-center p-2">
-                <ResourceReserveCard reserve={reserve} onEdit={editDialog.open} onCancel={cancelDialog.open} />
+                <ResourceReserveCard
+                  reserve={reserve}
+                  onEdit={editDialog.open}
+                  onCancel={cancelDialog.open}
+                  onReport={reportDialog.open}
+                />
               </div>
             ))}
           </div>
