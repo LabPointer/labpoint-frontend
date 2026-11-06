@@ -1,8 +1,9 @@
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, Clock, Pencil, Users, X } from "lucide-react";
+import { Calendar, Clock, Package, Pencil, Users, X } from "lucide-react";
 import { memo, useMemo } from "react";
 import { type Reserve, statusFromNumber } from "#/lib/queries/reserves";
+import { isActiveReserveStatus } from "#/lib/queries/resource-reserves";
 import { hhmm, shiftLabels, sortSchedules } from "#/lib/queries/schedules";
 import { statusLabel, statusVariantClass } from "#/lib/utils/reservation-utils";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +34,12 @@ export const HistoryCard = memo(function HistoryCard({ reserve, showCTA, onEdit,
     }
     return [...byShift.entries()];
   }, [reserve.schedules]);
+
+  // só os recursos ainda ativos (cancelados/recusados individualmente não aparecem)
+  const linkedResources = useMemo(
+    () => (reserve.resources ?? []).filter((resource) => isActiveReserveStatus(resource.status)),
+    [reserve.resources],
+  );
 
   return (
     <Card className="min-h-72 min-w-72 max-w-72 rounded-md border bg-white p-4 shadow-md hover:shadow-lg dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15">
@@ -76,6 +83,16 @@ export const HistoryCard = memo(function HistoryCard({ reserve, showCTA, onEdit,
             </div>
           ))}
         </div>
+
+        {linkedResources.length > 0 && (
+          <div className="flex items-start gap-2 text-foreground/90">
+            <Package className="mt-0.5 size-4 shrink-0 text-violet-500 dark:text-violet-400" />
+            <p className="text-xs font-medium">
+              <span className="text-sm font-semibold">Recursos:</span>{" "}
+              {linkedResources.map((resource) => `${resource.name} × ${resource.quantity}`).join(", ")}
+            </p>
+          </div>
+        )}
 
         <p className="text-xs font-medium text-foreground">
           <span className="text-sm font-semibold">Propósito:</span> {reserve.purpose || "Propósito não informado"}

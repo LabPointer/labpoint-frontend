@@ -1,3 +1,4 @@
+import { Package } from "lucide-react";
 import { ReservationEventPopup } from "#/components/calendar/ReservationEventPopup";
 import type { ReservationEventData } from "#/lib/types/reservation-types";
 import { statusLabel, statusVariantClass } from "#/lib/utils/reservation-utils";
@@ -22,8 +23,14 @@ export function MonthEventChip({ data }: MonthEventChipProps) {
     <span className="flex w-full min-w-0 cursor-pointer items-center gap-1.5">
       {/* Dot colorido com a cor do status (flui de --ec-event-color) */}
       <span aria-hidden className="-me-0.5 size-1.5 shrink-0 rounded-full bg-(--ec-event-color)" />
-      {/* Nome da sala */}
+      {/* Nome da sala (ou do recurso, na reserva avulsa) */}
+      {data.kind === "resource" && <Package aria-label="Recurso" className="size-3 shrink-0 text-muted-foreground" />}
       <span className="truncate font-medium text-xs">{data.spaceName}</span>
+      {data.kind === "space" && data.resources.length > 0 && (
+        <span className="shrink-0 text-[10px] text-muted-foreground" title="Recursos reservados junto">
+          +{data.resources.length}
+        </span>
+      )}
       {/* Badge de status */}
       <span
         className={cn(

@@ -1,7 +1,8 @@
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { AlertCircle, BookOpen, CalendarDays, Clock } from "lucide-react";
+import { AlertCircle, BookOpen, CalendarDays, Clock, Package } from "lucide-react";
 import { useState } from "react";
+import { ReservedResourcesList } from "#/components/calendar/ReservedResourcesList";
 import { Badge } from "#/components/ui/badge.tsx";
 import { Button } from "#/components/ui/button.tsx";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "#/components/ui/dialog.tsx";
@@ -44,6 +45,9 @@ export function ReservationEventModal({ data }: ReservationEventModalProps) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {data.kind === "resource" ? "Reserva de recurso" : "Reserva de sala"}
+            </p>
             <DialogTitle className="text-base">{data.spaceName}</DialogTitle>
           </DialogHeader>
 
@@ -86,6 +90,18 @@ export function ReservationEventModal({ data }: ReservationEventModalProps) {
                 </div>
               </div>
             </div>
+
+            {data.resources.length > 0 && (
+              <div className="flex items-start gap-3">
+                <Package className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <p className="text-xs font-medium text-muted-foreground">
+                    {data.kind === "resource" ? "Quantidade" : "Recursos reservados"}
+                  </p>
+                  <ReservedResourcesList resources={data.resources} />
+                </div>
+              </div>
+            )}
 
             {/* Propósito */}
             <div className="flex items-start gap-3">

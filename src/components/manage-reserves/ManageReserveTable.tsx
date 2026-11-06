@@ -1,7 +1,8 @@
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Clock, Pencil, X } from "lucide-react";
+import { Clock, Package, Pencil, X } from "lucide-react";
 import { memo } from "react";
+import { ReservedResourcesList } from "#/components/calendar/ReservedResourcesList";
 import { useFormDialog } from "#/hooks/use-form-dialog";
 import type { AdminReserve } from "#/lib/queries/admin-reserves";
 import { statusFromNumber } from "#/lib/queries/reserves";
@@ -23,7 +24,9 @@ const fmtDate = (date: string) => format(parseISO(date), "dd/MM/yyyy", { locale:
 
 export function ManageReserveTable({ reserves, onEdit, onCancel }: ManageReserveTableProps) {
   const schedulesDialog = useFormDialog<AdminReserve>();
+  const resourcesDialog = useFormDialog<AdminReserve>();
   const target = schedulesDialog.target;
+  const resourcesTarget = resourcesDialog.target;
 
   return (
     <>
@@ -44,6 +47,29 @@ export function ManageReserveTable({ reserves, onEdit, onCancel }: ManageReserve
         </InfoDialog>
       )}
 
+      {resourcesTarget && (
+        <InfoDialog
+          open={resourcesDialog.isOpen}
+          onClose={resourcesDialog.close}
+          title={`Recursos · ${resourcesTarget.spaces.name}`}
+          description={`Recursos reservados junto com a sala por ${resourcesTarget.account.username}.`}
+        >
+          {resourcesTarget.resources.length === 0 ? (
+            <p className="text-muted-foreground">Nenhum recurso associado a esta reserva.</p>
+          ) : (
+            <div className="rounded-md border p-2">
+              <ReservedResourcesList
+                resources={resourcesTarget.resources.map((resource) => ({
+                  name: resource.name,
+                  quantity: Number(resource.quantity),
+                  status: statusFromNumber(resource.status),
+                }))}
+              />
+            </div>
+          )}
+        </InfoDialog>
+      )}
+
       <Table className="w-full border bg-white p-4 shadow-md hover:shadow-lg dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15">
         <TableCaption>Lista de reservas.</TableCaption>
         <TableHeader>
@@ -52,6 +78,7 @@ export function ManageReserveTable({ reserves, onEdit, onCancel }: ManageReserve
             <TableHead>Usuário</TableHead>
             <TableHead className="text-center">Período</TableHead>
             <TableHead className="text-center">Horários</TableHead>
+            <TableHead className="text-center">Recursos associados</TableHead>
             <TableHead className="text-center">Status</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
@@ -64,6 +91,7 @@ export function ManageReserveTable({ reserves, onEdit, onCancel }: ManageReserve
               onEdit={onEdit}
               onCancel={onCancel}
               onSchedules={schedulesDialog.open}
+              onResources={resourcesDialog.open}
             />
           ))}
         </TableBody>
@@ -77,11 +105,13 @@ const ManageReserveRow = memo(function ManageReserveRow({
   onEdit,
   onCancel,
   onSchedules,
+  onResources,
 }: {
   reserve: AdminReserve;
   onEdit: (reserve: AdminReserve) => void;
   onCancel: (reserve: AdminReserve) => void;
   onSchedules: (reserve: AdminReserve) => void;
+  onResources: (reserve: AdminReserve) => void;
 }) {
   const status = statusFromNumber(reserve.status);
   const isCanceled = status === "CANCELED";
@@ -104,6 +134,12 @@ const ManageReserveRow = memo(function ManageReserveRow({
         <Button type="button" variant="outline" size="sm" onClick={() => onSchedules(reserve)}>
           <Clock className="size-4" />
           Ver horários ({reserve.schedules.length})
+        </Button>
+      </TableCell>
+      <TableCell className="text-center">
+        <Button type="button" variant="outline" size="sm" onClick={() => onResources(reserve)}>
+          <Package className="size-4" />
+          Ver recursos ({reserve.resources.length})
         </Button>
       </TableCell>
       <TableCell className="text-center">

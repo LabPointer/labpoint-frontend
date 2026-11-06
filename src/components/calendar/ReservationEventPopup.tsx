@@ -1,7 +1,8 @@
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { BookOpen, CalendarDays, Clock } from "lucide-react";
+import { BookOpen, CalendarDays, Clock, Package } from "lucide-react";
 import type { ReactNode } from "react";
+import { ReservedResourcesList } from "#/components/calendar/ReservedResourcesList";
 import { Badge } from "#/components/ui/badge.tsx";
 import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover.tsx";
 import { Separator } from "#/components/ui/separator.tsx";
@@ -41,6 +42,9 @@ export function ReservationEventPopup({ data, trigger }: ReservationEventPopupPr
           className="rounded-t-md px-4 py-3"
           style={{ backgroundColor: `color-mix(in srgb, ${getStatusBgColor(data.status)} 15%, transparent)` }}
         >
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            {data.kind === "resource" ? "Reserva de recurso" : "Reserva de sala"}
+          </p>
           <p className="text-sm font-semibold leading-tight">{data.spaceName}</p>
           <Badge variant="outline" className={cn("mt-1 text-xs font-medium", statusVariantClass(data.status))}>
             {statusLabel(data.status)}
@@ -77,6 +81,19 @@ export function ReservationEventPopup({ data, trigger }: ReservationEventPopupPr
               ))}
             </div>
           </div>
+
+          {data.resources.length > 0 && (
+            <>
+              <Separator />
+              {/* Recursos: os reservados junto com a sala, ou o próprio recurso da reserva avulsa */}
+              <div className="flex items-start gap-2">
+                <Package className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+                <div className="min-w-0 flex-1">
+                  <ReservedResourcesList resources={data.resources} size="xs" />
+                </div>
+              </div>
+            </>
+          )}
 
           <Separator />
 

@@ -1,7 +1,7 @@
 import { Pencil } from "lucide-react";
 import { memo } from "react";
 import type { Resource } from "#/lib/queries/resources";
-import { StatusBadge } from "@/components/shared/StatusBadge";
+import { InfoBadge, StatusBadge } from "@/components/shared/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -16,7 +16,10 @@ export function ManageResourceTable({ resources, onEdit }: ManageResourceTablePr
       <TableCaption>Lista de recursos</TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-25">Nome</TableHead>
+          <TableHead>Nome</TableHead>
+          <TableHead className="hidden md:table-cell">Descrição</TableHead>
+          <TableHead className="text-center">Tipo</TableHead>
+          <TableHead className="text-center">Quantidade</TableHead>
           <TableHead className="text-center">Status</TableHead>
           <TableHead className="text-right">Ações</TableHead>
         </TableRow>
@@ -39,7 +42,14 @@ const ManageResourceRow = memo(function ManageResourceRow({
 }) {
   return (
     <TableRow>
-      <TableCell className="w-25 font-bold">{resource.name}</TableCell>
+      <TableCell className="font-bold">{resource.name}</TableCell>
+      <TableCell className="hidden max-w-80 truncate text-muted-foreground md:table-cell" title={resource.description ?? ""}>
+        {resource.description || "—"}
+      </TableCell>
+      <TableCell className="text-center">
+        {resource.reservable ? <InfoBadge>Reservável</InfoBadge> : <span className="text-muted-foreground">Fixo</span>}
+      </TableCell>
+      <TableCell className="text-center tabular-nums">{resource.reservable ? resource.quantity : "—"}</TableCell>
       <TableCell className="text-center">
         <StatusBadge active={resource.enabled} />
       </TableCell>

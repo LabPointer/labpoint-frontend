@@ -1,15 +1,16 @@
 import { useForm, useStore } from "@tanstack/react-form";
+import { useRouteContext } from "@tanstack/react-router";
 import { addDays, startOfDay } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import z from "zod";
 import { DateRangeField } from "@/components/reserve/DateRangeField";
+import { type ReservedResource, ReserveResourcesField } from "@/components/reserve/ReserveResourcesField";
 import { ReserveScheduleField } from "@/components/reserve/ReserveScheduleField";
 import { FormDialog } from "@/components/shared/FormDialog";
 import type { RemoteOption } from "@/components/shared/RemoteCombobox";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupText, InputGroupTextarea } from "@/components/ui/input-group";
-import { useRouteContext } from "@tanstack/react-router";
 import { BooleanField } from "../shared/BooleanField";
 
 type ListData = {
@@ -28,6 +29,8 @@ export type SpaceProps = {
 export type SpaceReserveFormData = {
   range: DateRange;
   schedules: RemoteOption[];
+  /** Recursos reserváveis pedidos junto com a sala (opcional). */
+  resources: ReservedResource[];
   purpose: string;
   lock: boolean;
 };
@@ -50,6 +53,9 @@ const formSchema = z.object({
       "A data da reserva deve começar a partir de amanhã.",
     ),
   schedules: z.array(z.object({ id: z.number(), name: z.string() })).min(1, "Selecione pelo menos um horário."),
+  resources: z.array(
+    z.object({ id: z.number(), name: z.string(), quantity: z.number().int().min(1, "Quantidade mínima: 1.") }),
+  ),
   lock: z.boolean(),
   purpose: z
     .string()
@@ -66,6 +72,7 @@ export function SpaceReserveModal({ space, open, onClose, onSubmit }: SpaceReser
     defaultValues: {
       range: undefined as DateRange | undefined,
       schedules: [] as RemoteOption[],
+      resources: [] as ReservedResource[],
       lock: false,
       purpose: "",
     },
@@ -75,6 +82,7 @@ export function SpaceReserveModal({ space, open, onClose, onSubmit }: SpaceReser
       await onSubmit({
         range: value.range,
         schedules: value.schedules,
+        resources: value.resources,
         purpose: value.purpose.trim(),
         lock: value.lock,
       });
@@ -127,20 +135,41 @@ export function SpaceReserveModal({ space, open, onClose, onSubmit }: SpaceReser
         )}
       </form.Field>
 
-      <form.Subscribe selector={(state) => state.values.range}>
-        {(range) => (
-          <form.Field name="schedules">
-            {(field) => (
-              <ReserveScheduleField
-                id="reserve-schedules"
-                spaceId={space.id}
-                range={range}
-                value={field.state.value}
-                onChange={field.handleChange}
-                errors={field.state.meta.isTouched ? field.state.meta.errors : undefined}
-              />
-            )}
-          </form.Field>
+      <form.Subscribe
+        selector={(state) => ({
+          range: state.values.range,
+          schedules: state.values.schedules,
+          resources: state.values.resources,
+        })}
+      >
+        {({ range, schedules, resources }) => (
+          <>
+            <form.Field name="resources">
+              {(field) => (
+                <ReserveResourcesField
+                  id="reserve-resources"
+                  range={range}
+                  scheduleIds={schedules.map((schedule) => schedule.id)}
+                  value={field.state.value}
+                  onChange={field.handleChange}
+                  errors={field.state.meta.isTouched ? field.state.meta.errors : undefined}
+                />
+              )}
+            </form.Field>
+            <form.Field name="schedules">
+              {(field) => (
+                <ReserveScheduleField
+                  id="reserve-schedules"
+                  spaceId={space.id}
+                  range={range}
+                  resources={resources}
+                  value={field.state.value}
+                  onChange={field.handleChange}
+                  errors={field.state.meta.isTouched ? field.state.meta.errors : undefined}
+                />
+              )}
+            </form.Field>
+          </>
         )}
       </form.Subscribe>
 

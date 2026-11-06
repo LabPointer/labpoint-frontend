@@ -1,6 +1,7 @@
 import { addDays, parseISO } from "date-fns";
 import type { CalendarEvent } from "#/components/reui/event-calendar/event-calendar-types.tsx";
 import { RESERVE_STATUS, type Reserve, statusFromNumber } from "#/lib/queries/reserves";
+import type { ResourceReserve } from "#/lib/queries/resource-reserves";
 import { sortSchedules } from "#/lib/queries/schedules";
 import type { ReservationEventData, ReservationStatus } from "#/lib/types/reservation-types";
 
@@ -71,7 +72,7 @@ function reserveToEvent(reserve: Reserve): CalendarEvent<ReservationEventData> {
   const endDate = addDays(parseISO(reserve.dateTo), 1);
 
   return {
-    id: String(reserve.id),
+    id: `space-${reserve.id}`,
     title: reserve.space.name,
     start: startDate,
     end: endDate,
@@ -83,16 +84,61 @@ function reserveToEvent(reserve: Reserve): CalendarEvent<ReservationEventData> {
     readOnly: true,
     data: {
       reserveId: Number(reserve.id),
+      kind: "space",
       spaceName: reserve.space.name,
       status,
       purpose: reserve.purpose,
       schedules: sortSchedules(reserve.schedules),
       reservedDateFrom: reserve.dateFrom,
       reservedDateTo: reserve.dateTo,
+      // recursos reservados junto com a sala aparecem no mesmo card
+      resources: (reserve.resources ?? []).map((resource) => ({
+        name: resource.name,
+        quantity: Number(resource.quantity),
+        status: statusFromNumber(resource.status),
+      })),
     },
   };
 }
 
-export function reservesToCalendarEvents(reserves: Reserve[]): CalendarEvent<ReservationEventData>[] {
-  return reserves.map(reserveToEvent);
+/** Reserva avulsa de recurso (sem sala): vira um card próprio no calendário. */
+function resourceReserveToEvent(reserve: ResourceReserve): CalendarEvent<ReservationEventData> {
+  const status = statusFromNumber(reserve.status);
+
+  return {
+    id: `resource-${reserve.id}`,
+    title: reserve.resource.name,
+    start: parseISO(reserve.dateFrom),
+    end: addDays(parseISO(reserve.dateTo), 1),
+    allDay: true,
+    color: statusToColor(status),
+    draggable: false,
+    resizable: false,
+    readOnly: true,
+    data: {
+      reserveId: Number(reserve.id),
+      kind: "resource",
+      spaceName: reserve.resource.name,
+      status,
+      purpose: reserve.purpose,
+      schedules: sortSchedules(reserve.schedules),
+      reservedDateFrom: reserve.dateFrom,
+      reservedDateTo: reserve.dateTo,
+      resources: [{ name: reserve.resource.name, quantity: Number(reserve.quantity), status }],
+    },
+  };
+}
+
+/**
+ * Eventos do calendário: cada reserva de sala é um evento (com os recursos vinculados dentro dele) e cada
+ * reserva AVULSA de recurso é outro. Reservas de recurso vinculadas a uma sala não viram evento próprio.
+ */
+export function reservesToCalendarEvents(
+  reserves: Reserve[],
+  resourceReserves: ResourceReserve[] = [],
+): CalendarEvent<ReservationEventData>[] {
+  return [
+    ...reserves.map(reserveToEvent),
+    ...resourceReserves.filter((reserve) => !reserve.spaceReserve).map(resourceReserveToEvent),
+  ];
 }

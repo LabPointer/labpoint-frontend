@@ -13,6 +13,7 @@ import { succeeded } from "#/lib/utils/api-result";
 import { paginateLocal } from "#/lib/utils/pagination";
 import { CancelReserveDialog } from "@/components/history/CancelReserveDialog";
 import {
+  activeAdminLinkedResources,
   type ManageReserveEditData,
   ManageReserveEditDialog,
 } from "@/components/manage-reserves/ManageReserveEditDialog";
@@ -22,6 +23,7 @@ import {
   type ReserveFilters,
 } from "@/components/manage-reserves/ManageReserveSearchBar";
 import { ManageReserveTable } from "@/components/manage-reserves/ManageReserveTable";
+import { sameResources } from "@/components/reserve/ReserveResourcesField";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
@@ -60,9 +62,10 @@ function RouteComponent() {
     const datesChanged = startAt !== reserve.dateFrom || endAt !== reserve.dateTo;
     const schedulesChanged = scheduleIds.join(",") !== currentScheduleIds.join(",");
     const statusChanged = data.status !== Number(reserve.status);
+    const resourcesChanged = !sameResources(data.resources, activeAdminLinkedResources(reserve));
 
     // sem alterações: não há o que enviar (o backend recusa PATCH vazio)
-    if (!datesChanged && !schedulesChanged && !statusChanged) {
+    if (!datesChanged && !schedulesChanged && !statusChanged && !resourcesChanged) {
       editDialog.close();
       return;
     }
@@ -76,6 +79,9 @@ function RouteComponent() {
           startAt: datesChanged ? startAt : null,
           endAt: datesChanged ? endAt : null,
           scheduleIds: schedulesChanged ? scheduleIds : null,
+          resources: resourcesChanged
+            ? data.resources.map((resource) => ({ resourceId: resource.id, quantity: resource.quantity }))
+            : null,
         },
       }),
     );
@@ -105,6 +111,11 @@ function RouteComponent() {
           open={cancelDialog.isOpen}
           spaceName={cancelDialog.target.spaces.name}
           userName={cancelDialog.target.account.username}
+          note={
+            cancelDialog.target.resources.length
+              ? "Os recursos reservados junto com esta sala também serão cancelados."
+              : undefined
+          }
           isPending={cancelReserve.isPending}
           onClose={cancelDialog.close}
           onConfirm={handleConfirmCancel}

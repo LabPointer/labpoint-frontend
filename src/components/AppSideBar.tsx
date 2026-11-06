@@ -7,11 +7,15 @@ import {
   Calendar,
   ChevronsUpDown,
   Clock,
+  FileBarChart,
   FileText,
   FlaskConical,
   History,
   Home,
   LogOut,
+  Package,
+  PackageCheck,
+  PackageSearch,
   UserRound,
   Users,
 } from "lucide-react";
@@ -49,19 +53,29 @@ type PageRoute = {
 
 const userRoutes: PageRoute[] = [
   {
-    to: "/home",
-    label: "Início",
+    to: "/space-reserve",
+    label: "Reservar sala",
     icon: <Home className="size-4" />,
   },
   {
+    to: "/resource-reserve",
+    label: "Reservar recurso",
+    icon: <Package className="size-4" />,
+  },
+  {
     to: "/calendar",
-    label: "Calendario",
+    label: "Calendário",
     icon: <Calendar className="size-4" />,
   },
   {
-    to: "/history",
-    label: "Histórico",
+    to: "/space-history",
+    label: "Histórico de sala",
     icon: <History className="size-4" />,
+  },
+  {
+    to: "/resource-history",
+    label: "Histórico de recursos",
+    icon: <PackageSearch className="size-4" />,
   },
 ];
 
@@ -96,13 +110,23 @@ const adminRoutes: PageRoute[] = [
     label: "Gerenciar reserva de espaços",
     icon: <Building2 className="size-4" />,
   },
+  {
+    to: "/admin/manage-resource-reserves",
+    label: "Gerenciar reserva de recursos",
+    icon: <PackageCheck className="size-4" />,
+  },
 ];
 
 const coordinatorRoutes: PageRoute[] = [
   {
-    to: "/admin/report",
-    label: "Relatorios",
+    to: "/admin/space-report",
+    label: "Relatório de salas",
     icon: <FileText className="size-4" />,
+  },
+  {
+    to: "/admin/resource-report",
+    label: "Relatório de recursos",
+    icon: <FileBarChart className="size-4" />,
   },
 ];
 

@@ -16,6 +16,7 @@ import type {
 import { Card, CardContent } from "#/components/ui/card.tsx";
 import { Skeleton } from "#/components/ui/skeleton.tsx";
 import { useMonthReserves } from "#/lib/queries/reserves";
+import { useMonthResourceReserves } from "#/lib/queries/resource-reserves";
 import type { ReservationEventData, ReservationStatus } from "#/lib/types/reservation-types";
 import { RESERVE_STATUS_LIST, reservesToCalendarEvents } from "#/lib/utils/reservation-utils";
 
@@ -94,15 +95,18 @@ export function HistoryCalendar() {
 
   // Mês atualmente visível — define a query e o agendaDayCount
   const [activeMonth, setActiveMonth] = useState<Date>(() => startOfMonth(new Date()));
-  const reserves = useMonthReserves({ year: activeMonth.getFullYear(), month: activeMonth.getMonth() });
+  const monthQuery = { year: activeMonth.getFullYear(), month: activeMonth.getMonth() };
+  const reserves = useMonthReserves(monthQuery);
+  // reservas de recurso SEM sala (as vinculadas já vêm dentro da reserva de sala, no mesmo card)
+  const resourceReserves = useMonthResourceReserves(monthQuery);
   // Filtro de status aplicado no cliente: os dados do mês continuam em cache ao alternar os status
   const [visibleStatuses, setVisibleStatuses] = useState<ReservationStatus[]>(() => [...RESERVE_STATUS_LIST]);
   const events = useMemo<CalendarEvent<ReservationEventData>[]>(
     () =>
-      reservesToCalendarEvents(reserves.data ?? []).filter(
+      reservesToCalendarEvents(reserves.data ?? [], resourceReserves.data ?? []).filter(
         (event) => event.data && visibleStatuses.includes(event.data.status),
       ),
-    [reserves.data, visibleStatuses],
+    [reserves.data, resourceReserves.data, visibleStatuses],
   );
 
   // Detecta mudança de mês no calendário (navegação) e ancora a agenda no dia 1
@@ -190,7 +194,7 @@ export function HistoryCalendar() {
             views={["month", "agenda"]}
             defaultDate={activeMonth}
             agendaDayCount={agendaDayCount}
-            loading={reserves.isFetching}
+            loading={reserves.isFetching || resourceReserves.isFetching}
             locale={ptBR}
             i18n={PT_BR_I18N}
             weekStartsOn={0}

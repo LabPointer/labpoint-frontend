@@ -1,4 +1,4 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, type QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, endOfMonth, format, parseISO, startOfMonth, startOfToday } from "date-fns";
 import { useCallback } from "react";
 import type { ReservationStatus } from "#/lib/types/reservation-types";
@@ -6,6 +6,7 @@ import type { components } from "#/lib/utils/api";
 import { assertOk, unwrapList } from "#/lib/utils/api-result";
 import { notifyError, notifySuccess } from "#/lib/utils/notify";
 import { api } from "#/lib/utils/restapi";
+import { resourceKeys } from "./resources";
 import type { Schedule } from "./schedules";
 
 export type Reserve = components["schemas"]["SpaceReserveResponseDTO"];
@@ -34,6 +35,14 @@ export function reserveTab(reserve: Reserve, today = startOfToday()): ReserveTab
   const status = statusFromNumber(reserve.status);
   if (status === "CANCELED" || status === "REJECTED") return "canceled";
   return parseISO(reserve.dateTo) < today ? "concluded" : "next";
+}
+
+/** Reservas de sala e de recurso se afetam (recursos vinculados, disponibilidade): invalida as duas. */
+export function invalidateReservations(queryClient: QueryClient) {
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: reserveKeys.all }),
+    queryClient.invalidateQueries({ queryKey: resourceKeys.all }),
+  ]);
 }
 
 export const toApiDate = (date: Date) => format(date, "yyyy-MM-dd");
@@ -111,23 +120,26 @@ export function useRangeReserves({ startAt, endAt, status }: { startAt: string; 
   });
 }
 
-/** Horários já ocupados do espaço no período (`to` ausente = um único dia). */
-export function useExistingSchedules(spaceId: number, range: { from?: Date; to?: Date } | undefined) {
+/**
+ * Horários já ocupados do espaço no período (`to` ausente = um único dia).
+ * Sem `spaceId` (reserva só de recurso) não consulta nada.
+ */
+export function useExistingSchedules(spaceId: number | undefined, range: { from?: Date; to?: Date } | undefined) {
   const from = range?.from;
   const startAt = from ? toApiDate(from) : "";
   const endAt = from ? toApiDate(range?.to ?? from) : "";
 
   return useQuery({
-    queryKey: reserveKeys.existingSchedules(spaceId, startAt, endAt),
+    queryKey: reserveKeys.existingSchedules(spaceId ?? 0, startAt, endAt),
     queryFn: async ({ signal }): Promise<Schedule[]> =>
       unwrapList(
         await api.GET("/space-reserve/existing-schedules/{spaceId}", {
-          params: { path: { spaceId }, query: { StartAt: startAt, EndAt: endAt } },
+          params: { path: { spaceId: spaceId ?? 0 }, query: { StartAt: startAt, EndAt: endAt } },
           signal,
         }),
         "Erro ao buscar horários ocupados.",
       ),
-    enabled: Boolean(from),
+    enabled: Boolean(from) && spaceId !== undefined,
   });
 }
 
@@ -144,7 +156,7 @@ export function useCreateReserve() {
     }) => assertOk(await api.POST("/space-reserve/create/{spaceId}", { params: { path: { spaceId } }, body })),
     onSuccess: () => {
       notifySuccess("Reserva criada com sucesso!");
-      return queryClient.invalidateQueries({ queryKey: reserveKeys.all });
+      return invalidateReservations(queryClient);
     },
     onError: notifyError,
   });
@@ -163,7 +175,7 @@ export function useEditReserve() {
     }) => assertOk(await api.PATCH("/space-reserve/edit/{reserveId}", { params: { path: { reserveId } }, body })),
     onSuccess: () => {
       notifySuccess("Reserva atualizada com sucesso!");
-      return queryClient.invalidateQueries({ queryKey: reserveKeys.all });
+      return invalidateReservations(queryClient);
     },
     onError: notifyError,
   });
@@ -177,7 +189,7 @@ export function useCancelReserve() {
       assertOk(await api.DELETE("/space-reserve/cancel/{id}", { params: { path: { id } } })),
     onSuccess: () => {
       notifySuccess("Reserva cancelada com sucesso!");
-      return queryClient.invalidateQueries({ queryKey: reserveKeys.all });
+      return invalidateReservations(queryClient);
     },
     onError: notifyError,
   });

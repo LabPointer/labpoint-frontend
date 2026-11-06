@@ -1,6 +1,6 @@
 import { BarChart3Icon } from "lucide-react";
 import { formatMonthYearPeriod } from "#/lib/utils/month-year";
-import { formatPercent, pluralize, type ReportData, type ReportSpaceStat } from "#/lib/utils/report";
+import { formatPercent, pluralize, type ReportCopy, type ReportData, type ReportSpaceStat } from "#/lib/utils/report";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
@@ -30,7 +30,7 @@ type RowConfig = {
 };
 
 export function ReportRankingCard({ report, mode }: ReportRankingCardProps) {
-  const { ranking } = report;
+  const { ranking, copy } = report;
 
   const rows: RowConfig[] = [
     {
@@ -40,8 +40,8 @@ export function ReportRankingCard({ report, mode }: ReportRankingCardProps) {
       barClass: "bg-violet-600 dark:bg-violet-500",
       stats: ranking.highestDemand,
       value: (stat) => stat.occupancyRate,
-      valueText: (stat) => `${formatPercent(stat.occupancyRate)} de ocupação`,
-      emptyText: "Nenhum espaço teve reservas no período",
+      valueText: (stat) => `${formatPercent(stat.occupancyRate)} de ${copy.rate}`,
+      emptyText: copy.rankingEmptyHighest,
       previewWidth: 78,
     },
     {
@@ -51,8 +51,8 @@ export function ReportRankingCard({ report, mode }: ReportRankingCardProps) {
       barClass: "bg-amber-500",
       stats: ranking.lowestDemand,
       value: (stat) => stat.occupancyRate,
-      valueText: (stat) => `${formatPercent(stat.occupancyRate)} de ocupação`,
-      emptyText: "É preciso ao menos dois espaços com demandas diferentes para comparar",
+      valueText: (stat) => `${formatPercent(stat.occupancyRate)} de ${copy.rate}`,
+      emptyText: copy.rankingEmptyLowest,
       previewWidth: 42,
     },
     {
@@ -63,7 +63,7 @@ export function ReportRankingCard({ report, mode }: ReportRankingCardProps) {
       stats: ranking.mostIdle,
       value: (stat) => stat.idleRate,
       valueText: (stat) =>
-        `${formatPercent(stat.idleRate)} ausentes · ${pluralize(stat.absentReserves, "ausência", "ausências")} em ${stat.totalReserves}`,
+        `${formatPercent(stat.idleRate)} dos horários ausentes · ${pluralize(stat.absentReserves, "ausência", "ausências")} em ${pluralize(stat.totalReserves, "reserva", "reservas")}`,
       emptyText: "Nenhuma ausência registrada no período",
       previewWidth: 26,
     },
@@ -76,16 +76,16 @@ export function ReportRankingCard({ report, mode }: ReportRankingCardProps) {
           <BarChart3Icon className="size-5" />
         </SectionIcon>
         <div>
-          <h2 className="text-lg font-bold leading-tight">Ranking de utilização por sala</h2>
+          <h2 className="text-lg font-bold leading-tight">{copy.rankingTitle}</h2>
           <p className="text-sm text-muted-foreground">
-            Percentual de ocupação em {formatMonthYearPeriod(report.period)}
+            Percentual de {copy.rate} em {formatMonthYearPeriod(report.period)}
           </p>
         </div>
       </div>
 
       <div className="flex flex-col gap-5">
         {rows.map((row) => (
-          <RankingRow key={row.key} row={row} mode={mode} />
+          <RankingRow key={row.key} row={row} mode={mode} copy={copy} />
         ))}
       </div>
     </Card>
@@ -95,7 +95,7 @@ export function ReportRankingCard({ report, mode }: ReportRankingCardProps) {
 /** Quantos espaços empatados aparecem antes do botão "Ver mais". */
 const VISIBLE_TIES = 3;
 
-function RankingRow({ row, mode }: { row: RowConfig; mode: ReportMode }) {
+function RankingRow({ row, mode, copy }: { row: RowConfig; mode: ReportMode; copy: ReportCopy }) {
   if (mode !== "data") {
     return (
       <div className="flex flex-col gap-2">
@@ -135,7 +135,7 @@ function RankingRow({ row, mode }: { row: RowConfig; mode: ReportMode }) {
       <CollapsibleList
         items={row.stats}
         limit={VISIBLE_TIES}
-        noun={row.stats.length - VISIBLE_TIES === 1 ? "espaço empatado" : "espaços empatados"}
+        noun={row.stats.length - VISIBLE_TIES === 1 ? copy.tiedOne : copy.tiedMany}
         renderItem={(stat) => (
           <div key={stat.spaceId} className="flex flex-col gap-2">
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">

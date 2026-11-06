@@ -14,7 +14,7 @@ import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
 
-export const Route = createFileRoute("/_private/home")({
+export const Route = createFileRoute("/_private/space-reserve")({
   component: RouteComponent,
 });
 
@@ -61,6 +61,9 @@ function RouteComponent() {
           scheduleIds: data.schedules.map((schedule) => schedule.id),
           purpose: data.purpose,
           lock: data.lock,
+          resources: data.resources.length
+            ? data.resources.map((resource) => ({ resourceId: resource.id, quantity: resource.quantity }))
+            : null,
         },
       }),
     );

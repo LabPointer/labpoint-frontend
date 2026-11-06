@@ -632,13 +632,7 @@ export interface paths {
         };
         /**
          * Relatório de um período de meses
-         * @description Retorna o relatório de ocupação e ociosidade de um mês ou de uma sequência de meses já encerrados
-         *     (do mês anterior ao atual para trás). Informe `FromYear`/`FromMonth` e, para mais de um mês,
-         *     também `ToYear`/`ToMonth`; sem o fim, o período é só o mês inicial.
-         *     Reservas canceladas, recusadas e bloqueadas não entram. Reservas pendentes cuja data de início já passou
-         *     contam como ausentes; pendentes que ainda não chegaram ao dia da reserva ficam de fora.
-         *     Quando há empate nos rankings (espaços ou usuários), todos os empatados são retornados.
-         *     O resultado é gravado na primeira consulta de cada período; use `Refresh=true` para recalcular.
+         * @description Relatório de ocupação e ociosidade das salas de um mês ou de uma sequência de meses já encerrados.
          */
         get: {
             parameters: {
@@ -687,6 +681,64 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/report/resources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Relatório de recursos de um período de meses
+         * @description Utilização e ociosidade dos recursos reserváveis, com as mesmas regras do relatório de salas.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    FromYear?: number | string;
+                    FromMonth?: number | string;
+                    ToYear?: number | string;
+                    ToMonth?: number | string;
+                    Refresh?: boolean;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ResourceReportResponseDTO"];
+                        "application/json": components["schemas"]["ResourceReportResponseDTO"];
+                        "text/json": components["schemas"]["ResourceReportResponseDTO"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/resource": {
         parameters: {
             query?: never;
@@ -696,7 +748,7 @@ export interface paths {
         };
         /**
          * Listar todos os recursos
-         * @description Lista todas os recursos cadastradas
+         * @description Lista os recursos. Com StartAt/EndAt, só os reserváveis com unidades livres (Available) no período.
          */
         get: {
             parameters: {
@@ -705,6 +757,14 @@ export interface paths {
                     Enabled?: boolean;
                     Limit?: number | string;
                     Offset?: number | string;
+                    SearchQuery?: string;
+                    Reservable?: boolean;
+                    StartAt?: string;
+                    EndAt?: string;
+                    ScheduleIds?: (number | string)[];
+                    MinQuantity?: number | string;
+                    ExcludeSpaceReserveId?: number | string;
+                    ExcludeResourceReserveId?: number | string;
                 };
                 header?: never;
                 path?: never;
@@ -766,7 +826,6 @@ export interface paths {
         put?: never;
         /**
          * Criar recurso
-         * @description Cria um novo recurso. Apenas usuários com permissões adequadas podem criar recursos.
          */
         post: {
             parameters: {
@@ -801,6 +860,17 @@ export interface paths {
                         "text/json": components["schemas"]["ErroResponseDTO"];
                     };
                 };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
             };
         };
         delete?: never;
@@ -824,7 +894,6 @@ export interface paths {
         head?: never;
         /**
          * Editar recurso
-         * @description Edita um recurso existente. Apenas usuários com permissões adequadas podem editar recursos.
          */
         patch: {
             parameters: {
@@ -870,6 +939,17 @@ export interface paths {
                         "text/json": components["schemas"]["ErroResponseDTO"];
                     };
                 };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
             };
         };
         trace?: never;
@@ -882,14 +962,17 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Listar reservas
-         * @description Lista todas as reservas de recursos cadastradas de acordo com os filtros fornecidos
+         * Listar minhas reservas de recurso
          */
         get: {
             parameters: {
                 query?: {
                     SearchQuery?: string;
-                    SpaceIds?: (number | string)[];
+                    StartAt?: string;
+                    EndAt?: string;
+                    ScheduleIds?: (number | string)[];
+                    Status?: components["schemas"]["EReserveStatus"];
+                    Standalone?: boolean;
                     Limit?: number | string;
                     Offset?: number | string;
                 };
@@ -942,7 +1025,76 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/resource-reserve/create/{spaceReserveId}": {
+    "/resource-reserve/availability/{resourceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Disponibilidade de um recurso por horário
+         */
+        get: {
+            parameters: {
+                query?: {
+                    StartAt?: string;
+                    EndAt?: string;
+                    ExcludeSpaceReserveId?: number | string;
+                    ExcludeResourceReserveId?: number | string;
+                };
+                header?: never;
+                path: {
+                    resourceId: number | string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ResourceScheduleAvailabilityDTO"][];
+                        "application/json": components["schemas"]["ResourceScheduleAvailabilityDTO"][];
+                        "text/json": components["schemas"]["ResourceScheduleAvailabilityDTO"][];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/resource-reserve/create/{resourceId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -952,15 +1104,14 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Criar reserva
-         * @description Cria uma nova reserva para o recurso especificado para um espaço especifico
+         * Reservar recurso
          */
         post: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    spaceReserveId: number | string;
+                    resourceId: number | string;
                 };
                 cookie?: never;
             };
@@ -981,6 +1132,17 @@ export interface paths {
                 };
                 /** @description Bad Request */
                 400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1012,8 +1174,7 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Editar reserva
-         * @description Edita uma reserva existente para o recurso especificado para um espaço especifico
+         * Editar reserva de recurso
          */
         patch: {
             parameters: {
@@ -1050,6 +1211,17 @@ export interface paths {
                         "text/json": components["schemas"]["ErroResponseDTO"];
                     };
                 };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
             };
         };
         trace?: never;
@@ -1065,8 +1237,7 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * Calcelar reserva
-         * @description Cancela uma reserva existente para o recurso especificado para um espaço especifico
+         * Cancelar reserva de recurso
          */
         delete: {
             parameters: {
@@ -1097,11 +1268,159 @@ export interface paths {
                         "text/json": components["schemas"]["ErroResponseDTO"];
                     };
                 };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
             };
         };
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/resource-reserve/admin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Admin: listar reservas de recurso
+         */
+        get: {
+            parameters: {
+                query?: {
+                    StartAt?: string;
+                    EndAt?: string;
+                    SearchQuery?: string;
+                    SpaceIds?: (number | string)[];
+                    AccountIds?: string[];
+                    Status?: components["schemas"]["EReserveStatus"];
+                    Limit?: number | string;
+                    Offset?: number | string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["AdminResourceReserveResponseDTO"][];
+                        "application/json": components["schemas"]["AdminResourceReserveResponseDTO"][];
+                        "text/json": components["schemas"]["AdminResourceReserveResponseDTO"][];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/resource-reserve/admin/edit/{resourceReserveId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Admin: editar reserva de recurso
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    resourceReserveId: number | string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminResourceReserveEditRequestDTO"];
+                    "text/json": components["schemas"]["AdminResourceReserveEditRequestDTO"];
+                    "application/*+json": components["schemas"]["AdminResourceReserveEditRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
         trace?: never;
     };
     "/schedule": {
@@ -2180,6 +2499,34 @@ export interface components {
             subjectId: null | number | string;
             lockAccount: null | boolean;
         };
+        AdminResourceReserveEditRequestDTO: {
+            status: null | components["schemas"]["EReserveStatus"];
+            /** Format: date */
+            startAt: null | string;
+            /** Format: date */
+            endAt: null | string;
+            scheduleIds: null | (number | string)[];
+            /** Format: int32 */
+            quantity: null | number | string;
+        };
+        AdminResourceReserveResponseDTO: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date */
+            dateFrom: string;
+            /** Format: date */
+            dateTo: string;
+            purpose: string;
+            status: components["schemas"]["EReserveStatus"];
+            /** Format: int32 */
+            quantity: number | string;
+            resource: components["schemas"]["ResourceResponseDTO"];
+            schedules: components["schemas"]["ScheduleResponseDTO"][];
+            spaceReserve: null | components["schemas"]["LinkedSpaceReserveDTO"];
+            account: components["schemas"]["AccountResponseDTO"];
+        };
         AdminSpaceReserveEditRequestDTO: {
             status: null | components["schemas"]["EReserveStatus"];
             /** Format: date */
@@ -2187,6 +2534,7 @@ export interface components {
             /** Format: date */
             endAt: null | string;
             scheduleIds: null | (number | string)[];
+            resources?: null | components["schemas"]["ReserveResourceItemDTO"][];
         };
         AdminSpaceReserveResponseDTO: {
             /** Format: int64 */
@@ -2202,6 +2550,7 @@ export interface components {
             spaces: components["schemas"]["SpaceResponseDTO"];
             account: components["schemas"]["AccountResponseDTO"];
             schedules: components["schemas"]["ScheduleResponseDTO"][];
+            resources: components["schemas"]["LinkedResourceDTO"][];
         };
         EAccountRole: number;
         EmailRequestDTO: {
@@ -2217,10 +2566,48 @@ export interface components {
             logout: boolean;
         };
         EShift: number;
+        LinkedResourceDTO: {
+            /** Format: int64 */
+            reserveId: number | string;
+            /** Format: int64 */
+            resourceId: number | string;
+            name: string;
+            description: null | string;
+            /** Format: int32 */
+            quantity: number | string;
+            status: components["schemas"]["EReserveStatus"];
+        };
+        LinkedSpaceReserveDTO: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: int64 */
+            spaceId: number | string;
+            spaceName: string;
+            status: components["schemas"]["EReserveStatus"];
+        };
         ReportRankingDTO: {
             highestDemand: components["schemas"]["ReportSpaceStatDTO"][];
             lowestDemand: components["schemas"]["ReportSpaceStatDTO"][];
             mostIdle: components["schemas"]["ReportSpaceStatDTO"][];
+        };
+        ReportResourceStatDTO: {
+            /** Format: int64 */
+            resourceId: number | string;
+            name: string;
+            /** Format: int32 */
+            quantity: number | string;
+            /** Format: double */
+            utilizationRate: number | string;
+            /** Format: int32 */
+            totalReserves: number | string;
+            /** Format: int32 */
+            confirmedReserves: number | string;
+            /** Format: int32 */
+            absentReserves: number | string;
+            /** Format: int32 */
+            unitsReserved: number | string;
+            /** Format: double */
+            idleRate: number | string;
         };
         ReportReserveDTO: {
             /** Format: int64 */
@@ -2294,6 +2681,12 @@ export interface components {
             /** Format: double */
             idleRate: number | string;
         };
+        ReserveResourceItemDTO: {
+            /** Format: int64 */
+            resourceId: number | string;
+            /** Format: int32 */
+            quantity: number | string;
+        };
         ResetPasswordRequestDTO: {
             email: string;
             token: string;
@@ -2301,36 +2694,129 @@ export interface components {
         };
         ResourceCreateRequestDTO: {
             name: string;
+            description?: null | string;
             /** @default true */
             enabled: boolean;
+            /** @default false */
+            reservable?: boolean;
+            /** Format: int32 */
+            quantity?: null | number | string;
         };
         ResourceEditRequestDTO: {
             /** Format: int64 */
             id: number | string;
             name: null | string;
             enabled: null | boolean;
+            description?: null | string;
+            reservable?: null | boolean;
+            /** Format: int32 */
+            quantity?: null | number | string;
         };
         ResourceReserveCreateRequestDTO: {
-            /** Format: int64 */
-            resourceId: number | string;
+            /** Format: date */
+            startAt: string;
+            /** Format: date */
+            endAt: string;
+            scheduleIds: (number | string)[];
+            /** Format: int32 */
+            quantity: number | string;
             purpose: string;
         };
         ResourceReserveEditRequestDTO: {
-            /** Format: int64 */
-            spaceReserveId: number | string;
-            purpose: null | string;
+            /** Format: date */
+            startAt: null | string;
+            /** Format: date */
+            endAt: null | string;
+            scheduleIds: null | (number | string)[];
+            /** Format: int32 */
+            quantity: null | number | string;
         };
         ResourceReserveResponseDTO: {
             /** Format: int64 */
             id: number | string;
-            name: string;
-            spaceReserve: components["schemas"]["SpaceReserveResponseDTO"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date */
+            dateFrom: string;
+            /** Format: date */
+            dateTo: string;
+            purpose: string;
+            status: components["schemas"]["EReserveStatus"];
+            /** Format: int32 */
+            quantity: number | string;
+            resource: components["schemas"]["ResourceResponseDTO"];
+            schedules: components["schemas"]["ScheduleResponseDTO"][];
+            spaceReserve: null | components["schemas"]["LinkedSpaceReserveDTO"];
+        };
+        ResourceReportRankingDTO: {
+            highestDemand: components["schemas"]["ReportResourceStatDTO"][];
+            lowestDemand: components["schemas"]["ReportResourceStatDTO"][];
+            mostIdle: components["schemas"]["ReportResourceStatDTO"][];
+        };
+        ResourceReportReserveDTO: {
+            /** Format: int64 */
+            id: number | string;
+            resourceName: string;
+            userName: string;
+            /** Format: int32 */
+            quantity: number | string;
+            spaceName: null | string;
+            /** Format: date */
+            dateFrom: string;
+            /** Format: date */
+            dateTo: string;
+            status: components["schemas"]["EReportReserveStatus"];
+        };
+        ResourceReportResponseDTO: {
+            /** Format: int32 */
+            fromYear: number | string;
+            /** Format: int32 */
+            fromMonth: number | string;
+            /** Format: int32 */
+            toYear: number | string;
+            /** Format: int32 */
+            toMonth: number | string;
+            /** Format: date-time */
+            generatedAt: string;
+            summary: components["schemas"]["ResourceReportSummaryDTO"];
+            ranking: components["schemas"]["ResourceReportRankingDTO"];
+            users: components["schemas"]["ReportUsersDTO"];
+            reserves: components["schemas"]["ResourceReportReserveDTO"][];
+        };
+        ResourceReportSummaryDTO: {
+            /** Format: double */
+            averageUtilizationRate: number | string;
+            /** Format: double */
+            idleRate: number | string;
+            /** Format: int32 */
+            totalReserves: number | string;
+            /** Format: int32 */
+            confirmedReserves: number | string;
+            /** Format: int32 */
+            absentReserves: number | string;
+            /** Format: int32 */
+            linkedReserves: number | string;
+            /** Format: int32 */
+            standaloneReserves: number | string;
+            mostDemandedResources: components["schemas"]["ReportResourceStatDTO"][];
         };
         ResourceResponseDTO: {
             /** Format: int64 */
             id: number | string;
             name: string;
             enabled: boolean;
+            description: null | string;
+            reservable: boolean;
+            /** Format: int32 */
+            quantity: null | number | string;
+            /** Format: int32 */
+            available: null | number | string;
+        };
+        ResourceScheduleAvailabilityDTO: {
+            /** Format: int64 */
+            scheduleId: number | string;
+            /** Format: int32 */
+            available: number | string;
         };
         ScheduleCreateRequestDTO: {
             /** Format: time */
@@ -2405,6 +2891,7 @@ export interface components {
             scheduleIds: (number | string)[];
             lock: boolean;
             purpose: string;
+            resources?: null | components["schemas"]["ReserveResourceItemDTO"][];
         };
         SpaceReserveEditRequestDTO: {
             /** Format: date */
@@ -2412,6 +2899,7 @@ export interface components {
             /** Format: date */
             endAt: null | string;
             scheduleIds: null | (number | string)[];
+            resources?: null | components["schemas"]["ReserveResourceItemDTO"][];
         };
         SpaceReserveResponseDTO: {
             /** Format: int64 */
@@ -2426,6 +2914,7 @@ export interface components {
             status: components["schemas"]["EReserveStatus"];
             space: components["schemas"]["SpaceResponseDTO"];
             schedules: components["schemas"]["ScheduleResponseDTO"][];
+            resources: components["schemas"]["LinkedResourceDTO"][];
         };
         SpaceResponseDTO: {
             /** Format: int64 */

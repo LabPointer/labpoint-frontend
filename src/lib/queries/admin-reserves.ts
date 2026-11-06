@@ -3,7 +3,7 @@ import type { components } from "#/lib/utils/api";
 import { assertOk, unwrapList } from "#/lib/utils/api-result";
 import { notifyError, notifySuccess } from "#/lib/utils/notify";
 import { api } from "#/lib/utils/restapi";
-import { RESERVE_STATUS, reserveKeys } from "./reserves";
+import { invalidateReservations, RESERVE_STATUS, reserveKeys } from "./reserves";
 
 export type AdminReserve = components["schemas"]["AdminSpaceReserveResponseDTO"];
 
@@ -60,7 +60,7 @@ export function useEditAdminReserve() {
       assertOk(await api.PATCH("/space-reserve/admin/edit/{reserveId}", { params: { path: { reserveId } }, body })),
     onSuccess: () => {
       notifySuccess("Reserva atualizada com sucesso!");
-      return queryClient.invalidateQueries({ queryKey: reserveKeys.all });
+      return invalidateReservations(queryClient);
     },
     onError: notifyError,
   });
@@ -80,7 +80,7 @@ export function useCancelAdminReserve() {
       ),
     onSuccess: () => {
       notifySuccess("Reserva cancelada com sucesso!");
-      return queryClient.invalidateQueries({ queryKey: reserveKeys.all });
+      return invalidateReservations(queryClient);
     },
     onError: notifyError,
   });

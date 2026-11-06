@@ -3,6 +3,7 @@ import { useDebouncedValue } from "#/hooks/use-debounced-value";
 import { useAccounts } from "#/lib/queries/accounts";
 import { useResources } from "#/lib/queries/resources";
 import { SCHEDULE_OPTIONS_LIMIT, scheduleLabel, sortSchedules, useSchedules } from "#/lib/queries/schedules";
+import { useSpaces } from "#/lib/queries/spaces";
 import { useSubjects } from "#/lib/queries/subjects";
 import { RemoteCombobox, RemoteMultiCombobox, type RemoteOption } from "./RemoteCombobox";
 
@@ -103,6 +104,10 @@ export function SubjectMultiSelect({
   );
 }
 
+/**
+ * Recursos FIXOS de espaço (filtros de busca de sala e associação a um espaço).
+ * Recursos reserváveis nunca aparecem aqui: eles não podem ser associados a um espaço.
+ */
 export function ResourceMultiSelect({
   id,
   label = "Recursos",
@@ -115,6 +120,7 @@ export function ResourceMultiSelect({
   const query = useResources({
     name: search,
     enabled: enabledOnly ? true : undefined,
+    reservable: false,
     limit: OPTIONS_LIMIT,
   });
   const options = useMemo(() => (query.data ?? []).map(toOption), [query.data]);
@@ -132,6 +138,39 @@ export function ResourceMultiSelect({
       onValueChange={onValueChange}
       placeholder="Qualquer recurso"
       emptyText="Nenhum recurso encontrado."
+    />
+  );
+}
+
+/** Máximo de salas sugeridas no combobox (a lista é refeita conforme o usuário digita). */
+const SPACE_OPTIONS_LIMIT = 10;
+
+/** Salas: busca no servidor por nome ou descrição (`/space?SearchQuery`), no máximo 10 opções. */
+export function SpaceMultiSelect({
+  id,
+  label = "Salas",
+  value,
+  onValueChange,
+  className,
+}: Omit<MultiSelectProps, "enabledOnly">) {
+  const { search, setText } = useRemoteSearch();
+  const query = useSpaces({ search, limit: SPACE_OPTIONS_LIMIT });
+  // o backend devolve Limit + 1 itens (indicador de próxima página): mostramos só os 10 primeiros
+  const options = useMemo(() => (query.data ?? []).slice(0, SPACE_OPTIONS_LIMIT).map(toOption), [query.data]);
+
+  return (
+    <RemoteMultiCombobox
+      id={id}
+      label={label}
+      className={className}
+      options={options}
+      isLoading={query.isFetching}
+      isError={query.isError}
+      onSearchChange={setText}
+      value={value}
+      onValueChange={onValueChange}
+      placeholder="Nome ou descrição da sala"
+      emptyText="Nenhuma sala encontrada."
     />
   );
 }

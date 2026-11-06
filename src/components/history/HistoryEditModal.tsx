@@ -4,8 +4,10 @@ import { useMemo } from "react";
 import type { DateRange } from "react-day-picker";
 import z from "zod";
 import type { Reserve } from "#/lib/queries/reserves";
+import { isActiveReserveStatus } from "#/lib/queries/resource-reserves";
 import { scheduleLabel, sortSchedules } from "#/lib/queries/schedules";
 import { DateRangeField, firstAvailableDate } from "@/components/reserve/DateRangeField";
+import { type ReservedResource, ReserveResourcesField } from "@/components/reserve/ReserveResourcesField";
 import { ReserveScheduleField } from "@/components/reserve/ReserveScheduleField";
 import { FormDialog } from "@/components/shared/FormDialog";
 import type { RemoteOption } from "@/components/shared/RemoteCombobox";
@@ -13,6 +15,8 @@ import type { RemoteOption } from "@/components/shared/RemoteCombobox";
 export type HistoryEditFormData = {
   range: DateRange;
   schedules: RemoteOption[];
+  /** Conjunto final de recursos vinculados (adicionar/remover/alterar quantidade). */
+  resources: ReservedResource[];
 };
 
 type HistoryEditModalProps = {
@@ -31,14 +35,26 @@ const formSchema = z.object({
       "A nova data deve começar a partir de amanhã.",
     ),
   schedules: z.array(z.object({ id: z.number(), name: z.string() })).min(1, "Selecione pelo menos um horário."),
+  resources: z.array(
+    z.object({ id: z.number(), name: z.string(), quantity: z.number().int().min(1, "Quantidade mínima: 1.") }),
+  ),
 });
 
+/** Recursos ativos (pendentes ou confirmados) vinculados à reserva de sala. */
+export function activeLinkedResources(reserve: Reserve): ReservedResource[] {
+  return (reserve.resources ?? [])
+    .filter((resource) => isActiveReserveStatus(resource.status))
+    .map((resource) => ({ id: Number(resource.resourceId), name: resource.name, quantity: Number(resource.quantity) }));
+}
+
 /**
- * Altera período e horários de uma reserva. Os valores iniciais vêm da própria reserva (já carregada
- * na listagem), então não há mais busca de "date-info". O pai deve remontar o modal (`key`) a cada abertura.
+ * Altera período, horários e recursos de uma reserva. Os valores iniciais vêm da própria reserva (já carregada
+ * na listagem). As unidades e horários da própria reserva não contam como ocupados, então só somem das opções os
+ * recursos que conflitam com o horário já definido. O pai deve remontar o modal (`key`) a cada abertura.
  */
 export function HistoryEditModal({ reserve, open, onClose, onSubmit }: HistoryEditModalProps) {
   const ownScheduleIds = useMemo(() => reserve.schedules.map((schedule) => Number(schedule.id)), [reserve.schedules]);
+  const exclude = useMemo(() => ({ spaceReserveId: Number(reserve.id) }), [reserve.id]);
 
   const form = useForm({
     defaultValues: {
@@ -47,13 +63,15 @@ export function HistoryEditModal({ reserve, open, onClose, onSubmit }: HistoryEd
         id: Number(schedule.id),
         name: scheduleLabel(schedule),
       })) as RemoteOption[],
+      resources: activeLinkedResources(reserve),
     },
     validators: { onSubmit: formSchema },
     onSubmit: async ({ value }) => {
       if (!value.range?.from) return;
-      await onSubmit({ range: value.range, schedules: value.schedules });
+      await onSubmit({ range: value.range, schedules: value.schedules, resources: value.resources });
     },
   });
+
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
   return (
@@ -86,21 +104,44 @@ export function HistoryEditModal({ reserve, open, onClose, onSubmit }: HistoryEd
         )}
       </form.Field>
 
-      <form.Subscribe selector={(state) => state.values.range}>
-        {(range) => (
-          <form.Field name="schedules">
-            {(field) => (
-              <ReserveScheduleField
-                id="history-schedules"
-                spaceId={Number(reserve.space.id)}
-                range={range}
-                ownScheduleIds={ownScheduleIds}
-                value={field.state.value}
-                onChange={field.handleChange}
-                errors={field.state.meta.isTouched ? field.state.meta.errors : undefined}
-              />
-            )}
-          </form.Field>
+      <form.Subscribe
+        selector={(state) => ({
+          range: state.values.range,
+          schedules: state.values.schedules,
+          resources: state.values.resources,
+        })}
+      >
+        {({ range, schedules, resources }) => (
+          <>
+            <form.Field name="resources">
+              {(field) => (
+                <ReserveResourcesField
+                  id="history-resources"
+                  range={range}
+                  scheduleIds={schedules.map((schedule) => schedule.id)}
+                  exclude={exclude}
+                  value={field.state.value}
+                  onChange={field.handleChange}
+                  errors={field.state.meta.isTouched ? field.state.meta.errors : undefined}
+                />
+              )}
+            </form.Field>
+            <form.Field name="schedules">
+              {(field) => (
+                <ReserveScheduleField
+                  id="history-schedules"
+                  spaceId={Number(reserve.space.id)}
+                  range={range}
+                  ownScheduleIds={ownScheduleIds}
+                  resources={resources}
+                  exclude={exclude}
+                  value={field.state.value}
+                  onChange={field.handleChange}
+                  errors={field.state.meta.isTouched ? field.state.meta.errors : undefined}
+                />
+              )}
+            </form.Field>
+          </>
         )}
       </form.Subscribe>
     </FormDialog>

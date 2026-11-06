@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, redirect, useLocation, type LinkProps } from "@tanstack/react-router";
+import { createFileRoute, type LinkProps, Outlet, redirect, useLocation } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/AppSideBar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -14,17 +14,21 @@ export const Route = createFileRoute("/_private")({
 });
 
 const routeTitles: Map<LinkProps["to"], string> = new Map([
-  ["/home", "Início"],
+  ["/space-reserve", "Reservar sala"],
+  ["/resource-reserve", "Reservar recurso"],
   ["/calendar", "Calendário"],
-  ["/history", "Histórico"],
+  ["/space-history", "Histórico de sala"],
+  ["/resource-history", "Histórico de recursos"],
   ["/profile", "Perfil"],
   ["/admin/manage-spaces", "Gerenciar espaços"],
   ["/admin/manage-space-reserves", "Gerenciar reservas de espaço"],
+  ["/admin/manage-resource-reserves", "Gerenciar reservas de recurso"],
   ["/admin/manage-users", "Gerenciar usuários"],
   ["/admin/manage-resources", "Gerenciar recursos"],
   ["/admin/manage-subjects", "Gerenciar matérias"],
   ["/admin/manage-schedules", "Gerenciar horários"],
-  ["/admin/report", "Relatórios"],
+  ["/admin/space-report", "Relatório de salas"],
+  ["/admin/resource-report", "Relatório de recursos"],
 ]);
 
 function RouteComponent() {
