@@ -20,7 +20,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
     const sessionInfo = await getSessionServerFn();
     if (sessionInfo) {
-      sessionInfo.username = sessionInfo.username.replace("+", " ");
+      sessionInfo.username = sessionInfo.username.replaceAll("+", " ");
     }
 
 
