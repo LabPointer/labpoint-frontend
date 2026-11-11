@@ -14,7 +14,11 @@ import { succeeded } from "#/lib/utils/api-result";
 import { paginateLocal } from "#/lib/utils/pagination";
 import { CancelReserveDialog } from "@/components/history/CancelReserveDialog";
 import { HistoryCard } from "@/components/history/HistoryCard";
-import { activeLinkedResources, type HistoryEditFormData, HistoryEditModal } from "@/components/history/HistoryEditModal";
+import {
+  activeLinkedResources,
+  type HistoryEditFormData,
+  HistoryEditModal,
+} from "@/components/history/HistoryEditModal";
 import { type HistoryFilters, HistorySearchBar, initialHistoryFilters } from "@/components/history/HistorySearchBar";
 import { sameResources } from "@/components/reserve/ReserveResourcesField";
 import { PaginationControls } from "@/components/shared/PaginationControls";
@@ -29,7 +33,12 @@ export const Route = createFileRoute("/_private/space-history")({
 function RouteComponent() {
   const [filters, setFilters] = useState<HistoryFilters>(initialHistoryFilters);
   const pagination = usePagination(filters);
-  const reserves = useRangeReserves({ startAt: filters.startAt, endAt: filters.endAt, status: filters.status });
+  const reserves = useRangeReserves({
+    startAt: filters.startAt,
+    endAt: filters.endAt,
+    status: filters.status,
+    spaceIds: filters.spaceIds,
+  });
   // GET /space-reserve não tem Limit/Offset: o backend devolve o período todo e a página é recortada aqui.
   const { items, hasNext } = paginateLocal(reserves.data, pagination);
   const editReserve = useEditReserve();
@@ -120,9 +129,9 @@ function RouteComponent() {
           loadingText="Carregando..."
           emptyText="Nenhum histórico encontrado."
         >
-          <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(288px,1fr))] justify-center gap-6">
+          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] sm:gap-6">
             {items.map((reserve) => (
-              <div key={reserve.id} className="flex w-full justify-center p-2">
+              <div key={reserve.id} className="flex">
                 <HistoryCard
                   reserve={reserve}
                   showCTA={reserveTab(reserve) === "next"}

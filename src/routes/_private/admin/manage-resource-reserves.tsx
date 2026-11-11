@@ -35,7 +35,7 @@ function RouteComponent() {
   const pagination = usePagination(filters);
   const reserves = useAdminResourceReserves(
     {
-      search: filters?.search,
+      resourceIds: filters?.resourceIds,
       startAt: filters?.startAt ?? "",
       endAt: filters?.endAt ?? "",
       spaceIds: filters?.spaceIds,

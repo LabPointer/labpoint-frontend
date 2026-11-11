@@ -6,15 +6,19 @@ import { toApiDate } from "#/lib/queries/reserves";
 import { DEFAULT_PAGE_LIMIT } from "#/lib/utils/pagination";
 import { reserveStatusFilterOptions } from "#/lib/utils/reservation-utils";
 import { DateRangeField } from "@/components/reserve/DateRangeField";
-import { AccountMultiSelect, SpaceMultiSelect } from "@/components/shared/entity-selects";
+import {
+  AccountMultiSelect,
+  ReservableResourceMultiSelect,
+  SpaceMultiSelect,
+} from "@/components/shared/entity-selects";
 import { FilterSelect } from "@/components/shared/FilterSelect";
 import { PageLimitSelect } from "@/components/shared/PageLimitSelect";
 import type { RemoteOption } from "@/components/shared/RemoteCombobox";
-import { SearchPanel, SearchTextField } from "@/components/shared/SearchPanel";
+import { SearchPanel } from "@/components/shared/SearchPanel";
 
 export type ResourceReserveFilters = {
-  /** nome ou descrição do recurso */
-  search: string;
+  /** ids dos recursos escolhidos; vazio = todos */
+  resourceIds: number[];
   /** yyyy-MM-dd */
   startAt: string;
   /** yyyy-MM-dd */
@@ -40,7 +44,7 @@ type ManageResourceReserveSearchBarProps = {
 
 export function ManageResourceReserveSearchBar({ onSearch }: ManageResourceReserveSearchBarProps) {
   const maxDate = useMemo(() => endOfYear(addYears(new Date(), 1)), []);
-  const [search, setSearch] = useState("");
+  const [resources, setResources] = useState<RemoteOption[]>([]);
   const [range, setRange] = useState<DateRange>(defaultRange);
   const [spaces, setSpaces] = useState<RemoteOption[]>([]);
   const [accounts, setAccounts] = useState<RemoteOption<string>[]>([]);
@@ -50,7 +54,7 @@ export function ManageResourceReserveSearchBar({ onSearch }: ManageResourceReser
   const filters = useMemo<ResourceReserveFilters>(() => {
     const from = range.from ?? (defaultRange().from as Date);
     return {
-      search,
+      resourceIds: resources.map((resource) => resource.id),
       startAt: toApiDate(from),
       endAt: toApiDate(range.to ?? from),
       spaceIds: spaces.map((space) => space.id),
@@ -58,7 +62,7 @@ export function ManageResourceReserveSearchBar({ onSearch }: ManageResourceReser
       status,
       limit,
     };
-  }, [search, range, spaces, accounts, status, limit]);
+  }, [resources, range, spaces, accounts, status, limit]);
   const debouncedFilters = useDebouncedValue(filters, 500);
 
   useEffect(() => {
@@ -68,11 +72,12 @@ export function ManageResourceReserveSearchBar({ onSearch }: ManageResourceReser
   return (
     <SearchPanel>
       <div className="flex flex-wrap items-end gap-4">
-        <SearchTextField
-          id="resource-reserve-search"
-          placeholder="Buscar pelo nome ou descrição do recurso..."
-          value={search}
-          onValueChange={setSearch}
+        <ReservableResourceMultiSelect
+          id="resource-reserve-resources"
+          label="Recursos"
+          value={resources}
+          onValueChange={setResources}
+          className="min-w-50 flex-1"
         />
         <PageLimitSelect
           id="resource-reserve-limit"

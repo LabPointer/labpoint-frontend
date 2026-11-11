@@ -233,8 +233,8 @@ export interface paths {
         head?: never;
         /**
          * Admin: editar usuário
-         * @description Somente o Owner altera cargos. Ativar/desativar a conta exige cargo superior ao do usuário alvo
-         *     (ordem crescente: User, Admin, Owner).
+         * @description Somente o Root altera cargos. Ativar/desativar a conta exige cargo superior ao do usuário alvo
+         *     (ordem crescente: User, Admin, Root).
          */
         patch: {
             parameters: {
@@ -329,7 +329,7 @@ export interface paths {
         /**
          * Registrar
          * @description Registra um novo usuário com a role "User" e envia um e-mail de confirmação.
-         *     Apenas um Admin/Owner autenticado pode definir outra role através do campo "role".
+         *     Apenas um Admin/Root autenticado pode definir outra role através do campo "role".
          */
         post: {
             parameters: {
@@ -1577,7 +1577,7 @@ export interface paths {
         };
         /**
          * Sessões de uso de uma reserva de sala
-         * @description Dono da reserva ou Admin/Owner. Lista vazia quando ainda não há sessões.
+         * @description Dono da reserva ou Admin/Root. Lista vazia quando ainda não há sessões.
          */
         get: {
             parameters: {
@@ -1631,7 +1631,7 @@ export interface paths {
         };
         /**
          * Sessões de uso de uma reserva de recurso
-         * @description Reserva vinculada devolve as sessões da sala. Dono da reserva ou Admin/Owner.
+         * @description Reserva vinculada devolve as sessões da sala. Dono da reserva ou Admin/Root.
          */
         get: {
             parameters: {
@@ -2097,6 +2097,7 @@ export interface paths {
                     ScheduleIds?: (number | string)[];
                     Status?: components["schemas"]["EReserveStatus"];
                     Standalone?: boolean;
+                    ResourceIds?: (number | string)[];
                     Limit?: number | string;
                     Offset?: number | string;
                 };
@@ -2436,6 +2437,7 @@ export interface paths {
                     EndAt?: string;
                     SearchQuery?: string;
                     SpaceIds?: (number | string)[];
+                    ResourceIds?: (number | string)[];
                     AccountIds?: string[];
                     Status?: components["schemas"]["EReserveStatus"];
                     Limit?: number | string;

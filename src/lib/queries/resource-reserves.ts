@@ -18,6 +18,8 @@ export type MyResourceReserveParams = {
   startAt?: string;
   endAt?: string;
   scheduleIds?: number[];
+  /** só reservas desses recursos (vazio = todos) */
+  resourceIds?: number[];
   status?: number;
   /** `true` = só avulsas; `false` = só vinculadas a uma sala */
   standalone?: boolean;
@@ -26,7 +28,8 @@ export type MyResourceReserveParams = {
 };
 
 export type AdminResourceReserveParams = {
-  search?: string;
+  /** só reservas desses recursos (vazio = todos) */
+  resourceIds?: number[];
   /** yyyy-MM-dd (obrigatório no backend) */
   startAt: string;
   endAt: string;
@@ -44,7 +47,7 @@ export const resourceReserveKeys = {
 
 /** Minhas reservas de recurso. O backend devolve até `limit + 1` (o extra indica a próxima página). */
 export function useMyResourceReserves(params: MyResourceReserveParams, options: { enabled?: boolean } = {}) {
-  const { search, startAt, endAt, scheduleIds, status, standalone, limit = 30, offset = 0 } = params;
+  const { search, startAt, endAt, scheduleIds, resourceIds, status, standalone, limit = 30, offset = 0 } = params;
 
   return useQuery({
     queryKey: resourceReserveKeys.mine({
@@ -52,6 +55,7 @@ export function useMyResourceReserves(params: MyResourceReserveParams, options: 
       startAt,
       endAt,
       scheduleIds: scheduleIds?.length ? scheduleIds : undefined,
+      resourceIds: resourceIds?.length ? resourceIds : undefined,
       status,
       standalone,
       limit,
@@ -66,6 +70,7 @@ export function useMyResourceReserves(params: MyResourceReserveParams, options: 
               StartAt: startAt,
               EndAt: endAt,
               ScheduleIds: scheduleIds?.length ? scheduleIds : undefined,
+              ResourceIds: resourceIds?.length ? resourceIds : undefined,
               Status: status,
               Standalone: standalone,
               Limit: limit,
@@ -96,11 +101,11 @@ export function useMonthResourceReserves({ year, month }: { year: number; month:
 }
 
 export function useAdminResourceReserves(params: AdminResourceReserveParams, options: { enabled?: boolean } = {}) {
-  const { search, startAt, endAt, spaceIds, accountIds, status, limit = 30, offset = 0 } = params;
+  const { resourceIds, startAt, endAt, spaceIds, accountIds, status, limit = 30, offset = 0 } = params;
 
   return useQuery({
     queryKey: resourceReserveKeys.admin({
-      search: search || undefined,
+      resourceIds: resourceIds?.length ? resourceIds : undefined,
       startAt,
       endAt,
       spaceIds: spaceIds?.length ? spaceIds : undefined,
@@ -114,7 +119,7 @@ export function useAdminResourceReserves(params: AdminResourceReserveParams, opt
         await api.GET("/resource-reserve/admin", {
           params: {
             query: {
-              SearchQuery: search || undefined,
+              ResourceIds: resourceIds?.length ? resourceIds : undefined,
               StartAt: startAt,
               EndAt: endAt,
               SpaceIds: spaceIds?.length ? spaceIds : undefined,

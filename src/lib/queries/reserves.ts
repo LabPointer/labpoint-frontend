@@ -50,8 +50,8 @@ export const toApiDate = (date: Date) => format(date, "yyyy-MM-dd");
 export const reserveKeys = {
   all: ["reserves"] as const,
   month: (year: number, month: number) => [...reserveKeys.all, "month", year, month] as const,
-  range: (startAt: string, endAt: string, status: number | undefined) =>
-    [...reserveKeys.all, "range", startAt, endAt, status] as const,
+  range: (startAt: string, endAt: string, status: number | undefined, spaceIds?: number[]) =>
+    [...reserveKeys.all, "range", startAt, endAt, status, spaceIds?.length ? spaceIds : undefined] as const,
   existingSchedules: (spaceId: number, startAt: string, endAt: string) =>
     [...reserveKeys.all, "existing-schedules", spaceId, startAt, endAt] as const,
 };
@@ -96,7 +96,18 @@ export function useMonthReserves({ year, month }: { year: number; month: number 
  * Reservas do usuário que tocam o período `startAt`–`endAt` (yyyy-MM-dd), opcionalmente de um único status.
  * Mesma estratégia de `useMonthReserves`: janela maior no backend (que filtra por contenção) e sobreposição filtrada aqui.
  */
-export function useRangeReserves({ startAt, endAt, status }: { startAt: string; endAt: string; status?: number }) {
+export function useRangeReserves({
+  startAt,
+  endAt,
+  status,
+  spaceIds,
+}: {
+  startAt: string;
+  endAt: string;
+  status?: number;
+  /** Só reservas dessas salas (vazio = todas). */
+  spaceIds?: number[];
+}) {
   const windowStart = toApiDate(addDays(parseISO(startAt), -MAX_RESERVE_DAYS));
   const windowEnd = toApiDate(addDays(parseISO(endAt), MAX_RESERVE_DAYS));
 
@@ -106,11 +117,18 @@ export function useRangeReserves({ startAt, endAt, status }: { startAt: string; 
   );
 
   return useQuery({
-    queryKey: reserveKeys.range(startAt, endAt, status),
+    queryKey: reserveKeys.range(startAt, endAt, status, spaceIds),
     queryFn: async ({ signal }) =>
       unwrapList(
         await api.GET("/space-reserve", {
-          params: { query: { StartAt: windowStart, EndAt: windowEnd, Status: status } },
+          params: {
+            query: {
+              StartAt: windowStart,
+              EndAt: windowEnd,
+              Status: status,
+              SpaceIds: spaceIds?.length ? spaceIds : undefined,
+            },
+          },
           signal,
         }),
         "Erro ao buscar reservas.",

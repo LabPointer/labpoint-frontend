@@ -38,6 +38,7 @@ function RouteComponent() {
       startAt: from ? toApiDate(from) : undefined,
       endAt: from ? toApiDate(filters?.range?.to ?? from) : undefined,
       scheduleIds: filters?.scheduleIds,
+      resourceIds: filters?.resourceIds,
       ...pagination.request,
     },
     { enabled: filters !== null },
@@ -136,6 +137,7 @@ function RouteComponent() {
           minDate={null}
           maxDays={null}
           rangeHint="Opcional: mostra as reservas que tocam o período escolhido."
+          showResourceFilter
         />
       </section>
 
@@ -150,9 +152,9 @@ function RouteComponent() {
           loadingText="Carregando..."
           emptyText="Nenhuma reserva de recurso encontrada."
         >
-          <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(288px,1fr))] justify-center gap-6">
+          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] sm:gap-6">
             {items.map((reserve) => (
-              <div key={reserve.id} className="flex w-full justify-center p-2">
+              <div key={reserve.id} className="flex">
                 <ResourceReserveCard
                   reserve={reserve}
                   onEdit={editDialog.open}

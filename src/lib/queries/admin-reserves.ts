@@ -8,8 +8,8 @@ import { invalidateReservations, RESERVE_STATUS, reserveKeys } from "./reserves"
 export type AdminReserve = components["schemas"]["AdminSpaceReserveResponseDTO"];
 
 export type AdminReserveParams = {
-  /** busca pelo nome do espaço */
-  search?: string;
+  /** só reservas desses espaços (vazio = todos) */
+  spaceIds?: number[];
   /** yyyy-MM-dd (obrigatório no backend) */
   startAt: string;
   /** yyyy-MM-dd (obrigatório no backend) */
@@ -24,16 +24,23 @@ export const adminReserveKeys = {
 };
 
 export function useAdminReserves(params: AdminReserveParams) {
-  const { search, startAt, endAt, scheduleIds, accountIds, status } = params;
+  const { spaceIds, startAt, endAt, scheduleIds, accountIds, status } = params;
 
   return useQuery({
-    queryKey: adminReserveKeys.list({ search: search || undefined, startAt, endAt, scheduleIds, accountIds, status }),
+    queryKey: adminReserveKeys.list({
+      spaceIds: spaceIds?.length ? spaceIds : undefined,
+      startAt,
+      endAt,
+      scheduleIds,
+      accountIds,
+      status,
+    }),
     queryFn: async ({ signal }) =>
       unwrapList(
         await api.GET("/space-reserve/admin", {
           params: {
             query: {
-              SearchQuery: search || undefined,
+              SpaceIds: spaceIds?.length ? spaceIds : undefined,
               StartAt: startAt,
               EndAt: endAt,
               ScheduleIds: scheduleIds?.length ? scheduleIds : undefined,

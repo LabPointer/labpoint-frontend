@@ -104,23 +104,26 @@ export function SubjectMultiSelect({
   );
 }
 
-/**
- * Recursos FIXOS de espaço (filtros de busca de sala e associação a um espaço).
- * Recursos reserváveis nunca aparecem aqui: eles não podem ser associados a um espaço.
- */
-export function ResourceMultiSelect({
+type ResourceKindMultiSelectProps = MultiSelectProps & {
+  /** `false` = recursos fixos de sala (equipamentos); `true` = recursos reserváveis. */
+  reservable: boolean;
+};
+
+/** Recursos buscados no servidor pelo nome; o tipo (fixo ou reservável) define quais aparecem. */
+function ResourceKindMultiSelect({
   id,
   label = "Recursos",
   value,
   onValueChange,
   enabledOnly = false,
   className,
-}: MultiSelectProps) {
+  reservable,
+}: ResourceKindMultiSelectProps) {
   const { search, setText } = useRemoteSearch();
   const query = useResources({
     name: search,
     enabled: enabledOnly ? true : undefined,
-    reservable: false,
+    reservable,
     limit: OPTIONS_LIMIT,
   });
   const options = useMemo(() => (query.data ?? []).map(toOption), [query.data]);
@@ -140,6 +143,19 @@ export function ResourceMultiSelect({
       emptyText="Nenhum recurso encontrado."
     />
   );
+}
+
+/**
+ * Recursos FIXOS de espaço (filtros de busca de sala e associação a um espaço).
+ * Recursos reserváveis nunca aparecem aqui: eles não podem ser associados a um espaço.
+ */
+export function ResourceMultiSelect(props: MultiSelectProps) {
+  return <ResourceKindMultiSelect {...props} reservable={false} />;
+}
+
+/** Recursos reserváveis (filtro do histórico de reservas de recurso). */
+export function ReservableResourceMultiSelect(props: MultiSelectProps) {
+  return <ResourceKindMultiSelect {...props} reservable />;
 }
 
 /** Máximo de salas sugeridas no combobox (a lista é refeita conforme o usuário digita). */

@@ -6,8 +6,10 @@ import { toApiDate } from "#/lib/queries/reserves";
 import { DEFAULT_PAGE_LIMIT } from "#/lib/utils/pagination";
 import { reserveStatusFilterOptions } from "#/lib/utils/reservation-utils";
 import { DateRangeField } from "@/components/reserve/DateRangeField";
+import { SpaceMultiSelect } from "@/components/shared/entity-selects";
 import { FilterSelect } from "@/components/shared/FilterSelect";
 import { PageLimitSelect } from "@/components/shared/PageLimitSelect";
+import type { RemoteOption } from "@/components/shared/RemoteCombobox";
 import { SearchPanel } from "@/components/shared/SearchPanel";
 
 export type HistoryFilters = {
@@ -17,6 +19,8 @@ export type HistoryFilters = {
   endAt: string;
   /** valor de EReserveStatus; `undefined` = todos os status */
   status: number | undefined;
+  /** ids das salas escolhidas; vazio = todas */
+  spaceIds: number[];
   /** itens por página */
   limit: number;
 };
@@ -33,6 +37,7 @@ export const initialHistoryFilters = (): HistoryFilters => {
     startAt: toApiDate(range.from as Date),
     endAt: toApiDate(range.to as Date),
     status: undefined,
+    spaceIds: [],
     limit: DEFAULT_PAGE_LIMIT,
   };
 };
@@ -45,6 +50,7 @@ export function HistorySearchBar({ onSearch }: HistorySearchBarProps) {
   const maxDate = useMemo(() => endOfYear(addMonths(new Date(), 12)), []);
   const [range, setRange] = useState<DateRange>(defaultRange);
   const [status, setStatus] = useState<number | undefined>(undefined);
+  const [spaces, setSpaces] = useState<RemoteOption[]>([]);
   const [limit, setLimit] = useState(DEFAULT_PAGE_LIMIT);
 
   const filters = useMemo<HistoryFilters>(() => {
@@ -54,9 +60,10 @@ export function HistorySearchBar({ onSearch }: HistorySearchBarProps) {
       // sem fim selecionado = um único dia
       endAt: toApiDate(range.to ?? from),
       status,
+      spaceIds: spaces.map((space) => space.id),
       limit,
     };
-  }, [range, status, limit]);
+  }, [range, status, spaces, limit]);
   const debouncedFilters = useDebouncedValue(filters, 500);
 
   useEffect(() => {
@@ -65,6 +72,7 @@ export function HistorySearchBar({ onSearch }: HistorySearchBarProps) {
 
   return (
     <SearchPanel className="w-full">
+      <SpaceMultiSelect id="history-spaces" label="Salas" value={spaces} onValueChange={setSpaces} />
       <div className="grid gap-4 md:grid-cols-3">
         <DateRangeField
           id="history-period"

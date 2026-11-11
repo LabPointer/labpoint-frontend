@@ -3,7 +3,7 @@ import type { DateRange } from "react-day-picker";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
 import { DEFAULT_PAGE_LIMIT } from "#/lib/utils/pagination";
 import { DateRangeField } from "@/components/reserve/DateRangeField";
-import { ScheduleMultiSelect } from "@/components/shared/entity-selects";
+import { ReservableResourceMultiSelect, ScheduleMultiSelect } from "@/components/shared/entity-selects";
 import { PageLimitSelect } from "@/components/shared/PageLimitSelect";
 import type { RemoteOption } from "@/components/shared/RemoteCombobox";
 import { SearchPanel, SearchTextField } from "@/components/shared/SearchPanel";
@@ -14,6 +14,8 @@ export type ResourceSearchFilters = {
   /** período para checar a disponibilidade (opcional) */
   range: DateRange | undefined;
   scheduleIds: number[];
+  /** ids dos recursos escolhidos no filtro (só com `showResourceFilter`); vazio = todos */
+  resourceIds: number[];
   /** itens por página */
   limit: number;
 };
@@ -28,6 +30,8 @@ type ResourceSearchBarProps = {
   maxDays?: number | null;
   rangeHint?: string | null;
   initialRange?: DateRange;
+  /** Troca a busca por texto pelo combobox de recursos específicos (histórico). */
+  showResourceFilter?: boolean;
 };
 
 /** Barra de pesquisa de recursos reserváveis: texto (nome/descrição), itens por página, período e horários. */
@@ -38,15 +42,23 @@ export function ResourceSearchBar({
   maxDays,
   rangeHint,
   initialRange,
+  showResourceFilter = false,
 }: ResourceSearchBarProps) {
   const [search, setSearch] = useState("");
   const [range, setRange] = useState<DateRange | undefined>(initialRange);
   const [schedules, setSchedules] = useState<RemoteOption[]>([]);
+  const [resources, setResources] = useState<RemoteOption[]>([]);
   const [limit, setLimit] = useState(DEFAULT_PAGE_LIMIT);
 
   const filters = useMemo<ResourceSearchFilters>(
-    () => ({ search, range, scheduleIds: schedules.map((schedule) => schedule.id), limit }),
-    [search, range, schedules, limit],
+    () => ({
+      search,
+      range,
+      scheduleIds: schedules.map((schedule) => schedule.id),
+      resourceIds: resources.map((resource) => resource.id),
+      limit,
+    }),
+    [search, range, schedules, resources, limit],
   );
   const debouncedFilters = useDebouncedValue(filters, 500);
 
@@ -57,12 +69,22 @@ export function ResourceSearchBar({
   return (
     <SearchPanel>
       <div className="flex flex-wrap items-end gap-4">
-        <SearchTextField
-          id="resource-search"
-          placeholder="Buscar por nome ou descrição..."
-          value={search}
-          onValueChange={setSearch}
-        />
+        {showResourceFilter ? (
+          <ReservableResourceMultiSelect
+            id="resource-filter"
+            label="Recursos"
+            value={resources}
+            onValueChange={setResources}
+            className="min-w-50 flex-1"
+          />
+        ) : (
+          <SearchTextField
+            id="resource-search"
+            placeholder="Buscar por nome ou descrição..."
+            value={search}
+            onValueChange={setSearch}
+          />
+        )}
         <PageLimitSelect id="resource-limit" value={limit} onValueChange={setLimit} className="w-full sm:w-40" />
       </div>
       <div className="grid gap-4 md:grid-cols-2">
