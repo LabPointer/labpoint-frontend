@@ -1,16 +1,18 @@
-import { format, parseISO } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { Calendar, Clock, FileText, Package, Pencil, Users, X } from "lucide-react";
+import { FlaskConical, Users } from "lucide-react";
 import { memo, useMemo } from "react";
-import { type Reserve, statusFromNumber } from "#/lib/queries/reserves";
+import type { Reserve } from "#/lib/queries/reserves";
 import { isActiveReserveStatus } from "#/lib/queries/resource-reserves";
-import { hhmm, shiftLabels, sortSchedules } from "#/lib/queries/schedules";
 import { reportCount } from "#/lib/queries/usage";
-import { statusLabel, statusVariantClass } from "#/lib/utils/reservation-utils";
+import { RESERVE_CARD_CLASS, ReserveCardIcon } from "@/components/shared/ReserveCardParts";
+import {
+  HistoryCardActions,
+  ReservePeriodStat,
+  ReservePurpose,
+  ReserveSchedules,
+  ReserveStatusBadge,
+} from "@/components/shared/ReserveHistoryCardParts";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export interface HistoryCardProps {
   reserve: Reserve;
@@ -22,8 +24,6 @@ export interface HistoryCardProps {
   onReport?: (reserve: Reserve) => void;
 }
 
-const fmtDate = (date: string) => format(parseISO(date), "dd/MM/yyyy", { locale: ptBR });
-
 export const HistoryCard = memo(function HistoryCard({
   reserve,
   showCTA,
@@ -31,20 +31,6 @@ export const HistoryCard = memo(function HistoryCard({
   onCancel,
   onReport,
 }: HistoryCardProps) {
-  const reports = reportCount(reserve.usage);
-  const status = statusFromNumber(reserve.status);
-
-  // horários agrupados por turno, em ordem: [[turno, ["07:30 às 08:30", ...]], ...]
-  const groups = useMemo(() => {
-    const byShift = new Map<number, string[]>();
-    for (const schedule of sortSchedules(reserve.schedules)) {
-      const list = byShift.get(schedule.shift) ?? [];
-      list.push(`${hhmm(schedule.startAt)} às ${hhmm(schedule.endAt)}`);
-      byShift.set(schedule.shift, list);
-    }
-    return [...byShift.entries()];
-  }, [reserve.schedules]);
-
   // só os recursos ainda ativos (cancelados/recusados individualmente não aparecem)
   const linkedResources = useMemo(
     () => (reserve.resources ?? []).filter((resource) => isActiveReserveStatus(resource.status)),
@@ -52,93 +38,56 @@ export const HistoryCard = memo(function HistoryCard({
   );
 
   return (
-    <Card className="min-h-72 min-w-72 max-w-72 rounded-md border bg-white p-4 shadow-md hover:shadow-lg dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15">
-      <CardHeader className="flex flex-row items-start justify-between border-0 p-0">
-        <div className="flex flex-col gap-1">
-          <CardTitle className="text-lg font-bold text-foreground">{reserve.space.name}</CardTitle>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Users className="size-3.5" />
-            <span>{reserve.space.capacity} lugares</span>
-          </div>
+    <Card aria-label={`Reserva de ${reserve.space.name}`} className={RESERVE_CARD_CLASS}>
+      {/* Identificação: sala, capacidade e situação da reserva */}
+      <CardHeader className="flex flex-row items-start gap-3 p-0">
+        <ReserveCardIcon>
+          <FlaskConical aria-hidden="true" />
+        </ReserveCardIcon>
+        <div className="min-w-0 flex-1">
+          <CardTitle className="text-base leading-tight font-bold text-neutral-900 dark:text-neutral-100">
+            <span className="line-clamp-2" title={reserve.space.name}>
+              {reserve.space.name}
+            </span>
+          </CardTitle>
+          <p className="mt-1 flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400">
+            <Users className="size-3.5 shrink-0" aria-hidden="true" />
+            {reserve.space.capacity} lugares
+          </p>
         </div>
-
-        <CardAction className="m-0">
-          <Badge
-            variant="outline"
-            className={cn("rounded-full px-3 py-0.5 text-xs font-medium", statusVariantClass(status))}
-          >
-            {statusLabel(status)}
-          </Badge>
-        </CardAction>
+        <ReserveStatusBadge status={reserve.status} />
       </CardHeader>
 
-      <CardContent className="flex h-full flex-col gap-2.5 p-0 text-sm">
-        <div className="flex items-center gap-2 text-foreground/90">
-          <Calendar className="size-4 shrink-0 text-violet-500 dark:text-violet-400" />
-          <span className="text-sm font-semibold">
-            {reserve.dateFrom === reserve.dateTo
-              ? fmtDate(reserve.dateFrom)
-              : `${fmtDate(reserve.dateFrom)} a ${fmtDate(reserve.dateTo)}`}
-          </span>
-        </div>
-
-        <div className="flex min-h-40 flex-col items-start gap-2 text-foreground/90">
-          {groups.map(([shift, times]) => (
-            <div key={shift} className="flex w-full flex-col items-start gap-1">
-              <div className="flex w-full items-center gap-1">
-                <Clock className="size-4 shrink-0 text-violet-500 dark:text-violet-400" />
-                <span className="text-sm font-semibold">{shiftLabels[shift] ?? "—"}:</span>
-              </div>
-              <p className="w-full rounded-md border p-1 text-xs font-medium">{times.join(" - ")}</p>
-            </div>
-          ))}
-        </div>
+      <CardContent className="flex flex-1 flex-col gap-4 p-0">
+        <ReservePeriodStat dateFrom={reserve.dateFrom} dateTo={reserve.dateTo} />
+        <ReserveSchedules schedules={reserve.schedules} />
 
         {linkedResources.length > 0 && (
-          <div className="flex items-start gap-2 text-foreground/90">
-            <Package className="mt-0.5 size-4 shrink-0 text-violet-500 dark:text-violet-400" />
-            <p className="text-xs font-medium">
-              <span className="text-sm font-semibold">Recursos:</span>{" "}
-              {linkedResources.map((resource) => `${resource.name} × ${resource.quantity}`).join(", ")}
-            </p>
-          </div>
+          <ul className="flex flex-wrap gap-1.5" aria-label="Recursos reservados junto">
+            {linkedResources.map((resource) => (
+              <li key={resource.reserveId}>
+                <Badge
+                  variant="outline"
+                  className="max-w-48 rounded-md border-violet-500/20 bg-violet-500/5 font-medium text-violet-700 dark:bg-violet-400/10 dark:text-violet-200"
+                >
+                  <span className="truncate">{resource.name}</span>
+                  <span className="tabular-nums opacity-70">× {resource.quantity}</span>
+                </Badge>
+              </li>
+            ))}
+          </ul>
         )}
 
-        <p className="text-xs font-medium text-foreground">
-          <span className="text-sm font-semibold">Propósito:</span> {reserve.purpose || "Propósito não informado"}
-        </p>
+        <ReservePurpose purpose={reserve.purpose} />
       </CardContent>
 
-      {reports > 0 && onReport && (
-        <Button variant="outline" size="sm" className="w-full gap-2" onClick={() => onReport(reserve)}>
-          <FileText className="size-4" />
-          Ver relatório de uso ({reports})
-        </Button>
-      )}
-
-      {showCTA && (
-        <CardFooter className="grid grid-cols-2 gap-3 border-0 bg-transparent">
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full gap-2 rounded-xl border-neutral-200 text-sm font-medium hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
-            onClick={() => onEdit?.(reserve)}
-          >
-            <Pencil className="size-4" />
-            Alterar
-          </Button>
-
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full gap-2 rounded-xl border-rose-300 text-sm font-medium text-rose-600 hover:border-rose-400 hover:bg-rose-50 hover:text-rose-700 dark:border-rose-900/70 dark:text-rose-400 dark:hover:bg-rose-950/40"
-            onClick={() => onCancel?.(reserve)}
-          >
-            <X className="size-4" />
-            Cancelar
-          </Button>
-        </CardFooter>
-      )}
+      <HistoryCardActions
+        reports={reportCount(reserve.usage)}
+        onReport={onReport ? () => onReport(reserve) : undefined}
+        showCTA={showCTA}
+        onEdit={() => onEdit?.(reserve)}
+        onCancel={() => onCancel?.(reserve)}
+      />
     </Card>
   );
 });

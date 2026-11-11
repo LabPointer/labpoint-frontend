@@ -92,9 +92,9 @@ function RouteComponent() {
           loadingText="Carregando..."
           emptyText={from ? "Nenhum recurso com unidades livres neste período." : "Nenhum recurso encontrado."}
         >
-          <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(288px,1fr))] justify-center gap-6">
+          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] sm:gap-6">
             {items.map((resource) => (
-              <div key={resource.id} className="flex w-full justify-center p-2">
+              <div key={resource.id} className="flex">
                 <ResourceCard
                   resource={resource}
                   showAvailability={Boolean(from)}

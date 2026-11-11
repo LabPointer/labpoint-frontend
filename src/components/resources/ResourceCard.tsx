@@ -1,16 +1,16 @@
-import { Package } from "lucide-react";
+import { Boxes, CalendarRange, Package } from "lucide-react";
 import type { Resource } from "#/lib/queries/resources";
-import { StatusBadge } from "@/components/shared/StatusBadge";
-import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  AvailabilityBadge,
+  RESERVE_CARD_CLASS,
+  RESERVE_CARD_FOOTER_CLASS,
+  ReserveCardButton,
+  ReserveCardDescription,
+  ReserveCardIcon,
+  ReserveCardStat,
+} from "@/components/shared/ReserveCardParts";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 type ResourceCardProps = {
   resource: Resource;
@@ -23,50 +23,56 @@ export function ResourceCard({ resource, showAvailability, onReserve }: Resource
   const total = Number(resource.quantity ?? 0);
   const available = resource.available == null ? total : Number(resource.available);
   const hasUnits = available > 0;
+  const freePercent = total > 0 ? Math.round((available / total) * 100) : 0;
 
   return (
-    <Card className="min-h-60 w-72 rounded-md border bg-white p-4 shadow-md hover:shadow-lg dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15">
-      <CardHeader className="flex flex-row items-start justify-between border-0 p-0">
-        <div className="min-w-0">
-          <CardTitle className="text-lg font-bold">
-            <span className="line-clamp-1" title={resource.name}>
+    <Card aria-label={resource.name} className={RESERVE_CARD_CLASS}>
+      {/* Identificação: ícone, nome, total de unidades e situação */}
+      <CardHeader className="flex flex-row items-start gap-3 p-0">
+        <ReserveCardIcon>
+          <Package aria-hidden="true" />
+        </ReserveCardIcon>
+        <div className="min-w-0 flex-1">
+          <CardTitle className="text-base leading-tight font-bold text-neutral-900 dark:text-neutral-100">
+            <span className="line-clamp-2" title={resource.name}>
               {resource.name}
             </span>
           </CardTitle>
-          <CardDescription className="text-sm">{total} unidade(s) no total</CardDescription>
+          <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">Recurso reservável</p>
         </div>
-        <CardAction>
-          <StatusBadge active={hasUnits} activeLabel="Disponível" inactiveLabel="Esgotado" />
-        </CardAction>
+        <AvailabilityBadge available={hasUnits} unavailableLabel="Esgotado" unavailableIcon="slash" />
       </CardHeader>
 
-      <CardContent className="mt-3 flex flex-col gap-3 p-0">
-        <div className="flex items-center gap-2.5 text-sm">
-          <Package className="size-4 shrink-0 text-violet-600 dark:text-violet-400" />
+      <CardContent className="flex flex-1 flex-col gap-4 p-0">
+        {/* Unidades: total e livres no período escolhido */}
+        <dl className="grid grid-cols-2 gap-2">
+          <ReserveCardStat icon={<Boxes />} label="Total" value={total} unit={total === 1 ? "unidade" : "unidades"} />
           {showAvailability ? (
-            <span>
-              <strong className="font-semibold tabular-nums">
-                {available} de {total}
-              </strong>{" "}
-              livres no período
-            </span>
+            <ReserveCardStat icon={<CalendarRange />} label="Livres no período" value={available} unit={`de ${total}`}>
+              <span
+                className="mt-1.5 block h-1 overflow-hidden rounded-full bg-neutral-200 dark:bg-white/10"
+                role="presentation"
+              >
+                <span
+                  className={cn("block h-full rounded-full", hasUnits ? "bg-emerald-500" : "bg-rose-500")}
+                  style={{ width: `${hasUnits ? Math.max(freePercent, 4) : 100}%` }}
+                />
+              </span>
+            </ReserveCardStat>
           ) : (
-            <span className="text-muted-foreground">Escolha um período para ver a disponibilidade</span>
+            <div className="flex items-center gap-2.5 rounded-lg border border-dashed border-neutral-300 px-3 py-2 text-xs leading-snug text-neutral-500 dark:border-white/10 dark:text-neutral-400">
+              <CalendarRange className="size-4 shrink-0 text-violet-600 dark:text-violet-400" aria-hidden="true" />
+              <dt className="sr-only">Livres no período</dt>
+              <dd>Escolha o período para ver</dd>
+            </div>
           )}
-        </div>
-        <p className="line-clamp-4 rounded-md border p-2 text-xs text-muted-foreground">
-          {resource.description || "Sem descrição."}
-        </p>
+        </dl>
+
+        <ReserveCardDescription text={resource.description} />
       </CardContent>
 
-      <CardFooter className="mt-auto border-0 bg-transparent">
-        <Button
-          className="h-10 w-full rounded-xl bg-[#5925dc] font-medium text-white shadow-sm transition-colors hover:bg-[#4b1ec0]"
-          onClick={onReserve}
-          disabled={!hasUnits}
-        >
-          Reservar
-        </Button>
+      <CardFooter className={RESERVE_CARD_FOOTER_CLASS}>
+        <ReserveCardButton itemName={resource.name} onClick={onReserve} disabled={!hasUnits} />
       </CardFooter>
     </Card>
   );

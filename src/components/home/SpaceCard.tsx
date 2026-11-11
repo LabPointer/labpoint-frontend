@@ -1,17 +1,15 @@
-import { Box, Users } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { BookOpen, FlaskConical, Package, Users } from "lucide-react";
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
-import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
+  AvailabilityBadge,
+  RESERVE_CARD_CLASS,
+  RESERVE_CARD_FOOTER_CLASS,
+  ReserveCardButton,
+  ReserveCardDescription,
+  ReserveCardIcon,
+  ReserveCardStat,
+} from "@/components/shared/ReserveCardParts";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 export type ListData = {
   id: number;
@@ -29,90 +27,82 @@ export type SpaceCardProps = {
   onReserve: () => void;
 };
 
+/** Recursos mostrados como chips; o resto vira "+N". */
+const MAX_VISIBLE_RESOURCES = 4;
+
 export function SpaceCard(props: SpaceCardProps) {
-  const { name, capacity, description, resources, subjects, locked, onReserve } = props;
+  const { name, capacity, description, resources = [], subjects = [], locked, onReserve } = props;
+  const visibleResources = resources.slice(0, MAX_VISIBLE_RESOURCES);
+  const hiddenResources = resources.slice(MAX_VISIBLE_RESOURCES);
+  const subjectNames = subjects.map((subject) => subject.name).join(", ");
 
   return (
-    <Card className="min-w-72 max-w-72 min-h-72 bg-white dark:bg-white/5 rounded-md border dark:border-violet-500/10 shadow-md hover:shadow-lg p-4 dark:shadow-violet-300/15">
-      <CardHeader className="border-0 p-0 flex flex-row items-start justify-between">
-        <div>
-          <CardTitle className="text-lg font-bold text-neutral-900 dark:text-neutral-100">
-            <span className="line-clamp-1" title={name}>
+    <Card aria-label={name} className={RESERVE_CARD_CLASS}>
+      {/* Identificação: ícone, nome, matérias e situação */}
+      <CardHeader className="flex flex-row items-start gap-3 p-0">
+        <ReserveCardIcon>
+          <FlaskConical aria-hidden="true" />
+        </ReserveCardIcon>
+        <div className="min-w-0 flex-1">
+          <CardTitle className="text-base leading-tight font-bold text-neutral-900 dark:text-neutral-100">
+            <span className="line-clamp-2" title={name}>
               {name}
             </span>
           </CardTitle>
-          <CardDescription className="text-sm text-neutral-500 dark:text-neutral-400 line-clamp-1">
-            {subjects?.length ? subjects.map((s) => s.name).join(", ") : "---"}
-          </CardDescription>
-        </div>
-        <CardAction>
-          <Badge
-            variant="outline"
-            className="border-emerald-500/30 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-500/30 rounded-full px-2.5 py-0.5 text-xs font-normal"
+          <p
+            className="mt-1 flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400"
+            title={subjectNames || undefined}
           >
-            {locked ? "Bloqueado" : "Disponível"}
-          </Badge>
-        </CardAction>
+            <BookOpen className="size-3.5 shrink-0" aria-hidden="true" />
+            <span className="line-clamp-1">{subjectNames || "Sem matérias vinculadas"}</span>
+          </p>
+        </div>
+        <AvailabilityBadge available={!locked} unavailableLabel="Bloqueado" />
       </CardHeader>
 
-      <CardContent className="flex flex-col gap-y-2.5 p-0 mt-3">
-        <div className="flex items-center gap-2.5 text-sm text-neutral-700 dark:text-neutral-300">
-          <Users className="size-4 shrink-0 text-violet-600 dark:text-violet-400" />
-          <span className="font-medium ttext-neutral-900 dark:text-white">
-            Capacidade:{" "}
-            <strong className="font-semibold text-neutral-900 dark:text-neutral-100">{capacity} lugares</strong>
-          </span>
-        </div>
-        {description && (
-          <Field>
-            <FieldLabel>
-              <Box className="size-4 shrink-0 text-violet-600 dark:text-violet-400" />
-              <span>Descrição</span>
-            </FieldLabel>
-            <FieldContent>
-              <div className="flex items-start border rounded-md p-2">
-                <span className="font-medium text-xs line-clamp-4 text-wrap truncate">• {description}</span>
-              </div>
-            </FieldContent>
-          </Field>
+      <CardContent className="flex flex-1 flex-col gap-4 p-0">
+        {/* Números que decidem a escolha da sala */}
+        <dl className="grid grid-cols-2 gap-2">
+          <ReserveCardStat icon={<Users />} label="Capacidade" value={capacity} unit="lugares" />
+          <ReserveCardStat
+            icon={<Package />}
+            label="Recursos"
+            value={resources.length}
+            unit={resources.length === 1 ? "item" : "itens"}
+          />
+        </dl>
+
+        <ReserveCardDescription text={description} />
+
+        {resources.length > 0 && (
+          <ul className="mt-auto flex flex-wrap gap-1.5" aria-label="Recursos da sala">
+            {visibleResources.map((resource) => (
+              <li key={resource.id}>
+                <Badge
+                  variant="outline"
+                  className="max-w-40 rounded-md border-violet-500/20 bg-violet-500/5 font-medium text-violet-700 dark:bg-violet-400/10 dark:text-violet-200"
+                >
+                  <span className="truncate">{resource.name}</span>
+                </Badge>
+              </li>
+            ))}
+            {hiddenResources.length > 0 && (
+              <li>
+                <Badge
+                  variant="outline"
+                  className="rounded-md text-neutral-500 dark:text-neutral-400"
+                  title={hiddenResources.map((resource) => resource.name).join(", ")}
+                >
+                  +{hiddenResources.length}
+                </Badge>
+              </li>
+            )}
+          </ul>
         )}
-        <Field>
-          <FieldLabel>
-            <Box className="size-4 shrink-0 text-violet-600 dark:text-violet-400" />
-            <span>Recursos</span>
-          </FieldLabel>
-          <FieldContent>
-            {resources && resources.length > 0 ? (
-              <div className="flex flex-wrap gap-1 items-start border rounded-md p-2">
-                {resources.map((val, index) => {
-                  if (index < 3) {
-                    return (
-                      <span className="flex text-xs font-semibold p-1 border border-neutral-200 dark:border-neutral-700 rounded-sm">
-                        {val.name}
-                      </span>
-                    );
-                  } else if (index === 3) {
-                    return (
-                      <span className="flex text-xs font-semibold p-1 border border-neutral-200 dark:border-neutral-700 rounded-sm">
-                        ...{resources.length - 3} outros
-                      </span>
-                    )
-                  }
-                  return null;
-                })}
-              </div>
-            ) : null}
-          </FieldContent>
-        </Field>
       </CardContent>
 
-      <CardFooter className="bg-transparent border-0 mt-auto">
-        <Button
-          className="w-full h-10 rounded-xl bg-[#5925dc] hover:bg-[#4b1ec0] text-white font-medium shadow-sm transition-colors"
-          onClick={onReserve}
-        >
-          Reservar
-        </Button>
+      <CardFooter className={RESERVE_CARD_FOOTER_CLASS}>
+        <ReserveCardButton itemName={name} onClick={onReserve} />
       </CardFooter>
     </Card>
   );

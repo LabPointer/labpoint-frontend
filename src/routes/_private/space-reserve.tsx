@@ -95,9 +95,9 @@ function RouteComponent() {
           loadingText="Carregando..."
           emptyText="Nenhum laboratório encontrado."
         >
-          <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(288px,1fr))] justify-center gap-6">
+          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] sm:gap-6">
             {items.map((space) => (
-              <div key={space.id} className="flex w-full justify-center p-2">
+              <div key={space.id} className="flex">
                 <SpaceCard
                   id={Number(space.id)}
                   name={space.name}
