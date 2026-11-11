@@ -107,6 +107,7 @@ export function ResourceReserveModal({ resource, initialRange, open, onClose, on
         {(field) => (
           <DateRangeField
             id="resource-reserve-range"
+            calendarRules="block"
             label="Data da reserva"
             value={field.state.value}
             errors={field.state.meta.isTouched ? field.state.meta.errors : undefined}

@@ -26,6 +26,7 @@ import { Route as PublicForgetPasswordRouteImport } from './routes/_public/forge
 import { Route as PublicResendEmailConfirmationRouteImport } from './routes/_public/resend-email-confirmation'
 import { Route as PublicResetPasswordRouteImport } from './routes/_public/reset-password'
 import { Route as PublicSignUpRouteImport } from './routes/_public/sign-up'
+import { Route as PrivateAdminManageCalendarRouteImport } from './routes/_private/admin/manage-calendar'
 import { Route as PrivateAdminManageCheckOutRouteImport } from './routes/_private/admin/manage-check-out'
 import { Route as PrivateAdminManageResourceReservesRouteImport } from './routes/_private/admin/manage-resource-reserves'
 import { Route as PrivateAdminManageResourcesRouteImport } from './routes/_private/admin/manage-resources'
@@ -121,6 +122,12 @@ const PublicSignUpRoute = PublicSignUpRouteImport.update({
   path: '/sign-up',
   getParentRoute: () => PublicRouteRoute,
 } as any)
+const PrivateAdminManageCalendarRoute =
+  PrivateAdminManageCalendarRouteImport.update({
+    id: '/manage-calendar',
+    path: '/manage-calendar',
+    getParentRoute: () => PrivateAdminRouteRoute,
+  } as any)
 const PrivateAdminManageCheckOutRoute =
   PrivateAdminManageCheckOutRouteImport.update({
     id: '/manage-check-out',
@@ -196,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/resend-email-confirmation': typeof PublicResendEmailConfirmationRoute
   '/reset-password': typeof PublicResetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
+  '/admin/manage-calendar': typeof PrivateAdminManageCalendarRoute
   '/admin/manage-check-out': typeof PrivateAdminManageCheckOutRoute
   '/admin/manage-resource-reserves': typeof PrivateAdminManageResourceReservesRoute
   '/admin/manage-resources': typeof PrivateAdminManageResourcesRoute
@@ -223,6 +231,7 @@ export interface FileRoutesByTo {
   '/resend-email-confirmation': typeof PublicResendEmailConfirmationRoute
   '/reset-password': typeof PublicResetPasswordRoute
   '/sign-up': typeof PublicSignUpRoute
+  '/admin/manage-calendar': typeof PrivateAdminManageCalendarRoute
   '/admin/manage-check-out': typeof PrivateAdminManageCheckOutRoute
   '/admin/manage-resource-reserves': typeof PrivateAdminManageResourceReservesRoute
   '/admin/manage-resources': typeof PrivateAdminManageResourcesRoute
@@ -253,6 +262,7 @@ export interface FileRoutesById {
   '/_public/reset-password': typeof PublicResetPasswordRoute
   '/_public/sign-up': typeof PublicSignUpRoute
   '/_public/': typeof PublicIndexRoute
+  '/_private/admin/manage-calendar': typeof PrivateAdminManageCalendarRoute
   '/_private/admin/manage-check-out': typeof PrivateAdminManageCheckOutRoute
   '/_private/admin/manage-resource-reserves': typeof PrivateAdminManageResourceReservesRoute
   '/_private/admin/manage-resources': typeof PrivateAdminManageResourcesRoute
@@ -282,6 +292,7 @@ export interface FileRouteTypes {
     | '/resend-email-confirmation'
     | '/reset-password'
     | '/sign-up'
+    | '/admin/manage-calendar'
     | '/admin/manage-check-out'
     | '/admin/manage-resource-reserves'
     | '/admin/manage-resources'
@@ -309,6 +320,7 @@ export interface FileRouteTypes {
     | '/resend-email-confirmation'
     | '/reset-password'
     | '/sign-up'
+    | '/admin/manage-calendar'
     | '/admin/manage-check-out'
     | '/admin/manage-resource-reserves'
     | '/admin/manage-resources'
@@ -338,6 +350,7 @@ export interface FileRouteTypes {
     | '/_public/reset-password'
     | '/_public/sign-up'
     | '/_public/'
+    | '/_private/admin/manage-calendar'
     | '/_private/admin/manage-check-out'
     | '/_private/admin/manage-resource-reserves'
     | '/_private/admin/manage-resources'
@@ -477,6 +490,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicSignUpRouteImport
       parentRoute: typeof PublicRouteRoute
     }
+    '/_private/admin/manage-calendar': {
+      id: '/_private/admin/manage-calendar'
+      path: '/manage-calendar'
+      fullPath: '/admin/manage-calendar'
+      preLoaderRoute: typeof PrivateAdminManageCalendarRouteImport
+      parentRoute: typeof PrivateAdminRouteRoute
+    }
     '/_private/admin/manage-check-out': {
       id: '/_private/admin/manage-check-out'
       path: '/manage-check-out'
@@ -551,6 +571,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface PrivateAdminRouteRouteChildren {
+  PrivateAdminManageCalendarRoute: typeof PrivateAdminManageCalendarRoute
   PrivateAdminManageCheckOutRoute: typeof PrivateAdminManageCheckOutRoute
   PrivateAdminManageResourceReservesRoute: typeof PrivateAdminManageResourceReservesRoute
   PrivateAdminManageResourcesRoute: typeof PrivateAdminManageResourcesRoute
@@ -564,6 +585,7 @@ interface PrivateAdminRouteRouteChildren {
 }
 
 const PrivateAdminRouteRouteChildren: PrivateAdminRouteRouteChildren = {
+  PrivateAdminManageCalendarRoute: PrivateAdminManageCalendarRoute,
   PrivateAdminManageCheckOutRoute: PrivateAdminManageCheckOutRoute,
   PrivateAdminManageResourceReservesRoute:
     PrivateAdminManageResourceReservesRoute,

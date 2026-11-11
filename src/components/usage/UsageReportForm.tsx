@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 /**
  * - `check-in`: entrada (ao menos o 1º horário), sem saída.
@@ -262,18 +262,22 @@ export function UsageReportForm({
                 {(field) => (
                   <Field>
                     <FieldLabel htmlFor={`${formId}-${index}-modality`}>Modalidade</FieldLabel>
-                    <NativeSelect
-                      id={`${formId}-${index}-modality`}
-                      className="w-full"
-                      value={String(field.state.value)}
-                      onChange={(event) => field.handleChange(Number(event.target.value))}
+                    <Select
+                      items={MODALITY_OPTIONS}
+                      value={Number(field.state.value)}
+                      onValueChange={(next) => next !== null && field.handleChange(Number(next))}
                     >
-                      {MODALITY_OPTIONS.map((option) => (
-                        <NativeSelectOption key={option.value} value={option.value}>
-                          {option.label}
-                        </NativeSelectOption>
-                      ))}
-                    </NativeSelect>
+                      <SelectTrigger id={`${formId}-${index}-modality`} className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {MODALITY_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </Field>
                 )}
               </form.Field>

@@ -645,6 +645,341 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/calendar/days": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Dias do calendário
+         * @description Situação de cada dia do período (no máximo 400 dias): fim de semana, feriados, liberado pela coordenação e
+         *     bloqueado para reservas. Fins de semana e feriados ficam bloqueados até um admin liberar a data.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    StartAt?: string;
+                    EndAt?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["CalendarDayResponseDTO"][];
+                        "application/json": components["schemas"]["CalendarDayResponseDTO"][];
+                        "text/json": components["schemas"]["CalendarDayResponseDTO"][];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/calendar/admin/release": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Liberar datas
+         * @description Libera fins de semana e feriados para reservas. Datas já liberadas são ignoradas.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReleaseDatesRequestDTO"];
+                    "text/json": components["schemas"]["ReleaseDatesRequestDTO"];
+                    "application/*+json": components["schemas"]["ReleaseDatesRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/calendar/admin/affected": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Reservas afetadas
+         * @description Quantas reservas ativas (de sala e de recurso avulsa) usam a data, para decidir entre manter e cancelar
+         *     antes de bloquear o dia de novo.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    date?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["AffectedReservesResponseDTO"];
+                        "application/json": components["schemas"]["AffectedReservesResponseDTO"];
+                        "text/json": components["schemas"]["AffectedReservesResponseDTO"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/calendar/admin/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bloquear data de novo
+         * @description Remove a liberação. Com "keepReserves", as reservas já feitas continuam usando o dia; sem, o dia sai delas e
+         *     as que ficam sem nenhum outro dia são canceladas.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RevokeDateRequestDTO"];
+                    "text/json": components["schemas"]["RevokeDateRequestDTO"];
+                    "application/*+json": components["schemas"]["RevokeDateRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/calendar/admin/holiday": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cadastrar feriado extra
+         * @description Feriado que não vem da lista nacional, estadual ou municipal (recesso, ponte, feriado decretado).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["HolidayCreateRequestDTO"];
+                    "text/json": components["schemas"]["HolidayCreateRequestDTO"];
+                    "application/*+json": components["schemas"]["HolidayCreateRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/calendar/admin/holiday/{holidayId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remover feriado extra
+         * @description Só feriados cadastrados pela coordenação podem ser removidos.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    holidayId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/report": {
         parameters: {
             query?: never;
@@ -3353,7 +3688,24 @@ export interface components {
             resources: components["schemas"]["LinkedResourceDTO"][];
             usage?: null | components["schemas"]["UsageSummaryDTO"];
         };
+        AffectedReservesResponseDTO: {
+            /** Format: date */
+            date: string;
+            /** Format: int32 */
+            spaceReserves: number | string;
+            /** Format: int32 */
+            resourceReserves: number | string;
+        };
+        CalendarDayResponseDTO: {
+            /** Format: date */
+            date: string;
+            isWeekend: boolean;
+            holidays: components["schemas"]["HolidayResponseDTO"][];
+            released: boolean;
+            blocked: boolean;
+        };
         EAccountRole: number;
+        EHolidaySource: number;
         EmailRequestDTO: {
             email: string;
         };
@@ -3370,6 +3722,19 @@ export interface components {
         EUsageModality: number;
         EUsageStatus: number;
         EUsageStep: number;
+        HolidayCreateRequestDTO: {
+            /** Format: date */
+            date: string;
+            name: string;
+        };
+        HolidayResponseDTO: {
+            /** Format: int64 */
+            id: number | string;
+            /** Format: date */
+            date: string;
+            name: string;
+            source: components["schemas"]["EHolidaySource"];
+        };
         LinkedResourceDTO: {
             /** Format: int64 */
             reserveId: number | string;
@@ -3388,6 +3753,9 @@ export interface components {
             spaceId: number | string;
             spaceName: string;
             status: components["schemas"]["EReserveStatus"];
+        };
+        ReleaseDatesRequestDTO: {
+            dates: string[];
         };
         ReportRankingDTO: {
             highestDemand: components["schemas"]["ReportSpaceStatDTO"][];
@@ -3622,6 +3990,11 @@ export interface components {
             scheduleId: number | string;
             /** Format: int32 */
             available: number | string;
+        };
+        RevokeDateRequestDTO: {
+            /** Format: date */
+            date: string;
+            keepReserves: boolean;
         };
         ScheduleCreateRequestDTO: {
             /** Format: time */

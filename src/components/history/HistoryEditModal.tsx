@@ -93,6 +93,7 @@ export function HistoryEditModal({ reserve, open, onClose, onSubmit }: HistoryEd
         {(field) => (
           <DateRangeField
             id="history-date-range"
+            calendarRules="block"
             label="Nova data"
             value={field.state.value}
             errors={field.state.meta.isTouched ? field.state.meta.errors : undefined}

@@ -99,6 +99,7 @@ export function ManageReserveEditDialog({ reserve, open, onClose, onSubmit }: Ma
         {(field) => (
           <DateRangeField
             id="manage-reserve-range"
+            calendarRules="warn"
             label="Dia da reserva"
             minDate={null}
             maxDays={null}

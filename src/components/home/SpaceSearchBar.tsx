@@ -120,7 +120,7 @@ export function SpaceSearchBar({ onSearch }: SpaceSearchBarProps) {
             onValueChange={setLimit}
             className="w-full"
             labelClassName={labelClass}
-            selectClassName="[&_select]:h-10"
+            selectClassName="data-[size=default]:h-10"
           />
         </div>
 

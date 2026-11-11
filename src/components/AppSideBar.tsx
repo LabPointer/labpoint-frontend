@@ -5,6 +5,7 @@ import {
   Building,
   Building2,
   Calendar,
+  CalendarCog,
   ChevronsUpDown,
   ClipboardCheck,
   ClipboardList,
@@ -128,6 +129,11 @@ const adminRoutes: PageRoute[] = [
     to: "/admin/manage-check-out",
     label: "Gerenciar check-out",
     icon: <ClipboardList className="size-4" />,
+  },
+  {
+    to: "/admin/manage-calendar",
+    label: "Gerenciar calendário",
+    icon: <CalendarCog className="size-4" />,
   },
 ];
 

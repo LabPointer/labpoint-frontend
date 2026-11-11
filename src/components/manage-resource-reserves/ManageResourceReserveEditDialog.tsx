@@ -121,6 +121,7 @@ export function ManageResourceReserveEditDialog({
         {(field) => (
           <DateRangeField
             id="manage-resource-reserve-range"
+            calendarRules="warn"
             label="Período"
             minDate={null}
             maxDays={null}

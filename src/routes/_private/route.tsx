@@ -27,6 +27,7 @@ const routeTitles: Map<LinkProps["to"], string> = new Map([
   ["/admin/manage-space-reserves", "Gerenciar reservas de espaço"],
   ["/admin/manage-resource-reserves", "Gerenciar reservas de recurso"],
   ["/admin/manage-check-out", "Gerenciar check-out"],
+  ["/admin/manage-calendar", "Gerenciar calendário"],
   ["/admin/manage-users", "Gerenciar usuários"],
   ["/admin/manage-resources", "Gerenciar recursos"],
   ["/admin/manage-subjects", "Gerenciar matérias"],

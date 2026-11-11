@@ -109,6 +109,7 @@ export function ResourceReserveEditModal({ reserve, open, onClose, onSubmit }: R
         {(field) => (
           <DateRangeField
             id="resource-edit-range"
+            calendarRules="block"
             label="Nova data"
             value={field.state.value}
             errors={field.state.meta.isTouched ? field.state.meta.errors : undefined}

@@ -123,6 +123,7 @@ export function SpaceReserveModal({ space, open, onClose, onSubmit }: SpaceReser
         {(field) => (
           <DateRangeField
             id="reserve-date-range"
+            calendarRules="block"
             label="Data da reserva"
             value={field.state.value}
             errors={field.state.meta.isTouched ? field.state.meta.errors : undefined}

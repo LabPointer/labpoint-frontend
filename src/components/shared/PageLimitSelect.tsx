@@ -1,6 +1,6 @@
 import { PAGE_LIMIT_OPTIONS } from "#/lib/utils/pagination";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 type PageLimitSelectProps = {
@@ -10,10 +10,13 @@ type PageLimitSelectProps = {
   label?: string;
   className?: string;
   labelClassName?: string;
+  /** Classes do botão do select. */
   selectClassName?: string;
 };
 
-/** Quantidade de itens por página (10 a 50, de 10 em 10). Select nativo: só aceita valores válidos. */
+const items = PAGE_LIMIT_OPTIONS.map((option) => ({ label: String(option), value: option }));
+
+/** Quantidade de itens por página (10 a 50, de 10 em 10). Lista fechada: só aceita valores válidos. */
 export function PageLimitSelect({
   id,
   value,
@@ -28,18 +31,18 @@ export function PageLimitSelect({
       <FieldLabel htmlFor={id} className={cn("font-bold", labelClassName)}>
         {label}
       </FieldLabel>
-      <NativeSelect
-        id={id}
-        className={cn("w-full", selectClassName)}
-        value={value}
-        onChange={(event) => onValueChange(Number(event.target.value))}
-      >
-        {PAGE_LIMIT_OPTIONS.map((option) => (
-          <NativeSelectOption key={option} value={option}>
-            {option}
-          </NativeSelectOption>
-        ))}
-      </NativeSelect>
+      <Select items={items} value={value} onValueChange={(next) => next !== null && onValueChange(Number(next))}>
+        <SelectTrigger id={id} className={cn("w-full", selectClassName)}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {items.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </Field>
   );
 }
