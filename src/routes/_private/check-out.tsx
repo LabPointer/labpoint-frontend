@@ -195,14 +195,14 @@ function SessionSection({
         {sessions.map((session) => (
           <Card
             key={session.id}
-            className="rounded-md border bg-white p-4 shadow-md dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15"
+            className="rounded-md border bg-white p-4 shadow-md has-data-[slot=card-footer]:pb-4 dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15"
           >
             <CardContent className="flex flex-col gap-3 p-0">
               <UsageSessionSummary session={session} showWindows />
               {(showReport || session.entries.length > 0) && <UsageReportView session={session} />}
             </CardContent>
             {render && (
-              <CardFooter className="flex flex-wrap gap-2 border-0 bg-transparent p-0 pt-2">
+              <CardFooter className="flex flex-wrap gap-2 border-0 bg-transparent p-0">
                 {render(session)}
               </CardFooter>
             )}

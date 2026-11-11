@@ -227,7 +227,10 @@ export function useReserveUsage(kind: ReserveKind, reserveId: number, options: {
 
 // ---------------------------------------------------------------- admin
 
-export function useAdminUsages(params: AdminUsageParams, options: { enabled?: boolean } = {}) {
+export function useAdminUsages(
+  params: AdminUsageParams,
+  options: { enabled?: boolean; refetchInterval?: number } = {},
+) {
   const { startAt, endAt, statuses, spaceIds, accountIds, limit = 30, offset = 0 } = params;
   return useQuery({
     queryKey: usageKeys.admin({ startAt, endAt, statuses, spaceIds, accountIds, limit, offset }),
@@ -250,6 +253,7 @@ export function useAdminUsages(params: AdminUsageParams, options: { enabled?: bo
         "Erro ao buscar as sessões de uso.",
       ),
     enabled: options.enabled ?? true,
+    refetchInterval: options.refetchInterval,
     placeholderData: keepPreviousData,
   });
 }

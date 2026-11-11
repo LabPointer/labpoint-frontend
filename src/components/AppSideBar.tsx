@@ -42,6 +42,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { NotificationDot } from "@/components/shared/NotificationDot";
+import { useCheckOutAlerts } from "@/components/usage/use-check-out-alerts";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 
@@ -142,7 +144,10 @@ const coordinatorRoutes: PageRoute[] = [
   },
 ];
 
-function NavLinks({ routes }: { routes: PageRoute[] }) {
+/** Rotas com algo a fazer: mostram uma bolinha de notificação. */
+type RouteAlerts = Partial<Record<string, boolean>>;
+
+function NavLinks({ routes, alerts = {} }: { routes: PageRoute[]; alerts?: RouteAlerts }) {
   return (
     <SidebarMenu>
       <SidebarMenuItem className="flex flex-col gap-y-1">
@@ -161,6 +166,7 @@ function NavLinks({ routes }: { routes: PageRoute[] }) {
               >
                 {route.icon}
                 <span>{route.label}</span>
+                {alerts[route.to as string] && <NotificationDot label="Há ações disponíveis" className="ml-auto" />}
               </LinkButton>
             }
           />
@@ -190,6 +196,8 @@ export function AppSidebar() {
   const router = useRouter();
   const username = sessionInfo?.username || "Não definido";
   const roles = sessionInfo?.roles.join(", ") || "Não definido";
+  const isAdmin = !!sessionInfo && (sessionInfo.roles.includes("Admin") || sessionInfo.roles.includes("Owner"));
+  const checkOutAlerts = useCheckOutAlerts({ isAdmin });
 
   async function handleLogout() {
     await api.POST("/auth/sign-out");
@@ -200,11 +208,13 @@ export function AppSidebar() {
     <Sidebar className="border-sidebar-border/70">
       <SidebarHeader className="flex justify-center border-b border-sidebar-border/70 px-5 h-16">
         <div className="flex items-center gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl shadow-sm bg-violet-600 dark:bg-violet-400">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-violet-500 to-violet-700 text-white shadow-md shadow-violet-600/30 ring-1 ring-violet-700/20 ring-inset dark:from-violet-400 dark:to-violet-600 dark:shadow-violet-500/40 dark:ring-white/15">
             <FlaskConical aria-hidden="true" className="size-5" strokeWidth={2.2} />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-lg font-bold tracking-wide">Labpoint</p>
+            <p className="truncate text-lg font-bold tracking-wide">
+              Lab<span className="text-violet-600 dark:text-violet-400">point</span>
+            </p>
           </div>
         </div>
       </SidebarHeader>
@@ -212,14 +222,14 @@ export function AppSidebar() {
         <SidebarGroup className="px-3 py-5">
           <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Reservas</p>
           <SidebarGroupContent>
-            <NavLinks routes={userRoutes} />
+            <NavLinks routes={userRoutes} alerts={{ "/check-out": checkOutAlerts.mine }} />
           </SidebarGroupContent>
         </SidebarGroup>
         {sessionInfo && (sessionInfo.roles.includes("Admin") || sessionInfo.roles.includes("Owner")) && (
           <SidebarGroup className="px-3 py-5">
             <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Coordenação</p>
             <SidebarGroupContent>
-              <NavLinks routes={adminRoutes} />
+              <NavLinks routes={adminRoutes} alerts={{ "/admin/manage-check-out": checkOutAlerts.admin }} />
             </SidebarGroupContent>
           </SidebarGroup>
         )}
