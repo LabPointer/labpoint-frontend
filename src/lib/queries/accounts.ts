@@ -7,15 +7,15 @@ import { api } from "#/lib/utils/restapi";
 
 /**
  * Cargos na ordem do enum do backend (EAccountRole): o índice do array é o valor enviado/recebido.
- * 0 = User, 1 = Admin, 2 = Owner.
- * Atenção: `UserRole.options` (lib/service) está na ordem inversa (Owner, Admin, User) e serve só para a sessão.
+ * 0 = User, 1 = Admin, 2 = Root.
+ * Atenção: `UserRole.options` (lib/service) está na ordem inversa (Root, Admin, User) e serve só para a sessão.
  */
-export const ROLE_LABELS = ["User", "Admin", "Owner"] as const;
+export const ROLE_LABELS = ["User", "Admin", "Root"] as const;
 
-/** Posição de um cargo na hierarquia (User < Admin < Owner). */
-export const ROLE_RANK = { User: 0, Admin: 1, Owner: 2 } as const;
+/** Posição de um cargo na hierarquia (User < Admin < Root). */
+export const ROLE_RANK = { User: 0, Admin: 1, Root: 2 } as const;
 
-/** Maior cargo entre os da sessão (`["Admin"]`, `["Owner"]`...). Sem cargo = User. */
+/** Maior cargo entre os da sessão (`["Admin"]`, `["Root"]`...). Sem cargo = User. */
 export function highestRole(roles: readonly string[] | undefined): number {
   return Math.max(
     ROLE_RANK.User,

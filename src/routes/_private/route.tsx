@@ -40,7 +40,7 @@ function RouteComponent() {
   const { pathname } = useLocation();
   const routeTitle = routeTitles.get(pathname as LinkProps["to"]) ?? "Labpoint";
   const { sessionInfo } = Route.useRouteContext();
-  const isAdmin = !!sessionInfo && (sessionInfo.roles.includes("Admin") || sessionInfo.roles.includes("Owner"));
+  const isAdmin = !!sessionInfo && (sessionInfo.roles.includes("Admin") || sessionInfo.roles.includes("Root"));
   // Mesmas queries da sidebar (o React Query compartilha o cache): avisa no botão do menu no mobile.
   const checkOutAlerts = useCheckOutAlerts({ isAdmin });
   const hasAlert = checkOutAlerts.mine || checkOutAlerts.admin;

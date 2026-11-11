@@ -202,7 +202,7 @@ export function AppSidebar() {
   const router = useRouter();
   const username = sessionInfo?.username || "Não definido";
   const roles = sessionInfo?.roles.join(", ") || "Não definido";
-  const isAdmin = !!sessionInfo && (sessionInfo.roles.includes("Admin") || sessionInfo.roles.includes("Owner"));
+  const isAdmin = !!sessionInfo && (sessionInfo.roles.includes("Admin") || sessionInfo.roles.includes("Root"));
   const checkOutAlerts = useCheckOutAlerts({ isAdmin });
 
   async function handleLogout() {
@@ -231,7 +231,7 @@ export function AppSidebar() {
             <NavLinks routes={userRoutes} alerts={{ "/check-out": checkOutAlerts.mine }} />
           </SidebarGroupContent>
         </SidebarGroup>
-        {sessionInfo && (sessionInfo.roles.includes("Admin") || sessionInfo.roles.includes("Owner")) && (
+        {sessionInfo && (sessionInfo.roles.includes("Admin") || sessionInfo.roles.includes("Root")) && (
           <SidebarGroup className="px-3 py-5">
             <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Coordenação</p>
             <SidebarGroupContent>
@@ -239,7 +239,7 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         )}
-        {sessionInfo && (sessionInfo.roles.includes("Admin") || sessionInfo.roles.includes("Owner")) && (
+        {sessionInfo && (sessionInfo.roles.includes("Admin") || sessionInfo.roles.includes("Root")) && (
           <SidebarGroup className="px-3 py-5">
             <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Diretoria</p>
             <SidebarGroupContent>

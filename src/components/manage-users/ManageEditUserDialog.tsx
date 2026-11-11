@@ -42,9 +42,9 @@ const roleOptions = ROLE_LABELS.map((label, index) => ({ label, value: index }))
  * o pai deve remontar o componente (`key`) a cada abertura.
  */
 export function ManageEditUserDialog({ account, viewerRole, open, onClose, onSubmit }: ManageEditUserDialogProps) {
-  // Regras (também validadas no backend): só o Owner altera cargos; ativar/desativar a conta exige
+  // Regras (também validadas no backend): só o Root altera cargos; ativar/desativar a conta exige
   // cargo superior ao do usuário editado.
-  const canChangeRole = viewerRole === ROLE_RANK.Owner;
+  const canChangeRole = viewerRole === ROLE_RANK.Root;
   const canToggleStatus = viewerRole > account.role;
 
   const { subject } = account;
@@ -135,7 +135,7 @@ export function ManageEditUserDialog({ account, viewerRole, open, onClose, onSub
               disabled={!canChangeRole}
             />
             {!canChangeRole && (
-              <p className="text-xs text-muted-foreground">Somente o proprietário (Owner) pode alterar cargos.</p>
+              <p className="text-xs text-muted-foreground">Somente o administrador geral (Root) pode alterar cargos.</p>
             )}
           </div>
         )}

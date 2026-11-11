@@ -174,7 +174,7 @@ export function SpaceReserveModal({ space, open, onClose, onSubmit }: SpaceReser
         )}
       </form.Subscribe>
 
-      {(sessionInfo?.roles.includes("Owner") || sessionInfo?.roles.includes("Admin")) && (
+      {(sessionInfo?.roles.includes("Root") || sessionInfo?.roles.includes("Admin")) && (
         <form.Field name="lock">
           {(field) => (
             <BooleanField
@@ -184,7 +184,7 @@ export function SpaceReserveModal({ space, open, onClose, onSubmit }: SpaceReser
               onCheckedChange={field.handleChange}
               trueLabel="Bloqueado"
               falseLabel="Disponível"
-              disabled={!(sessionInfo?.roles.includes("Owner") || sessionInfo?.roles.includes("Admin"))}
+              disabled={!(sessionInfo?.roles.includes("Root") || sessionInfo?.roles.includes("Admin"))}
               disabledReason="Você não pode bloquear a reserva de um espaço com cargo igual ou superior ao seu."
             />
           )}
