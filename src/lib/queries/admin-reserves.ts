@@ -3,13 +3,13 @@ import type { components } from "#/lib/utils/api";
 import { assertOk, unwrapList } from "#/lib/utils/api-result";
 import { notifyError, notifySuccess } from "#/lib/utils/notify";
 import { api } from "#/lib/utils/restapi";
-import { RESERVE_STATUS, reserveKeys } from "./reserves";
+import { invalidateReservations, RESERVE_STATUS, reserveKeys } from "./reserves";
 
 export type AdminReserve = components["schemas"]["AdminSpaceReserveResponseDTO"];
 
 export type AdminReserveParams = {
-  /** busca pelo nome do espaço */
-  search?: string;
+  /** só reservas desses espaços (vazio = todos) */
+  spaceIds?: number[];
   /** yyyy-MM-dd (obrigatório no backend) */
   startAt: string;
   /** yyyy-MM-dd (obrigatório no backend) */
@@ -24,16 +24,23 @@ export const adminReserveKeys = {
 };
 
 export function useAdminReserves(params: AdminReserveParams) {
-  const { search, startAt, endAt, scheduleIds, accountIds, status } = params;
+  const { spaceIds, startAt, endAt, scheduleIds, accountIds, status } = params;
 
   return useQuery({
-    queryKey: adminReserveKeys.list({ search: search || undefined, startAt, endAt, scheduleIds, accountIds, status }),
+    queryKey: adminReserveKeys.list({
+      spaceIds: spaceIds?.length ? spaceIds : undefined,
+      startAt,
+      endAt,
+      scheduleIds,
+      accountIds,
+      status,
+    }),
     queryFn: async ({ signal }) =>
       unwrapList(
         await api.GET("/space-reserve/admin", {
           params: {
             query: {
-              SearchQuery: search || undefined,
+              SpaceIds: spaceIds?.length ? spaceIds : undefined,
               StartAt: startAt,
               EndAt: endAt,
               ScheduleIds: scheduleIds?.length ? scheduleIds : undefined,
@@ -60,7 +67,7 @@ export function useEditAdminReserve() {
       assertOk(await api.PATCH("/space-reserve/admin/edit/{reserveId}", { params: { path: { reserveId } }, body })),
     onSuccess: () => {
       notifySuccess("Reserva atualizada com sucesso!");
-      return queryClient.invalidateQueries({ queryKey: reserveKeys.all });
+      return invalidateReservations(queryClient);
     },
     onError: notifyError,
   });
@@ -80,7 +87,7 @@ export function useCancelAdminReserve() {
       ),
     onSuccess: () => {
       notifySuccess("Reserva cancelada com sucesso!");
-      return queryClient.invalidateQueries({ queryKey: reserveKeys.all });
+      return invalidateReservations(queryClient);
     },
     onError: notifyError,
   });

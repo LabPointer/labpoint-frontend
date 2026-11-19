@@ -15,6 +15,8 @@ const PREVIEW_ROWS = 5;
 
 /** Larguras diferentes por linha/coluna para o esqueleto parecer uma tabela de verdade. */
 const previewWidths = ["w-24", "w-32", "w-20", "w-20", "w-16"];
+/** Relatório de recursos: + Quantidade e Sala. */
+const resourcePreviewWidths = ["w-24", "w-10", "w-24", "w-32", "w-20", "w-20", "w-16"];
 
 const statusLabels: Record<ReportReserveStatus, string> = { CONFIRMED: "Confirmada", ABSENT: "Ausente" };
 const statusClasses: Record<ReportReserveStatus, string> = {
@@ -34,6 +36,11 @@ export function ReportReservesTable({ report, mode }: ReportReservesTableProps) 
   const pagination = usePagination(filters);
   const { items, hasNext } = paginateLocal(report.reserves, pagination);
   const hasData = mode === "data";
+  const isResources = report.kind === "resources";
+  const widths = isResources ? resourcePreviewWidths : previewWidths;
+  const lastColumn = widths.length - 1;
+  // colunas centralizadas: datas e status (e a quantidade, no relatório de recursos)
+  const centered = (column: number) => column >= lastColumn - 2 || (isResources && column === 1);
 
   return (
     <Card className={cn(reportCardClass(mode), "gap-4 px-0")}>
@@ -55,7 +62,9 @@ export function ReportReservesTable({ report, mode }: ReportReservesTableProps) 
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="pl-4">Sala</TableHead>
+            <TableHead className="pl-4">{report.copy.entityColumn}</TableHead>
+            {isResources && <TableHead className="text-center">Qtd.</TableHead>}
+            {isResources && <TableHead>Sala</TableHead>}
             <TableHead>Usuário</TableHead>
             <TableHead className="text-center">Início</TableHead>
             <TableHead className="text-center">Fim</TableHead>
@@ -67,6 +76,12 @@ export function ReportReservesTable({ report, mode }: ReportReservesTableProps) 
             ? items.map((reserve) => (
                 <TableRow key={reserve.id}>
                   <TableCell className="pl-4 font-medium">{reserve.spaceName}</TableCell>
+                  {isResources && <TableCell className="text-center tabular-nums">{reserve.quantity}</TableCell>}
+                  {isResources && (
+                    <TableCell className={reserve.linkedSpaceName ? undefined : "text-muted-foreground"}>
+                      {reserve.linkedSpaceName ?? "Avulsa"}
+                    </TableCell>
+                  )}
                   <TableCell>{reserve.userName}</TableCell>
                   <TableCell className="text-center">{formatReportDate(reserve.dateFrom)}</TableCell>
                   <TableCell className="text-center">{formatReportDate(reserve.dateTo)}</TableCell>
@@ -82,14 +97,23 @@ export function ReportReservesTable({ report, mode }: ReportReservesTableProps) 
               ))
             : Array.from({ length: PREVIEW_ROWS }, (_, row) => (
                 <TableRow key={row} aria-hidden="true">
-                  {previewWidths.map((width, column) => (
+                  {widths.map((width, column) => (
                     <TableCell
                       key={column}
-                      className={cn(column === 0 && "pl-4", column === 4 && "pr-4", column >= 2 && "text-center")}
+                      className={cn(
+                        column === 0 && "pl-4",
+                        column === lastColumn && "pr-4",
+                        centered(column) && "text-center",
+                      )}
                     >
                       <ReportSkeleton
                         mode={mode}
-                        className={cn("h-4", width, column >= 2 && "mx-auto", column === 4 && "h-5 rounded-full")}
+                        className={cn(
+                          "h-4",
+                          width,
+                          centered(column) && "mx-auto",
+                          column === lastColumn && "h-5 rounded-full",
+                        )}
                       />
                     </TableCell>
                   ))}

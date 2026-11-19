@@ -4,7 +4,7 @@ export const Route = createFileRoute("/_public")({
     beforeLoad: async ({ context }) => {
         const { sessionInfo } = context;
         if (sessionInfo) {
-            throw redirect({ to: "/home" });
+            throw redirect({ to: "/space-reserve" });
         }
     },
     component: RouteComponent,

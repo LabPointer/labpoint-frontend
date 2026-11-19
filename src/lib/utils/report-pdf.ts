@@ -55,7 +55,7 @@ const CONTENT_W = PAGE_W - MARGIN * 2;
 const SECTION_GAP = 8;
 /** Limite inferior do conteúdo: abaixo dele ficam a margem e o rodapé de cada página. */
 const BOTTOM = PAGE_H - 18;
-/** Quantos laboratórios empatados têm o nome listado no cartão de resumo (o resto vira "e mais N"). */
+/** Quantos itens (laboratórios ou recursos) empatados têm o nome listado no cartão de resumo (o resto vira "e mais N"). */
 const MAX_DISPUTED_NAMES = 3;
 
 const STATUS_LABEL: Record<ReportReserveStatus, string> = { CONFIRMED: "Confirmada", ABSENT: "Ausente" };
@@ -126,7 +126,7 @@ function drawHeader(doc: jsPDF, report: ReportData) {
 
   font(doc, 19, "bold");
   ink(doc, COLOR.white);
-  doc.text("Relatório de Ocupação", MARGIN, 20);
+  doc.text(report.copy.title, MARGIN, 20);
 
   font(doc, 10.5);
   ink(doc, COLOR.violet200);
@@ -154,7 +154,7 @@ function drawHeader(doc: jsPDF, report: ReportData) {
 }
 
 function drawKpis(doc: jsPDF, report: ReportData, y: number) {
-  const { summary } = report;
+  const { summary, copy } = report;
   const preview = report.isPreview;
   const gap = 4;
   const w = (CONTENT_W - gap * 2) / 3;
@@ -166,7 +166,7 @@ function drawKpis(doc: jsPDF, report: ReportData, y: number) {
   const tiedLines = [
     ...visible.map((space) => ({ text: space.name, muted: false })),
     ...(hidden > 0
-      ? [{ text: `e mais ${hidden} ${hidden === 1 ? "laboratório empatado" : "laboratórios empatados"}`, muted: true }]
+      ? [{ text: `e mais ${hidden} ${hidden === 1 ? copy.tiedOne : copy.tiedMany}`, muted: true }]
       : []),
   ];
   const lineHeight = 5;
@@ -174,9 +174,9 @@ function drawKpis(doc: jsPDF, report: ReportData, y: number) {
 
   const kpis = [
     {
-      label: "Taxa de ocupação média",
+      label: copy.averageLabel,
       value: summary.averageOccupancyRate === null ? null : formatPercent(summary.averageOccupancyRate),
-      caption: "Horários reservados sobre a capacidade",
+      caption: copy.averageCaption,
       color: COLOR.ink,
       size: 18,
       lines: null as typeof tiedLines | null,
@@ -184,17 +184,17 @@ function drawKpis(doc: jsPDF, report: ReportData, y: number) {
     {
       label: "Taxa de ociosidade / no-show",
       value: summary.idleRate === null ? null : formatPercent(summary.idleRate),
-      caption: `${pluralize(summary.absentReserves, "reserva ausente", "reservas ausentes")} de ${summary.totalReserves}`,
+      caption: `dos horários reservados · ${pluralize(summary.absentReserves, "reserva ausente", "reservas ausentes")} de ${summary.totalReserves}`,
       color: COLOR.rose600,
       size: 18,
       lines: null,
     },
     {
-      label: tied ? "Laboratórios mais disputados" : "Laboratório mais disputado",
+      label: tied ? copy.mostDisputedMany : copy.mostDisputedOne,
       value: preview ? null : (disputed[0]?.name ?? "—"),
       caption: !disputed.length
-        ? "Nenhum espaço com reservas no período"
-        : `${formatPercent(disputed[0].occupancyRate)} de ocupação${tied ? " cada" : ""}`,
+        ? copy.noneWithReserves
+        : `${formatPercent(disputed[0].occupancyRate)} de ${copy.rate}${tied ? " cada" : ""}`,
       color: COLOR.violet600,
       size: 14,
       lines: tied ? tiedLines : null,
@@ -269,8 +269,8 @@ function drawRanking(doc: jsPDF, report: ReportData, y: number) {
   y = ensureSpace(doc, y, 18 + 8);
   sectionTitle(
     doc,
-    "Ranking de utilização por sala",
-    `Percentual de ocupação em ${formatMonthYearPeriod(report.period)}`,
+    report.copy.rankingTitle,
+    `Percentual de ${report.copy.rate} em ${formatMonthYearPeriod(report.period)}`,
     y,
   );
 
@@ -288,8 +288,8 @@ function drawRanking(doc: jsPDF, report: ReportData, y: number) {
       color: COLOR.violet600,
       stats: ranking.highestDemand,
       percent: (stat) => stat.occupancyRate,
-      text: (stat) => `${formatPercent(stat.occupancyRate)} de ocupação`,
-      empty: "Nenhum espaço teve reservas no período",
+      text: (stat) => `${formatPercent(stat.occupancyRate)} de ${report.copy.rate}`,
+      empty: report.copy.rankingEmptyHighest,
       previewWidth: 0.78,
     },
     {
@@ -297,8 +297,8 @@ function drawRanking(doc: jsPDF, report: ReportData, y: number) {
       color: COLOR.amber500,
       stats: ranking.lowestDemand,
       percent: (stat) => stat.occupancyRate,
-      text: (stat) => `${formatPercent(stat.occupancyRate)} de ocupação`,
-      empty: "É preciso ao menos dois espaços com demandas diferentes para comparar",
+      text: (stat) => `${formatPercent(stat.occupancyRate)} de ${report.copy.rate}`,
+      empty: report.copy.rankingEmptyLowest,
       previewWidth: 0.42,
     },
     {
@@ -307,7 +307,7 @@ function drawRanking(doc: jsPDF, report: ReportData, y: number) {
       stats: ranking.mostIdle,
       percent: (stat) => stat.idleRate,
       text: (stat) =>
-        `${formatPercent(stat.idleRate)} ausentes · ${pluralize(stat.absentReserves, "ausência", "ausências")} em ${stat.totalReserves}`,
+        `${formatPercent(stat.idleRate)} dos horários ausentes · ${pluralize(stat.absentReserves, "ausência", "ausências")} em ${pluralize(stat.totalReserves, "reserva", "reservas")}`,
       empty: "Nenhuma ausência registrada no período",
       previewWidth: 0.26,
     },
@@ -427,7 +427,7 @@ function drawUsers(doc: jsPDF, report: ReportData, startY: number) {
       numbers: (u) => ({
         value: String(u.absentReserves),
         label: u.absentReserves === 1 ? "ausência" : "ausências",
-        detail: `${formatPercent(u.idleRate)} de ${pluralize(u.totalReserves, "reserva", "reservas")}`,
+        detail: `${formatPercent(u.idleRate)} dos horários · ${pluralize(u.totalReserves, "reserva", "reservas")}`,
       }),
       empty: "Nenhuma ausência registrada no período",
     },
@@ -565,21 +565,47 @@ function drawTable(doc: jsPDF, report: ReportData, startY: number) {
     doc.text(pluralize(report.reserves.length, "reserva", "reservas"), PAGE_W - MARGIN, y + 4, { align: "right" });
   }
 
+  const isResources = report.kind === "resources";
+  const head = isResources
+    ? [report.copy.entityColumn, "Qtd.", "Sala", "Usuário", "Início", "Fim", "Status"]
+    : [report.copy.entityColumn, "Usuário", "Início", "Fim", "Status"];
+  const statusColumn = head.length - 1;
+  // colunas centralizadas: datas e status (e a quantidade, no relatório de recursos)
+  const centered = (index: number) => index >= statusColumn - 2 || (isResources && index === 1);
+
   const body = preview
-    ? Array.from({ length: 5 }, () => ["", "", "", "", ""])
+    ? Array.from({ length: 5 }, () => head.map(() => ""))
     : report.reserves.map((reserve) => [
         reserve.spaceName,
+        ...(isResources ? [String(reserve.quantity ?? ""), reserve.linkedSpaceName ?? "Avulsa"] : []),
         reserve.userName,
         formatReportDate(reserve.dateFrom),
         formatReportDate(reserve.dateTo),
         STATUS_LABEL[reserve.status],
       ]);
 
-  const skeletonWidths = [0.55, 0.65, 0.6, 0.6, 0.5];
+  const skeletonWidths = isResources ? [0.55, 0.5, 0.6, 0.65, 0.6, 0.6, 0.5] : [0.55, 0.65, 0.6, 0.6, 0.5];
+  const columnStyles: Record<string, { cellWidth: number; halign?: "center" }> = isResources
+    ? {
+        0: { cellWidth: 36 },
+        1: { cellWidth: 12, halign: "center" as const },
+        2: { cellWidth: 32 },
+        3: { cellWidth: 38 },
+        4: { cellWidth: 21, halign: "center" as const },
+        5: { cellWidth: 21, halign: "center" as const },
+        6: { cellWidth: 22, halign: "center" as const },
+      }
+    : {
+        0: { cellWidth: 46 },
+        1: { cellWidth: 52 },
+        2: { cellWidth: 24, halign: "center" as const },
+        3: { cellWidth: 24, halign: "center" as const },
+        4: { cellWidth: 36, halign: "center" as const },
+      };
 
   autoTable(doc, {
     startY: y + 13,
-    head: [["Sala", "Usuário", "Início", "Fim", "Status"]],
+    head: [head],
     body,
     theme: "grid",
     margin: { left: MARGIN, right: MARGIN, bottom: 18 },
@@ -594,22 +620,16 @@ function drawTable(doc: jsPDF, report: ReportData, startY: number) {
     },
     headStyles: { fillColor: COLOR.violet700, textColor: COLOR.white, fontStyle: "bold" },
     alternateRowStyles: { fillColor: COLOR.zebra },
-    columnStyles: {
-      0: { cellWidth: 46 },
-      1: { cellWidth: 52 },
-      2: { cellWidth: 24, halign: "center" },
-      3: { cellWidth: 24, halign: "center" },
-      4: { cellWidth: 36, halign: "center" },
-    },
+    columnStyles,
     didParseCell: (data) => {
-      if (preview || data.section !== "body" || data.column.index !== 4) return;
+      if (preview || data.section !== "body" || data.column.index !== statusColumn) return;
       data.cell.styles.fontStyle = "bold";
       data.cell.styles.textColor = data.cell.raw === STATUS_LABEL.ABSENT ? COLOR.rose600 : COLOR.emerald600;
     },
     didDrawCell: (data) => {
       if (!preview || data.section !== "body") return;
       const width = (data.cell.width - 5) * skeletonWidths[data.column.index];
-      const x = data.column.index >= 2 ? data.cell.x + (data.cell.width - width) / 2 : data.cell.x + 2.5;
+      const x = centered(data.column.index) ? data.cell.x + (data.cell.width - width) / 2 : data.cell.x + 2.5;
       skeletonBar(doc, x, data.cell.y + data.cell.height / 2 - 1.2, width, 2.4);
     },
   });
@@ -627,7 +647,7 @@ function drawFooters(doc: jsPDF, report: ReportData) {
 
     font(doc, 7.5);
     ink(doc, COLOR.muted);
-    doc.text(`Labpoint · Relatório de ocupação · ${formatMonthYearPeriod(report.period)}`, MARGIN, PAGE_H - 9);
+    doc.text(`Labpoint · ${report.copy.title} · ${formatMonthYearPeriod(report.period)}`, MARGIN, PAGE_H - 9);
     doc.text(`Página ${page} de ${pages}`, PAGE_W - MARGIN, PAGE_H - 9, { align: "right" });
   }
 }
@@ -640,8 +660,8 @@ function drawFooters(doc: jsPDF, report: ReportData) {
 export function buildReportPdf(report: ReportData) {
   const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
   doc.setProperties({
-    title: `Relatório de ocupação - ${formatMonthYearPeriod(report.period)}`,
-    subject: report.isPreview ? "Prévia (sem reservas no período)" : "Ocupação e ociosidade dos espaços",
+    title: `${report.copy.title} - ${formatMonthYearPeriod(report.period)}`,
+    subject: report.isPreview ? "Prévia (sem reservas no período)" : report.copy.pdfSubject,
     creator: "Labpoint",
   });
 
@@ -660,5 +680,5 @@ export function buildReportPdf(report: ReportData) {
 
 /** Gera e baixa o PDF (executa só no navegador). */
 export function exportReportPdf(report: ReportData) {
-  buildReportPdf(report).save(reportFileName(report.period));
+  buildReportPdf(report).save(reportFileName(report.period, report.kind));
 }

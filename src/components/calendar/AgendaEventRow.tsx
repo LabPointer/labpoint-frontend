@@ -1,3 +1,4 @@
+import { Package } from "lucide-react";
 import { ReservationEventModal } from "#/components/calendar/ReservationEventModal";
 import type { ReservationEventData } from "#/lib/types/reservation-types";
 import { statusLabel, statusVariantClass } from "#/lib/utils/reservation-utils";
@@ -30,8 +31,17 @@ export function AgendaEventRow({ data }: AgendaEventRowProps) {
         className="size-2 shrink-0 rounded-full bg-(--ec-event-color)"
       />
 
-      {/* Nome da sala */}
-      <span className="min-w-0 flex-1 truncate text-sm font-medium">{data.spaceName}</span>
+      {/* Nome da sala (ou do recurso, na reserva avulsa) + recursos reservados junto */}
+      {data.kind === "resource" && <Package aria-label="Recurso" className="size-3.5 shrink-0 text-muted-foreground" />}
+      <span className="min-w-0 flex-1 truncate text-sm font-medium">
+        {data.spaceName}
+        {data.resources.length > 0 && (
+          <span className="font-normal text-muted-foreground">
+            {" · "}
+            {data.resources.map((resource) => `${resource.name} × ${resource.quantity}`).join(", ")}
+          </span>
+        )}
+      </span>
 
       {/* Badge de status */}
       <span

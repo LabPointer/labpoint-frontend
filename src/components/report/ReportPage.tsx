@@ -1,7 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 import { EyeIcon } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useRefreshReport, useReport } from "#/lib/queries/report";
 import { ApiError } from "#/lib/types/error-types";
 import {
   formatMonthYearPeriod,
@@ -10,36 +9,39 @@ import {
   singleMonthPeriod,
 } from "#/lib/utils/month-year";
 import { notifyError, notifySuccess } from "#/lib/utils/notify";
-import { emptyReportData } from "#/lib/utils/report";
-import { ReportRankingCard } from "@/components/report/ReportRankingCard";
-import { ReportReservesTable } from "@/components/report/ReportReservesTable";
-import { ReportSummaryCards } from "@/components/report/ReportSummaryCards";
-import { ReportToolbar } from "@/components/report/ReportToolbar";
-import { ReportUserCards } from "@/components/report/ReportUserCards";
-import { type ReportMode, reportCardClass } from "@/components/report/report-ui";
+import { emptyReportData, type ReportData, type ReportKind } from "#/lib/utils/report";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ReportRankingCard } from "./ReportRankingCard";
+import { ReportReservesTable } from "./ReportReservesTable";
+import { ReportSummaryCards } from "./ReportSummaryCards";
+import { ReportToolbar } from "./ReportToolbar";
+import { ReportUserCards } from "./ReportUserCards";
+import { type ReportMode, reportCardClass } from "./report-ui";
 
-export const Route = createFileRoute("/_private/admin/report")({
-  component: RouteComponent,
-});
+type ReportPageProps = {
+  kind: ReportKind;
+  /** Hook da consulta do relatório (`useReport` ou `useResourceReport`). Deve ser sempre o mesmo por rota. */
+  useReportQuery: (period: MonthYearPeriod) => UseQueryResult<ReportData>;
+  /** Hook que recalcula o período (`useRefreshReport` ou `useRefreshResourceReport`). */
+  useRefresh: () => UseMutationResult<unknown, unknown, MonthYearPeriod>;
+};
 
-function RouteComponent() {
+/** Tela de relatório (salas ou recursos): período, indicadores, rankings, usuários, reservas e PDF. */
+export function ReportPage({ kind, useReportQuery, useRefresh }: ReportPageProps) {
   // Só meses encerrados: o atual e os futuros ainda mudam (confirmações, cancelamentos, novas reservas).
   const maxMonth = useMemo(previousMonthYear, []);
   const [period, setPeriod] = useState<MonthYearPeriod>(() => singleMonthPeriod(maxMonth));
   const [isExporting, setIsExporting] = useState(false);
+  const report = useReportQuery(period);
+  const refresh = useRefresh();
 
-  const report = useReport(period);
-  const refresh = useRefreshReport();
-
-  const data = report.data ?? emptyReportData(period);
+  const data = report.data ?? emptyReportData(period, kind);
   const mode: ReportMode = report.isPending ? "loading" : data.isPreview ? "preview" : "data";
   const failed = report.isError && !report.data;
 
   async function handleExport() {
     if (!report.data) return;
-
     setIsExporting(true);
     try {
       // jsPDF só é baixado quando alguém exporta (fica fora do bundle da página).
@@ -56,6 +58,8 @@ function RouteComponent() {
   return (
     <section className="container flex flex-col gap-6" aria-busy={report.isFetching}>
       <ReportToolbar
+        title={data.copy.title}
+        subtitle={data.copy.subtitle}
         period={period}
         maxMonth={maxMonth}
         onPeriodChange={setPeriod}

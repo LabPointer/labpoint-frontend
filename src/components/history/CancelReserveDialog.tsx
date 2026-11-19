@@ -14,6 +14,8 @@ type CancelReserveDialogProps = {
   spaceName: string;
   /** Quando informado (admin), diz de quem é a reserva. */
   userName?: string;
+  /** Texto extra após a mensagem padrão (ex.: o que acontece com os recursos vinculados). */
+  note?: string;
   isPending: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -24,6 +26,7 @@ export function CancelReserveDialog({
   open,
   spaceName,
   userName,
+  note,
   isPending,
   onClose,
   onConfirm,
@@ -41,6 +44,7 @@ export function CancelReserveDialog({
           <AlertDialogDescription>
             {userName ? `A reserva de ${userName} em ${spaceName}` : `A reserva de ${spaceName}`} será cancelada e os
             horários voltarão a ficar disponíveis. Essa ação não pode ser desfeita.
+            {note && <span className="mt-2 block">{note}</span>}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

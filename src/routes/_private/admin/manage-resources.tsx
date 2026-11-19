@@ -19,6 +19,7 @@ export const Route = createFileRoute("/_private/admin/manage-resources")({
 const initialFilters: ResourceFilters = {
   search: "",
   enabled: undefined,
+  reservable: undefined,
   limit: DEFAULT_PAGE_LIMIT,
 };
 
@@ -26,8 +27,9 @@ function RouteComponent() {
   const [filters, setFilters] = useState<ResourceFilters>(initialFilters);
   const pagination = usePagination(filters);
   const resources = useResources({
-    name: filters.search,
+    search: filters.search,
     enabled: filters.enabled,
+    reservable: filters.reservable,
     ...pagination.request,
   });
   const { items, hasNext } = toPaged(resources.data, pagination.limit);
@@ -37,18 +39,32 @@ function RouteComponent() {
   const editDialog = useFormDialog<Resource>();
 
   async function handleCreate(data: ResourceFormData) {
-    if (await succeeded(createResource.mutateAsync(data))) createDialog.close();
+    const ok = await succeeded(
+      createResource.mutateAsync({
+        name: data.name,
+        description: data.description || null,
+        enabled: data.enabled,
+        reservable: data.reservable,
+        quantity: data.reservable ? data.quantity : null,
+      }),
+    );
+    if (ok) createDialog.close();
   }
 
   async function handleEdit(data: ResourceFormData) {
     const resource = editDialog.target;
     if (!resource) return;
 
+    const currentQuantity = resource.quantity == null ? null : Number(resource.quantity);
     const ok = await succeeded(
       editResource.mutateAsync({
         id: resource.id,
         name: data.name.length > 0 ? data.name : null,
         enabled: data.enabled,
+        // "" remove a descrição; `null` mantém a atual
+        description: data.description === (resource.description ?? "") ? null : data.description,
+        reservable: data.reservable === resource.reservable ? null : data.reservable,
+        quantity: data.reservable && data.quantity !== currentQuantity ? data.quantity : null,
       }),
     );
     if (ok) editDialog.close();

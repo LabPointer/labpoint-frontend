@@ -2,12 +2,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { unwrap } from "#/lib/utils/api-result";
 import type { MonthYearPeriod } from "#/lib/utils/month-year";
 import { notifyError, notifySuccess } from "#/lib/utils/notify";
-import { toReportData } from "#/lib/utils/report";
+import { toReportData, toResourceReportData } from "#/lib/utils/report";
 import { api } from "#/lib/utils/restapi";
 
 export const reportKeys = {
   all: ["report"] as const,
   period: ({ from, to }: MonthYearPeriod) => [...reportKeys.all, from.year, from.month, to.year, to.month] as const,
+  resources: ({ from, to }: MonthYearPeriod) =>
+    [...reportKeys.all, "resources", from.year, from.month, to.year, to.month] as const,
 };
 
 /** `month` do front vai de 0 a 11; o backend espera 1 a 12. */
@@ -50,6 +52,48 @@ export function useRefreshReport() {
     mutationFn: (period: MonthYearPeriod) => fetchReport(period, true),
     onSuccess: (data, period) => {
       queryClient.setQueryData(reportKeys.period(period), data);
+      notifySuccess("Relatório atualizado com os dados mais recentes!");
+    },
+    onError: notifyError,
+  });
+}
+
+/** `month` do front vai de 0 a 11; o backend espera 1 a 12. */
+async function fetchResourceReport({ from, to }: MonthYearPeriod, refresh: boolean, signal?: AbortSignal) {
+  return unwrap(
+    await api.GET("/report/resources", {
+      params: {
+        query: {
+          FromYear: from.year,
+          FromMonth: from.month + 1,
+          ToYear: to.year,
+          ToMonth: to.month + 1,
+          Refresh: refresh || undefined,
+        },
+      },
+      signal,
+    }),
+    "Erro ao gerar o relatório de recursos.",
+  );
+}
+
+/** Relatório de recursos reserváveis: mesmas regras e cache do relatório de salas. */
+export function useResourceReport(period: MonthYearPeriod) {
+  return useQuery({
+    queryKey: reportKeys.resources(period),
+    queryFn: ({ signal }) => fetchResourceReport(period, false, signal),
+    select: toResourceReportData,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useRefreshResourceReport() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (period: MonthYearPeriod) => fetchResourceReport(period, true),
+    onSuccess: (data, period) => {
+      queryClient.setQueryData(reportKeys.resources(period), data);
       notifySuccess("Relatório atualizado com os dados mais recentes!");
     },
     onError: notifyError,

@@ -5,11 +5,11 @@ import { type ReportMode, ReportSkeleton, reportCardClass } from "./report-ui";
 
 type ReportSummaryCardsProps = { report: ReportData; mode: ReportMode };
 
-/** Quantos laboratórios empatados têm o nome listado no card (o resto vira "e mais N"). */
+/** Quantos itens (laboratórios ou recursos) empatados têm o nome listado no card (o resto vira "e mais N"). */
 const MAX_DISPUTED_NAMES = 3;
 
 export function ReportSummaryCards({ report, mode }: ReportSummaryCardsProps) {
-  const { summary } = report;
+  const { summary, copy } = report;
   const hasData = mode === "data";
   const disputed = summary.mostDisputedSpaces;
   const tied = disputed.length > 1;
@@ -17,11 +17,11 @@ export function ReportSummaryCards({ report, mode }: ReportSummaryCardsProps) {
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      <SummaryCard label="Taxa de ocupação média" mode={mode}>
+      <SummaryCard label={copy.averageLabel} mode={mode}>
         {hasData && summary.averageOccupancyRate !== null ? (
           <>
             <Value>{formatPercent(summary.averageOccupancyRate)}</Value>
-            <Caption>Horários reservados sobre a capacidade dos espaços</Caption>
+            <Caption>{copy.averageCaption}</Caption>
           </>
         ) : (
           <ValueSkeleton mode={mode} />
@@ -33,6 +33,7 @@ export function ReportSummaryCards({ report, mode }: ReportSummaryCardsProps) {
           <>
             <Value className="text-destructive">{formatPercent(summary.idleRate)}</Value>
             <Caption>
+              dos horários reservados ·{" "}
               {pluralize(summary.absentReserves, "reserva ausente", "reservas ausentes")} de {summary.totalReserves}
             </Caption>
           </>
@@ -41,13 +42,15 @@ export function ReportSummaryCards({ report, mode }: ReportSummaryCardsProps) {
         )}
       </SummaryCard>
 
-      <SummaryCard label={tied ? "Laboratórios mais disputados" : "Laboratório mais disputado"} mode={mode}>
+      <SummaryCard label={tied ? copy.mostDisputedMany : copy.mostDisputedOne} mode={mode}>
         {hasData && disputed.length === 1 ? (
           <>
             <Value className="truncate text-violet-600 dark:text-violet-400" title={disputed[0].name}>
               {disputed[0].name}
             </Value>
-            <Caption>{formatPercent(disputed[0].occupancyRate)} de ocupação</Caption>
+            <Caption>
+              {formatPercent(disputed[0].occupancyRate)} de {copy.rate}
+            </Caption>
           </>
         ) : hasData && tied ? (
           <>
@@ -64,15 +67,17 @@ export function ReportSummaryCards({ report, mode }: ReportSummaryCardsProps) {
             </ul>
             {hidden > 0 && (
               <Caption>
-                e mais {hidden} {hidden === 1 ? "laboratório empatado" : "laboratórios empatados"}
+                e mais {hidden} {hidden === 1 ? copy.tiedOne : copy.tiedMany}
               </Caption>
             )}
-            <Caption>{formatPercent(disputed[0].occupancyRate)} de ocupação cada</Caption>
+            <Caption>
+              {formatPercent(disputed[0].occupancyRate)} de {copy.rate} cada
+            </Caption>
           </>
         ) : hasData ? (
           <>
             <Value className="text-muted-foreground">—</Value>
-            <Caption>Nenhum espaço com reservas no período</Caption>
+            <Caption>{copy.noneWithReserves}</Caption>
           </>
         ) : (
           <ValueSkeleton mode={mode} />

@@ -32,7 +32,7 @@ const roleRecord: Record<string, number | undefined> = {
   "Todos os cargos": undefined,
   User: 0,
   Admin: 1,
-  Owner: 2,
+  Root: 2,
 };
 
 const statusRecord: Record<string, boolean | undefined> = {
@@ -102,7 +102,7 @@ export function ManageUserSearchBar({ onSearch }: ManageUserSearchBarProps = {})
   }, [subjectData]);
 
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const roles = ["Todos os cargos", "Owner", "Admin", "User"];
+  const roles = ["Todos os cargos", "Root", "Admin", "User"];
   const [role, setRole] = useState(roles[0]);
   const statuses = ["Todos os status", "Ativo", "Inativo"];
   const [status, setStatus] = useState(statuses[0]);

@@ -15,7 +15,7 @@ export type ManageUserTableRowProps = {
 const roleRecord: Record<number, string> = {
   0: "Usuário",
   1: "Administrador",
-  2: "Owner",
+  2: "Root",
 }
 
 const api = useApi();

@@ -1,4 +1,4 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, type QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, endOfMonth, format, parseISO, startOfMonth, startOfToday } from "date-fns";
 import { useCallback } from "react";
 import type { ReservationStatus } from "#/lib/types/reservation-types";
@@ -6,6 +6,7 @@ import type { components } from "#/lib/utils/api";
 import { assertOk, unwrapList } from "#/lib/utils/api-result";
 import { notifyError, notifySuccess } from "#/lib/utils/notify";
 import { api } from "#/lib/utils/restapi";
+import { resourceKeys } from "./resources";
 import type { Schedule } from "./schedules";
 
 export type Reserve = components["schemas"]["SpaceReserveResponseDTO"];
@@ -36,13 +37,21 @@ export function reserveTab(reserve: Reserve, today = startOfToday()): ReserveTab
   return parseISO(reserve.dateTo) < today ? "concluded" : "next";
 }
 
+/** Reservas de sala e de recurso se afetam (recursos vinculados, disponibilidade): invalida as duas. */
+export function invalidateReservations(queryClient: QueryClient) {
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: reserveKeys.all }),
+    queryClient.invalidateQueries({ queryKey: resourceKeys.all }),
+  ]);
+}
+
 export const toApiDate = (date: Date) => format(date, "yyyy-MM-dd");
 
 export const reserveKeys = {
   all: ["reserves"] as const,
   month: (year: number, month: number) => [...reserveKeys.all, "month", year, month] as const,
-  range: (startAt: string, endAt: string, status: number | undefined) =>
-    [...reserveKeys.all, "range", startAt, endAt, status] as const,
+  range: (startAt: string, endAt: string, status: number | undefined, spaceIds?: number[]) =>
+    [...reserveKeys.all, "range", startAt, endAt, status, spaceIds?.length ? spaceIds : undefined] as const,
   existingSchedules: (spaceId: number, startAt: string, endAt: string) =>
     [...reserveKeys.all, "existing-schedules", spaceId, startAt, endAt] as const,
 };
@@ -87,7 +96,18 @@ export function useMonthReserves({ year, month }: { year: number; month: number 
  * Reservas do usuário que tocam o período `startAt`–`endAt` (yyyy-MM-dd), opcionalmente de um único status.
  * Mesma estratégia de `useMonthReserves`: janela maior no backend (que filtra por contenção) e sobreposição filtrada aqui.
  */
-export function useRangeReserves({ startAt, endAt, status }: { startAt: string; endAt: string; status?: number }) {
+export function useRangeReserves({
+  startAt,
+  endAt,
+  status,
+  spaceIds,
+}: {
+  startAt: string;
+  endAt: string;
+  status?: number;
+  /** Só reservas dessas salas (vazio = todas). */
+  spaceIds?: number[];
+}) {
   const windowStart = toApiDate(addDays(parseISO(startAt), -MAX_RESERVE_DAYS));
   const windowEnd = toApiDate(addDays(parseISO(endAt), MAX_RESERVE_DAYS));
 
@@ -97,11 +117,18 @@ export function useRangeReserves({ startAt, endAt, status }: { startAt: string; 
   );
 
   return useQuery({
-    queryKey: reserveKeys.range(startAt, endAt, status),
+    queryKey: reserveKeys.range(startAt, endAt, status, spaceIds),
     queryFn: async ({ signal }) =>
       unwrapList(
         await api.GET("/space-reserve", {
-          params: { query: { StartAt: windowStart, EndAt: windowEnd, Status: status } },
+          params: {
+            query: {
+              StartAt: windowStart,
+              EndAt: windowEnd,
+              Status: status,
+              SpaceIds: spaceIds?.length ? spaceIds : undefined,
+            },
+          },
           signal,
         }),
         "Erro ao buscar reservas.",
@@ -111,23 +138,26 @@ export function useRangeReserves({ startAt, endAt, status }: { startAt: string; 
   });
 }
 
-/** Horários já ocupados do espaço no período (`to` ausente = um único dia). */
-export function useExistingSchedules(spaceId: number, range: { from?: Date; to?: Date } | undefined) {
+/**
+ * Horários já ocupados do espaço no período (`to` ausente = um único dia).
+ * Sem `spaceId` (reserva só de recurso) não consulta nada.
+ */
+export function useExistingSchedules(spaceId: number | undefined, range: { from?: Date; to?: Date } | undefined) {
   const from = range?.from;
   const startAt = from ? toApiDate(from) : "";
   const endAt = from ? toApiDate(range?.to ?? from) : "";
 
   return useQuery({
-    queryKey: reserveKeys.existingSchedules(spaceId, startAt, endAt),
+    queryKey: reserveKeys.existingSchedules(spaceId ?? 0, startAt, endAt),
     queryFn: async ({ signal }): Promise<Schedule[]> =>
       unwrapList(
         await api.GET("/space-reserve/existing-schedules/{spaceId}", {
-          params: { path: { spaceId }, query: { StartAt: startAt, EndAt: endAt } },
+          params: { path: { spaceId: spaceId ?? 0 }, query: { StartAt: startAt, EndAt: endAt } },
           signal,
         }),
         "Erro ao buscar horários ocupados.",
       ),
-    enabled: Boolean(from),
+    enabled: Boolean(from) && spaceId !== undefined,
   });
 }
 
@@ -144,7 +174,7 @@ export function useCreateReserve() {
     }) => assertOk(await api.POST("/space-reserve/create/{spaceId}", { params: { path: { spaceId } }, body })),
     onSuccess: () => {
       notifySuccess("Reserva criada com sucesso!");
-      return queryClient.invalidateQueries({ queryKey: reserveKeys.all });
+      return invalidateReservations(queryClient);
     },
     onError: notifyError,
   });
@@ -163,7 +193,7 @@ export function useEditReserve() {
     }) => assertOk(await api.PATCH("/space-reserve/edit/{reserveId}", { params: { path: { reserveId } }, body })),
     onSuccess: () => {
       notifySuccess("Reserva atualizada com sucesso!");
-      return queryClient.invalidateQueries({ queryKey: reserveKeys.all });
+      return invalidateReservations(queryClient);
     },
     onError: notifyError,
   });
@@ -177,7 +207,7 @@ export function useCancelReserve() {
       assertOk(await api.DELETE("/space-reserve/cancel/{id}", { params: { path: { id } } })),
     onSuccess: () => {
       notifySuccess("Reserva cancelada com sucesso!");
-      return queryClient.invalidateQueries({ queryKey: reserveKeys.all });
+      return invalidateReservations(queryClient);
     },
     onError: notifyError,
   });

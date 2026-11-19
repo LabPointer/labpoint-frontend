@@ -36,7 +36,7 @@ export function ReportUserCards({ report, mode }: ReportUserCardsProps) {
         stat={(user) => ({
           value: String(user.absentReserves),
           label: user.absentReserves === 1 ? "ausência" : "ausências",
-          detail: `${formatPercent(user.idleRate)} de ${pluralize(user.totalReserves, "reserva", "reservas")}`,
+          detail: `${formatPercent(user.idleRate)} dos horários · ${pluralize(user.totalReserves, "reserva", "reservas")}`,
         })}
       />
     </div>

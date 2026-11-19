@@ -8,6 +8,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { reportCardClass } from "./report-ui";
 
 type ReportToolbarProps = {
+  title?: string;
+  subtitle?: string;
   period: MonthYearPeriod;
   /** Último mês selecionável (o mês anterior ao atual). */
   maxMonth: MonthYear;
@@ -22,6 +24,8 @@ type ReportToolbarProps = {
 };
 
 export function ReportToolbar({
+  title = "Relatório de ocupação",
+  subtitle = "Ocupação, no-show e eficiência dos espaços",
   period,
   maxMonth,
   onPeriodChange,
@@ -41,9 +45,9 @@ export function ReportToolbar({
             <FileBarChartIcon aria-hidden="true" className="size-5" strokeWidth={2.2} />
           </div>
           <div className="min-w-0">
-            <h2 className="text-xl font-bold leading-tight">Relatório de ocupação</h2>
+            <h2 className="text-xl font-bold leading-tight">{title}</h2>
             <p className="text-sm text-muted-foreground">
-              Ocupação, no-show e eficiência dos espaços
+              {subtitle}
               {generatedAt && <span> · dados de {formatReportDateTime(generatedAt)}</span>}
             </p>
           </div>
