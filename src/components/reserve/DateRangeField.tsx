@@ -118,16 +118,18 @@ export function DateRangeField({
               variant="outline"
               id={id}
               disabled={disabled}
-              className="w-full justify-start px-2.5 font-normal"
+              // Em colunas estreitas o período quebra linha entre as datas em vez de vazar do botão.
+              className="h-auto min-h-8 w-full min-w-0 justify-start px-2.5 py-1 text-left font-normal whitespace-normal"
             >
               <CalendarIcon data-icon="inline-start" />
               {value?.from ? (
                 value.to && value.to.getTime() !== value.from.getTime() ? (
-                  <>
-                    {fmt(value.from)} - {fmt(value.to)}
-                  </>
+                  <span className="flex min-w-0 flex-wrap gap-x-1">
+                    <span className="whitespace-nowrap">{fmt(value.from)} -</span>
+                    <span className="whitespace-nowrap">{fmt(value.to)}</span>
+                  </span>
                 ) : (
-                  fmt(value.from)
+                  <span className="whitespace-nowrap">{fmt(value.from)}</span>
                 )
               ) : (
                 <span className="text-muted-foreground">Selecione a data</span>

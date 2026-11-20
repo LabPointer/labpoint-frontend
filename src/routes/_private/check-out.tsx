@@ -191,20 +191,19 @@ function SessionSection({
         </h2>
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4">
+      {/* `min(320px,100%)`: em telas menores que 320px + margens o card encolhe em vez de vazar. */}
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] gap-4">
         {sessions.map((session) => (
           <Card
             key={session.id}
-            className="rounded-md border bg-white p-4 shadow-md has-data-[slot=card-footer]:pb-4 dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15"
+            className="min-w-0 rounded-md border bg-white p-4 shadow-md has-data-[slot=card-footer]:pb-4 dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15"
           >
             <CardContent className="flex flex-col gap-3 p-0">
               <UsageSessionSummary session={session} showWindows />
               {(showReport || session.entries.length > 0) && <UsageReportView session={session} />}
             </CardContent>
             {render && (
-              <CardFooter className="flex flex-wrap gap-2 border-0 bg-transparent p-0">
-                {render(session)}
-              </CardFooter>
+              <CardFooter className="flex flex-wrap gap-2 border-0 bg-transparent p-0">{render(session)}</CardFooter>
             )}
           </Card>
         ))}

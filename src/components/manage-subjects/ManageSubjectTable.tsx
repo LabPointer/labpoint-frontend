@@ -1,55 +1,46 @@
 import { Pencil } from "lucide-react";
-import { memo } from "react";
 import type { Subject } from "#/lib/queries/subjects";
+import { DeleteButton } from "@/components/shared/DeleteButton";
+import type { DataColumn } from "@/components/shared/data-table/columns";
+import { DataTable } from "@/components/shared/data-table/DataTable";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+export const subjectColumns: DataColumn<Subject>[] = [
+  { id: "name", label: "Nome", hideable: false, cellClassName: "font-bold", cell: (subject) => subject.name },
+  {
+    id: "status",
+    label: "Status",
+    defaultVisible: true,
+    headClassName: "text-center",
+    cellClassName: "text-center",
+    cell: (subject) => <StatusBadge active={subject.enabled} />,
+  },
+];
 
 type ManageSubjectTableProps = {
   subjects: Subject[];
+  columns: DataColumn<Subject>[];
   onEdit: (subject: Subject) => void;
+  onDelete: (subject: Subject) => void;
 };
 
-export function ManageSubjectTable({ subjects, onEdit }: ManageSubjectTableProps) {
+export function ManageSubjectTable({ subjects, columns, onEdit, onDelete }: ManageSubjectTableProps) {
   return (
-    <Table className="w-full border bg-white p-4 shadow-md hover:shadow-lg dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15">
-      <TableCaption>Lista de matérias.</TableCaption>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-25">Nome</TableHead>
-          <TableHead className="text-center">Status</TableHead>
-          <TableHead className="text-right">Ações</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {subjects.map((subject) => (
-          <ManageSubjectRow key={subject.id} subject={subject} onEdit={onEdit} />
-        ))}
-      </TableBody>
-    </Table>
-  );
-}
-
-const ManageSubjectRow = memo(function ManageSubjectRow({
-  subject,
-  onEdit,
-}: {
-  subject: Subject;
-  onEdit: (subject: Subject) => void;
-}) {
-  return (
-    <TableRow>
-      <TableCell className="w-25 font-bold">{subject.name}</TableCell>
-      <TableCell className="text-center">
-        <StatusBadge active={subject.enabled} />
-      </TableCell>
-      <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-x-2">
+    <DataTable
+      rows={subjects}
+      columns={columns}
+      context={undefined}
+      getRowKey={(subject) => subject.id}
+      caption="Lista de matérias."
+      actions={(subject) => (
+        <>
           <Button variant="outline" size="icon" aria-label={`Editar ${subject.name}`} onClick={() => onEdit(subject)}>
             <Pencil className="size-4" />
           </Button>
-        </div>
-      </TableCell>
-    </TableRow>
+          <DeleteButton label={`Excluir ${subject.name}`} onClick={() => onDelete(subject)} />
+        </>
+      )}
+    />
   );
-});
+}

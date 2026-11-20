@@ -36,8 +36,19 @@ export const resourceKeys = {
 };
 
 export function useResources(params: ResourceParams = {}, options: { enabled?: boolean } = {}) {
-  const { name, search, enabled, reservable, limit = 30, offset = 0, startAt, endAt, scheduleIds, minQuantity, exclude } =
-    params;
+  const {
+    name,
+    search,
+    enabled,
+    reservable,
+    limit = 30,
+    offset = 0,
+    startAt,
+    endAt,
+    scheduleIds,
+    minQuantity,
+    exclude,
+  } = params;
   const hasPeriod = Boolean(startAt && endAt);
 
   return useQuery({
@@ -174,6 +185,24 @@ export function useEditResource() {
     onSuccess: () => {
       notifySuccess("Recurso editado com sucesso!");
       return queryClient.invalidateQueries({ queryKey: resourceKeys.all });
+    },
+    onError: notifyError,
+  });
+}
+
+/**
+ * Exclusão permanente (a coordenação digita o nome para confirmar). Apaga em cascata reservas e históricos
+ * ligados ao item, então todas as consultas são invalidadas.
+ */
+export function useDeleteResource() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (body: components["schemas"]["AdminDeleteRequestDTO"]) =>
+      assertOk(await api.DELETE("/resource/admin/delete", { body })),
+    onSuccess: () => {
+      notifySuccess("Recurso excluído permanentemente.");
+      return queryClient.invalidateQueries();
     },
     onError: notifyError,
   });

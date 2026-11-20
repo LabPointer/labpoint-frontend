@@ -57,3 +57,21 @@ export function useEditSubject() {
     onError: notifyError,
   });
 }
+
+/**
+ * Exclusão permanente (a coordenação digita o nome para confirmar). Apaga em cascata reservas e históricos
+ * ligados ao item, então todas as consultas são invalidadas.
+ */
+export function useDeleteSubject() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (body: components["schemas"]["AdminDeleteRequestDTO"]) =>
+      assertOk(await api.DELETE("/subject/admin/delete", { body })),
+    onSuccess: () => {
+      notifySuccess("Matéria excluída permanentemente.");
+      return queryClient.invalidateQueries();
+    },
+    onError: notifyError,
+  });
+}

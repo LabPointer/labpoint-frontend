@@ -22,8 +22,10 @@ import {
   ManageReserveSearchBar,
   type ReserveFilters,
 } from "@/components/manage-reserves/ManageReserveSearchBar";
-import { ManageReserveTable } from "@/components/manage-reserves/ManageReserveTable";
+import { ManageReserveTable, reserveColumns } from "@/components/manage-reserves/ManageReserveTable";
 import { sameResources } from "@/components/reserve/ReserveResourcesField";
+import { ColumnChooser } from "@/components/shared/data-table/ColumnChooser";
+import { useColumnPreferences } from "@/components/shared/data-table/use-column-preferences";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
@@ -33,6 +35,7 @@ export const Route = createFileRoute("/_private/admin/manage-space-reserves")({
 });
 
 function RouteComponent() {
+  const columns = useColumnPreferences("manage-space-reserves", reserveColumns);
   const [filters, setFilters] = useState<ReserveFilters>(initialReserveFilters);
   const pagination = usePagination(filters);
   const reserves = useAdminReserves({
@@ -127,7 +130,11 @@ function RouteComponent() {
       </section>
 
       <section className="container">
-        <ResultsHeader title="Reservas" count={items.length} />
+        <ResultsHeader
+          title="Reservas"
+          count={items.length}
+          actions={<ColumnChooser columns={reserveColumns} state={columns} />}
+        />
         <QueryBoundary
           isPending={reserves.isPending}
           isFetching={reserves.isFetching}
@@ -137,7 +144,12 @@ function RouteComponent() {
           loadingText="Carregando reservas..."
           emptyText="Nenhuma reserva encontrada."
         >
-          <ManageReserveTable reserves={items} onEdit={editDialog.open} onCancel={cancelDialog.open} />
+          <ManageReserveTable
+            reserves={items}
+            columns={columns.visibleColumns}
+            onEdit={editDialog.open}
+            onCancel={cancelDialog.open}
+          />
         </QueryBoundary>
         <PaginationControls
           page={pagination.page}

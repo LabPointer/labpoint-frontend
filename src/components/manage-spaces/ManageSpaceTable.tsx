@@ -1,19 +1,77 @@
 import { Info, Pencil } from "lucide-react";
-import { memo } from "react";
+import { useMemo } from "react";
 import { useFormDialog } from "#/hooks/use-form-dialog";
 import type { Space } from "#/lib/queries/spaces";
+import { DeleteButton } from "@/components/shared/DeleteButton";
+import type { DataColumn } from "@/components/shared/data-table/columns";
+import { DataTable } from "@/components/shared/data-table/DataTable";
 import { InfoDialog } from "@/components/shared/InfoDialog";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type InfoKind = "description" | "subjects" | "resources";
 type InfoTarget = { space: Space; kind: InfoKind };
 
+type SpaceTableContext = { onInfo: (space: Space, kind: InfoKind) => void };
+
+export const spaceColumns: DataColumn<Space, SpaceTableContext>[] = [
+  { id: "name", label: "Nome", hideable: false, cellClassName: "font-bold", cell: (space) => space.name },
+  {
+    id: "capacity",
+    label: "Capacidade",
+    defaultVisible: true,
+    headClassName: "text-center",
+    cellClassName: "text-center",
+    cell: (space) => space.capacity,
+  },
+  {
+    id: "description",
+    label: "Descrição",
+    headClassName: "text-center",
+    cellClassName: "text-center",
+    cell: (space, { onInfo }) =>
+      space.description ? <InfoButton label="Ver mais info" onClick={() => onInfo(space, "description")} /> : "—",
+  },
+  {
+    id: "subjects",
+    label: "Matérias",
+    headClassName: "text-center",
+    cellClassName: "text-center",
+    cell: (space, { onInfo }) =>
+      space.subjects.length > 0 ? (
+        <InfoButton label={`Ver mais info (${space.subjects.length})`} onClick={() => onInfo(space, "subjects")} />
+      ) : (
+        "—"
+      ),
+  },
+  {
+    id: "resources",
+    label: "Recursos",
+    headClassName: "text-center",
+    cellClassName: "text-center",
+    cell: (space, { onInfo }) =>
+      space.resources.length > 0 ? (
+        <InfoButton label={`Ver mais info (${space.resources.length})`} onClick={() => onInfo(space, "resources")} />
+      ) : (
+        "—"
+      ),
+  },
+  {
+    id: "status",
+    label: "Status",
+    defaultVisible: true,
+    headClassName: "text-center",
+    cellClassName: "text-center",
+    cell: (space) => <StatusBadge active={!space.locked} />,
+  },
+];
+
 type ManageSpaceTableProps = {
   spaces: Space[];
+  columns: DataColumn<Space, SpaceTableContext>[];
   onEdit: (space: Space) => void;
+  onDelete: (space: Space) => void;
 };
 
 const infoTitles: Record<InfoKind, string> = {
@@ -22,9 +80,14 @@ const infoTitles: Record<InfoKind, string> = {
   resources: "Recursos",
 };
 
-export function ManageSpaceTable({ spaces, onEdit }: ManageSpaceTableProps) {
+export function ManageSpaceTable({ spaces, columns, onEdit, onDelete }: ManageSpaceTableProps) {
   const info = useFormDialog<InfoTarget>();
   const target = info.target;
+  const openInfo = info.open;
+  const context = useMemo<SpaceTableContext>(
+    () => ({ onInfo: (space, kind) => openInfo({ space, kind }) }),
+    [openInfo],
+  );
 
   return (
     <>
@@ -39,30 +102,21 @@ export function ManageSpaceTable({ spaces, onEdit }: ManageSpaceTableProps) {
         </InfoDialog>
       )}
 
-      <Table className="w-full border bg-white p-4 shadow-md hover:shadow-lg dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15">
-        <TableCaption>Lista de espaços.</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nome</TableHead>
-            <TableHead className="text-center">Capacidade</TableHead>
-            <TableHead className="text-center">Descrição</TableHead>
-            <TableHead className="text-center">Matérias</TableHead>
-            <TableHead className="text-center">Recursos</TableHead>
-            <TableHead className="text-center">Status</TableHead>
-            <TableHead className="text-right">Ações</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {spaces.map((space) => (
-            <ManageSpaceRow
-              key={space.id}
-              space={space}
-              onEdit={onEdit}
-              onInfo={(kind) => info.open({ space, kind })}
-            />
-          ))}
-        </TableBody>
-      </Table>
+      <DataTable
+        rows={spaces}
+        columns={columns}
+        context={context}
+        getRowKey={(space) => space.id}
+        caption="Lista de espaços."
+        actions={(space) => (
+          <>
+            <Button variant="outline" size="icon" aria-label={`Editar ${space.name}`} onClick={() => onEdit(space)}>
+              <Pencil className="size-4" />
+            </Button>
+            <DeleteButton label={`Excluir ${space.name}`} onClick={() => onDelete(space)} />
+          </>
+        )}
+      />
     </>
   );
 }
@@ -102,47 +156,3 @@ function InfoButton({ label, onClick }: { label: string; onClick: () => void }) 
     </Button>
   );
 }
-
-const ManageSpaceRow = memo(function ManageSpaceRow({
-  space,
-  onEdit,
-  onInfo,
-}: {
-  space: Space;
-  onEdit: (space: Space) => void;
-  onInfo: (kind: InfoKind) => void;
-}) {
-  return (
-    <TableRow>
-      <TableCell className="font-bold">{space.name}</TableCell>
-      <TableCell className="text-center">{space.capacity}</TableCell>
-      <TableCell className="text-center">
-        {space.description ? <InfoButton label="Ver mais info" onClick={() => onInfo("description")} /> : "—"}
-      </TableCell>
-      <TableCell className="text-center">
-        {space.subjects.length > 0 ? (
-          <InfoButton label={`Ver mais info (${space.subjects.length})`} onClick={() => onInfo("subjects")} />
-        ) : (
-          "—"
-        )}
-      </TableCell>
-      <TableCell className="text-center">
-        {space.resources.length > 0 ? (
-          <InfoButton label={`Ver mais info (${space.resources.length})`} onClick={() => onInfo("resources")} />
-        ) : (
-          "—"
-        )}
-      </TableCell>
-      <TableCell className="text-center">
-        <StatusBadge active={!space.locked} />
-      </TableCell>
-      <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-x-2">
-          <Button variant="outline" size="icon" aria-label={`Editar ${space.name}`} onClick={() => onEdit(space)}>
-            <Pencil className="size-4" />
-          </Button>
-        </div>
-      </TableCell>
-    </TableRow>
-  );
-});

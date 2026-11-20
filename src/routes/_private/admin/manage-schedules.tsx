@@ -2,12 +2,25 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useFormDialog } from "#/hooks/use-form-dialog";
 import { usePagination } from "#/hooks/use-pagination";
-import { type Schedule, useCreateSchedule, useEditSchedule, useSchedules } from "#/lib/queries/schedules";
+import {
+  type Schedule,
+  useCreateSchedule,
+  useDeleteSchedule,
+  useEditSchedule,
+  useSchedules,
+} from "#/lib/queries/schedules";
 import { succeeded } from "#/lib/utils/api-result";
 import { DEFAULT_PAGE_LIMIT, toPaged } from "#/lib/utils/pagination";
 import { ManageScheduleDialog, type ScheduleFormData } from "@/components/manage-schedules/ManageScheduleDialog";
 import { ManageScheduleSearchBar, type ScheduleFilters } from "@/components/manage-schedules/ManageScheduleSearchBar";
-import { ManageScheduleTable } from "@/components/manage-schedules/ManageScheduleTable";
+import {
+  ManageScheduleTable,
+  scheduleColumns,
+  scheduleTimeLabel,
+} from "@/components/manage-schedules/ManageScheduleTable";
+import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
+import { ColumnChooser } from "@/components/shared/data-table/ColumnChooser";
+import { useColumnPreferences } from "@/components/shared/data-table/use-column-preferences";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
@@ -39,6 +52,18 @@ function RouteComponent() {
   const editSchedule = useEditSchedule();
   const createDialog = useFormDialog();
   const editDialog = useFormDialog<Schedule>();
+  const deleteSchedule = useDeleteSchedule();
+  const deleteDialog = useFormDialog<Schedule>();
+  const columns = useColumnPreferences("manage-schedules", scheduleColumns);
+
+  async function handleDelete() {
+    const schedule = deleteDialog.target;
+    if (!schedule) return;
+    const ok = await succeeded(
+      deleteSchedule.mutateAsync({ id: schedule.id, confirmName: scheduleTimeLabel(schedule) }),
+    );
+    if (ok) deleteDialog.close();
+  }
 
   async function handleCreate(data: ScheduleFormData) {
     if (await succeeded(createSchedule.mutateAsync(data))) createDialog.close();
@@ -73,12 +98,29 @@ function RouteComponent() {
         />
       )}
 
+      {deleteDialog.target && (
+        <DeleteConfirmDialog
+          key={deleteDialog.session}
+          open={deleteDialog.isOpen}
+          entityLabel="horário"
+          itemName={scheduleTimeLabel(deleteDialog.target)}
+          consequences="Ele sai de todas as reservas e relatórios de uso; reservas que ficarem sem nenhum horário também são excluídas."
+          isPending={deleteSchedule.isPending}
+          onClose={deleteDialog.close}
+          onConfirm={handleDelete}
+        />
+      )}
+
       <section className="container mb-8">
         <ManageScheduleSearchBar onSearch={setFilters} onAddNewSchedule={() => createDialog.open()} />
       </section>
 
       <section className="container">
-        <ResultsHeader title="Horários" count={items.length} />
+        <ResultsHeader
+          title="Horários"
+          count={items.length}
+          actions={<ColumnChooser columns={scheduleColumns} state={columns} />}
+        />
         <QueryBoundary
           isPending={schedules.isPending}
           isFetching={schedules.isFetching}
@@ -88,7 +130,12 @@ function RouteComponent() {
           loadingText="Carregando horários..."
           emptyText="Nenhum horário encontrado."
         >
-          <ManageScheduleTable schedules={items} onEdit={editDialog.open} />
+          <ManageScheduleTable
+            schedules={items}
+            columns={columns.visibleColumns}
+            onEdit={editDialog.open}
+            onDelete={deleteDialog.open}
+          />
         </QueryBoundary>
         <PaginationControls
           page={pagination.page}

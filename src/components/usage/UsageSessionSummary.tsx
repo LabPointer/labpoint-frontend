@@ -16,8 +16,8 @@ function Row({ icon, label, children }: { icon: ReactNode; label: string; childr
   return (
     <div className="flex items-start gap-2 text-sm">
       <span className="mt-0.5 text-violet-500 dark:text-violet-400">{icon}</span>
-      <span className="min-w-20 font-semibold">{label}</span>
-      <span className="text-foreground/90">{children}</span>
+      <span className="min-w-20 shrink-0 font-semibold">{label}</span>
+      <span className="min-w-0 wrap-break-word text-foreground/90">{children}</span>
     </div>
   );
 }
@@ -29,8 +29,8 @@ export function UsageSessionSummary({ session, showAccount = false, showWindows 
 
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-base font-bold">{sessionPlace(session)}</p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="min-w-0 text-base font-bold wrap-break-word">{sessionPlace(session)}</p>
         <UsageStatusBadge status={session.status} />
       </div>
 

@@ -2,12 +2,21 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useFormDialog } from "#/hooks/use-form-dialog";
 import { usePagination } from "#/hooks/use-pagination";
-import { type Resource, useCreateResource, useEditResource, useResources } from "#/lib/queries/resources";
+import {
+  type Resource,
+  useCreateResource,
+  useDeleteResource,
+  useEditResource,
+  useResources,
+} from "#/lib/queries/resources";
 import { succeeded } from "#/lib/utils/api-result";
 import { DEFAULT_PAGE_LIMIT, toPaged } from "#/lib/utils/pagination";
 import { ManageResourceDialog, type ResourceFormData } from "@/components/manage-resources/ManageResourceDialog";
 import { ManageResourceSearchBar, type ResourceFilters } from "@/components/manage-resources/ManageResourceSearchBar";
-import { ManageResourceTable } from "@/components/manage-resources/ManageResourceTable";
+import { ManageResourceTable, resourceColumns } from "@/components/manage-resources/ManageResourceTable";
+import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
+import { ColumnChooser } from "@/components/shared/data-table/ColumnChooser";
+import { useColumnPreferences } from "@/components/shared/data-table/use-column-preferences";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
@@ -37,6 +46,16 @@ function RouteComponent() {
   const editResource = useEditResource();
   const createDialog = useFormDialog();
   const editDialog = useFormDialog<Resource>();
+  const deleteResource = useDeleteResource();
+  const deleteDialog = useFormDialog<Resource>();
+  const columns = useColumnPreferences("manage-resources", resourceColumns);
+
+  async function handleDelete() {
+    const resource = deleteDialog.target;
+    if (!resource) return;
+    const ok = await succeeded(deleteResource.mutateAsync({ id: resource.id, confirmName: resource.name }));
+    if (ok) deleteDialog.close();
+  }
 
   async function handleCreate(data: ResourceFormData) {
     const ok = await succeeded(
@@ -92,12 +111,29 @@ function RouteComponent() {
         />
       )}
 
+      {deleteDialog.target && (
+        <DeleteConfirmDialog
+          key={deleteDialog.session}
+          open={deleteDialog.isOpen}
+          entityLabel="recurso"
+          itemName={deleteDialog.target.name}
+          consequences="As reservas deste recurso e o histórico de uso delas também serão excluídos, e ele sai dos espaços onde estava associado."
+          isPending={deleteResource.isPending}
+          onClose={deleteDialog.close}
+          onConfirm={handleDelete}
+        />
+      )}
+
       <section className="container mb-8">
         <ManageResourceSearchBar onSearch={setFilters} onAddNewResource={() => createDialog.open()} />
       </section>
 
       <section className="container">
-        <ResultsHeader title="Recursos" count={items.length} />
+        <ResultsHeader
+          title="Recursos"
+          count={items.length}
+          actions={<ColumnChooser columns={resourceColumns} state={columns} />}
+        />
         <QueryBoundary
           isPending={resources.isPending}
           isFetching={resources.isFetching}
@@ -107,7 +143,12 @@ function RouteComponent() {
           loadingText="Carregando recursos..."
           emptyText="Nenhum recurso encontrado."
         >
-          <ManageResourceTable resources={items} onEdit={editDialog.open} />
+          <ManageResourceTable
+            resources={items}
+            columns={columns.visibleColumns}
+            onEdit={editDialog.open}
+            onDelete={deleteDialog.open}
+          />
         </QueryBoundary>
         <PaginationControls
           page={pagination.page}

@@ -2,12 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useFormDialog } from "#/hooks/use-form-dialog";
 import { usePagination } from "#/hooks/use-pagination";
-import { type Subject, useCreateSubject, useEditSubject, useSubjects } from "#/lib/queries/subjects";
+import { type Subject, useCreateSubject, useDeleteSubject, useEditSubject, useSubjects } from "#/lib/queries/subjects";
 import { succeeded } from "#/lib/utils/api-result";
 import { DEFAULT_PAGE_LIMIT, toPaged } from "#/lib/utils/pagination";
 import { ManageSubjectDialog, type SubjectFormData } from "@/components/manage-subjects/ManageSubjectDialog";
 import { ManageSubjectSearchBar, type SubjectFilters } from "@/components/manage-subjects/ManageSubjectSearchBar";
-import { ManageSubjectTable } from "@/components/manage-subjects/ManageSubjectTable";
+import { ManageSubjectTable, subjectColumns } from "@/components/manage-subjects/ManageSubjectTable";
+import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
+import { ColumnChooser } from "@/components/shared/data-table/ColumnChooser";
+import { useColumnPreferences } from "@/components/shared/data-table/use-column-preferences";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
@@ -27,6 +30,16 @@ function RouteComponent() {
   const editSubject = useEditSubject();
   const createDialog = useFormDialog();
   const editDialog = useFormDialog<Subject>();
+  const deleteSubject = useDeleteSubject();
+  const deleteDialog = useFormDialog<Subject>();
+  const columns = useColumnPreferences("manage-subjects", subjectColumns);
+
+  async function handleDelete() {
+    const subject = deleteDialog.target;
+    if (!subject) return;
+    const ok = await succeeded(deleteSubject.mutateAsync({ id: subject.id, confirmName: subject.name }));
+    if (ok) deleteDialog.close();
+  }
 
   async function handleCreate(data: SubjectFormData) {
     if (await succeeded(createSubject.mutateAsync(data))) createDialog.close();
@@ -68,12 +81,29 @@ function RouteComponent() {
         />
       )}
 
+      {deleteDialog.target && (
+        <DeleteConfirmDialog
+          key={deleteDialog.session}
+          open={deleteDialog.isOpen}
+          entityLabel="matéria"
+          itemName={deleteDialog.target.name}
+          consequences="Ela deixa de estar vinculada aos usuários e espaços que a usam; as contas e os espaços continuam."
+          isPending={deleteSubject.isPending}
+          onClose={deleteDialog.close}
+          onConfirm={handleDelete}
+        />
+      )}
+
       <section className="container mb-8">
         <ManageSubjectSearchBar onSearch={setFilters} onAddNewSubject={() => createDialog.open()} />
       </section>
 
       <section className="container">
-        <ResultsHeader title="Matérias" count={items.length} />
+        <ResultsHeader
+          title="Matérias"
+          count={items.length}
+          actions={<ColumnChooser columns={subjectColumns} state={columns} />}
+        />
         <QueryBoundary
           isPending={subjects.isPending}
           isFetching={subjects.isFetching}
@@ -83,7 +113,12 @@ function RouteComponent() {
           loadingText="Carregando matérias..."
           emptyText="Nenhuma matéria encontrada."
         >
-          <ManageSubjectTable subjects={items} onEdit={editDialog.open} />
+          <ManageSubjectTable
+            subjects={items}
+            columns={columns.visibleColumns}
+            onEdit={editDialog.open}
+            onDelete={deleteDialog.open}
+          />
         </QueryBoundary>
         <PaginationControls
           page={pagination.page}

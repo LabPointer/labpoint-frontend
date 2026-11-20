@@ -20,7 +20,12 @@ import {
   ManageResourceReserveSearchBar,
   type ResourceReserveFilters,
 } from "@/components/manage-resource-reserves/ManageResourceReserveSearchBar";
-import { ManageResourceReserveTable } from "@/components/manage-resource-reserves/ManageResourceReserveTable";
+import {
+  ManageResourceReserveTable,
+  resourceReserveColumns,
+} from "@/components/manage-resource-reserves/ManageResourceReserveTable";
+import { ColumnChooser } from "@/components/shared/data-table/ColumnChooser";
+import { useColumnPreferences } from "@/components/shared/data-table/use-column-preferences";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
@@ -30,6 +35,7 @@ export const Route = createFileRoute("/_private/admin/manage-resource-reserves")
 });
 
 function RouteComponent() {
+  const columns = useColumnPreferences("manage-resource-reserves", resourceReserveColumns);
   // A barra de pesquisa emite os filtros iniciais (mês atual) na montagem; a query só roda depois disso.
   const [filters, setFilters] = useState<ResourceReserveFilters | null>(null);
   const pagination = usePagination(filters);
@@ -124,7 +130,11 @@ function RouteComponent() {
       </section>
 
       <section className="container">
-        <ResultsHeader title="Reservas de recurso" count={items.length} />
+        <ResultsHeader
+          title="Reservas de recurso"
+          count={items.length}
+          actions={<ColumnChooser columns={resourceReserveColumns} state={columns} />}
+        />
         <QueryBoundary
           isPending={reserves.isPending}
           isFetching={reserves.isFetching}
@@ -134,7 +144,12 @@ function RouteComponent() {
           loadingText="Carregando reservas..."
           emptyText="Nenhuma reserva de recurso encontrada."
         >
-          <ManageResourceReserveTable reserves={items} onEdit={editDialog.open} onCancel={cancelDialog.open} />
+          <ManageResourceReserveTable
+            reserves={items}
+            columns={columns.visibleColumns}
+            onEdit={editDialog.open}
+            onCancel={cancelDialog.open}
+          />
         </QueryBoundary>
         <PaginationControls
           page={pagination.page}

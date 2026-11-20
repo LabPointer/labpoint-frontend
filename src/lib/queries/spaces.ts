@@ -95,3 +95,21 @@ export function useEditSpace() {
     onError: notifyError,
   });
 }
+
+/**
+ * Exclusão permanente (a coordenação digita o nome para confirmar). Apaga em cascata reservas e históricos
+ * ligados ao item, então todas as consultas são invalidadas.
+ */
+export function useDeleteSpace() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (body: components["schemas"]["AdminDeleteRequestDTO"]) =>
+      assertOk(await api.DELETE("/space/admin/delete", { body })),
+    onSuccess: () => {
+      notifySuccess("Espaço excluído permanentemente.");
+      return queryClient.invalidateQueries();
+    },
+    onError: notifyError,
+  });
+}

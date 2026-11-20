@@ -1,4 +1,4 @@
-import { addYears, endOfYear } from "date-fns";
+import { addYears, endOfMonth, endOfYear, startOfMonth } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
@@ -41,10 +41,10 @@ const statusOptions: { label: string; value: StatusFilter }[] = [
   })),
 ];
 
-/** Por padrão: hoje. */
+/** Por padrão: o mês atual inteiro. */
 const defaultRange = (): DateRange => {
   const today = new Date();
-  return { from: today, to: today };
+  return { from: startOfMonth(today), to: endOfMonth(today) };
 };
 
 export function ManageCheckOutSearchBar({ onSearch }: { onSearch: (filters: CheckOutFilters) => void }) {
@@ -74,7 +74,9 @@ export function ManageCheckOutSearchBar({ onSearch }: { onSearch: (filters: Chec
 
   return (
     <SearchPanel>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      {/* Colunas de no mínimo 16rem: os campos descem para a linha de baixo em vez de espremer o período e os
+          textos (o período "01/11/2026 - 30/11/2026" cabe numa linha só). */}
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,16rem),1fr))] gap-4">
         <DateRangeField
           id="check-out-period"
           label="Período"

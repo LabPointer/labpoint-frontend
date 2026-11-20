@@ -73,7 +73,8 @@ export function HistorySearchBar({ onSearch }: HistorySearchBarProps) {
   return (
     <SearchPanel className="w-full">
       <SpaceMultiSelect id="history-spaces" label="Salas" value={spaces} onValueChange={setSpaces} />
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {/* Colunas de no mínimo 16rem: o período não quebra linha; os campos descem quando não cabem. */}
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,16rem),1fr))] gap-4">
         <DateRangeField
           id="history-period"
           label="Período"

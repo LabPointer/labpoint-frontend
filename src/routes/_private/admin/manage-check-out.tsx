@@ -11,12 +11,14 @@ import {
 } from "#/lib/queries/usage";
 import { succeeded } from "#/lib/utils/api-result";
 import { toPaged } from "#/lib/utils/pagination";
+import { ColumnChooser } from "@/components/shared/data-table/ColumnChooser";
+import { useColumnPreferences } from "@/components/shared/data-table/use-column-preferences";
 import { InfoDialog } from "@/components/shared/InfoDialog";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
 import { type CheckOutFilters, ManageCheckOutSearchBar } from "@/components/usage/ManageCheckOutSearchBar";
-import { ManageCheckOutTable } from "@/components/usage/ManageCheckOutTable";
+import { checkOutColumns, ManageCheckOutTable } from "@/components/usage/ManageCheckOutTable";
 import { UsageFormDialog } from "@/components/usage/UsageFormDialog";
 import { UsageReportView } from "@/components/usage/UsageReportView";
 import { UsageSessionSummary } from "@/components/usage/UsageSessionSummary";
@@ -29,7 +31,7 @@ export const Route = createFileRoute("/_private/admin/manage-check-out")({
 type FormTarget = { session: UsageSession; mode: "admin-edit" | "admin-check-out" };
 
 function RouteComponent() {
-  // A barra de pesquisa emite os filtros iniciais (hoje, em aberto) na montagem; a query só roda depois disso.
+  // A barra de pesquisa emite os filtros iniciais (mês atual, em aberto) na montagem; a query só roda depois disso.
   const [filters, setFilters] = useState<CheckOutFilters | null>(null);
   const pagination = usePagination(filters);
   const usages = useAdminUsages(
@@ -49,6 +51,7 @@ function RouteComponent() {
   const formDialog = useFormDialog<FormTarget>();
   const saveEntries = useAdminSaveUsageEntries();
   const checkOut = useAdminCheckOut();
+  const columns = useColumnPreferences("manage-check-out", checkOutColumns);
 
   async function handleSubmit(body: UsageEntriesBody) {
     const target = formDialog.target;
@@ -99,7 +102,11 @@ function RouteComponent() {
       </section>
 
       <section className="container">
-        <ResultsHeader title="Sessões de uso" count={items.length} />
+        <ResultsHeader
+          title="Sessões de uso"
+          count={items.length}
+          actions={<ColumnChooser columns={checkOutColumns} state={columns} />}
+        />
         <QueryBoundary
           isPending={usages.isPending}
           isFetching={usages.isFetching}
@@ -111,6 +118,7 @@ function RouteComponent() {
         >
           <ManageCheckOutTable
             sessions={items}
+            columns={columns.visibleColumns}
             onView={viewDialog.open}
             onEdit={(session) => formDialog.open({ session, mode: "admin-edit" })}
             onCheckOut={(session) => formDialog.open({ session, mode: "admin-check-out" })}

@@ -2,12 +2,15 @@ import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { useState } from "react";
 import { useFormDialog } from "#/hooks/use-form-dialog";
 import { usePagination } from "#/hooks/use-pagination";
-import { type Account, highestRole, useAccountsPage, useEditAccount } from "#/lib/queries/accounts";
+import { type Account, highestRole, useAccountsPage, useDeleteAccount, useEditAccount } from "#/lib/queries/accounts";
 import { succeeded } from "#/lib/utils/api-result";
 import { DEFAULT_PAGE_LIMIT } from "#/lib/utils/pagination";
 import { type ManageEditUserData, ManageEditUserDialog } from "@/components/manage-users/ManageEditUserDialog";
 import { ManageUserSearchBar, type UserFilters } from "@/components/manage-users/ManageUserSearchBar";
-import { ManageUserTable } from "@/components/manage-users/ManageUserTable";
+import { ManageUserTable, userColumns } from "@/components/manage-users/ManageUserTable";
+import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
+import { ColumnChooser } from "@/components/shared/data-table/ColumnChooser";
+import { useColumnPreferences } from "@/components/shared/data-table/use-column-preferences";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
@@ -36,6 +39,16 @@ function RouteComponent() {
   const viewerRole = highestRole(sessionInfo?.roles);
 
   const editDialog = useFormDialog<Account>();
+  const deleteAccount = useDeleteAccount();
+  const deleteDialog = useFormDialog<Account>();
+  const columns = useColumnPreferences("manage-users", userColumns);
+
+  async function handleDelete() {
+    const account = deleteDialog.target;
+    if (!account) return;
+    const ok = await succeeded(deleteAccount.mutateAsync({ id: account.id, confirmName: account.username }));
+    if (ok) deleteDialog.close();
+  }
 
   async function handleEditSubmit(data: ManageEditUserData) {
     const editing = editDialog.target;
@@ -72,12 +85,29 @@ function RouteComponent() {
         />
       )}
 
+      {deleteDialog.target && (
+        <DeleteConfirmDialog
+          key={deleteDialog.session}
+          open={deleteDialog.isOpen}
+          entityLabel="usuário"
+          itemName={deleteDialog.target.username}
+          consequences="A conta, as reservas dela e o histórico de uso também serão excluídos. Liberações de calendário feitas por ela passam para você."
+          isPending={deleteAccount.isPending}
+          onClose={deleteDialog.close}
+          onConfirm={handleDelete}
+        />
+      )}
+
       <section className="container mb-8">
         <ManageUserSearchBar onSearch={setFilters} />
       </section>
 
       <section className="container">
-        <ResultsHeader title="Usuários" count={accounts.items.length} />
+        <ResultsHeader
+          title="Usuários"
+          count={accounts.items.length}
+          actions={<ColumnChooser columns={userColumns} state={columns} />}
+        />
         <QueryBoundary
           isPending={accounts.isPending}
           isFetching={accounts.isFetching}
@@ -87,7 +117,13 @@ function RouteComponent() {
           loadingText="Carregando usuários..."
           emptyText="Nenhum usuário encontrado."
         >
-          <ManageUserTable accounts={accounts.items} onEdit={editDialog.open} />
+          <ManageUserTable
+            accounts={accounts.items}
+            columns={columns.visibleColumns}
+            canDelete={(account) => viewerRole > account.role}
+            onEdit={editDialog.open}
+            onDelete={deleteDialog.open}
+          />
         </QueryBoundary>
         <PaginationControls
           page={pagination.page}

@@ -1,60 +1,57 @@
 import { Pencil } from "lucide-react";
-import { memo } from "react";
 import { type Account, roleLabel } from "#/lib/queries/accounts";
+import { DeleteButton } from "@/components/shared/DeleteButton";
+import type { DataColumn } from "@/components/shared/data-table/columns";
+import { DataTable } from "@/components/shared/data-table/DataTable";
 import { InfoBadge, StatusBadge } from "@/components/shared/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+export const userColumns: DataColumn<Account>[] = [
+  { id: "name", label: "Nome", hideable: false, cellClassName: "font-bold", cell: (account) => account.username },
+  {
+    id: "registration",
+    label: "Matrícula",
+    defaultVisible: true,
+    cell: (account) => account.registration,
+  },
+  { id: "email", label: "E-mail", cellClassName: "break-all", cell: (account) => account.email },
+  { id: "subject", label: "Matéria", cell: (account) => account.subject?.name ?? "—" },
+  {
+    id: "role",
+    label: "Cargo",
+    headClassName: "text-center",
+    cellClassName: "text-center",
+    cell: (account) => <InfoBadge>{roleLabel(account.role)}</InfoBadge>,
+  },
+  {
+    id: "status",
+    label: "Status",
+    defaultVisible: true,
+    headClassName: "text-center",
+    cellClassName: "text-center",
+    cell: (account) => <StatusBadge active={account.enabled} />,
+  },
+];
 
 type ManageUserTableProps = {
   accounts: Account[];
+  columns: DataColumn<Account>[];
+  /** Só aparece a exclusão para contas de cargo inferior ao de quem está vendo (o backend também confere). */
+  canDelete: (account: Account) => boolean;
   onEdit: (account: Account) => void;
+  onDelete: (account: Account) => void;
 };
 
-export function ManageUserTable({ accounts, onEdit }: ManageUserTableProps) {
+export function ManageUserTable({ accounts, columns, canDelete, onEdit, onDelete }: ManageUserTableProps) {
   return (
-    <Table className="w-full border bg-white p-4 shadow-md hover:shadow-lg dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15">
-      <TableCaption>Lista de usuários.</TableCaption>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Nome</TableHead>
-          <TableHead>Matrícula</TableHead>
-          <TableHead>E-mail</TableHead>
-          <TableHead>Matéria</TableHead>
-          <TableHead className="text-center">Cargo</TableHead>
-          <TableHead className="text-center">Status</TableHead>
-          <TableHead className="text-right">Ações</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {accounts.map((account) => (
-          <ManageUserRow key={account.id} account={account} onEdit={onEdit} />
-        ))}
-      </TableBody>
-    </Table>
-  );
-}
-
-const ManageUserRow = memo(function ManageUserRow({
-  account,
-  onEdit,
-}: {
-  account: Account;
-  onEdit: (account: Account) => void;
-}) {
-  return (
-    <TableRow>
-      <TableCell className="font-bold">{account.username}</TableCell>
-      <TableCell>{account.registration}</TableCell>
-      <TableCell>{account.email}</TableCell>
-      <TableCell>{account.subject?.name ?? "—"}</TableCell>
-      <TableCell className="text-center">
-        <InfoBadge>{roleLabel(account.role)}</InfoBadge>
-      </TableCell>
-      <TableCell className="text-center">
-        <StatusBadge active={account.enabled} />
-      </TableCell>
-      <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-x-2">
+    <DataTable
+      rows={accounts}
+      columns={columns}
+      context={undefined}
+      getRowKey={(account) => account.id}
+      caption="Lista de usuários."
+      actions={(account) => (
+        <>
           <Button
             variant="outline"
             size="icon"
@@ -63,8 +60,11 @@ const ManageUserRow = memo(function ManageUserRow({
           >
             <Pencil className="size-4" />
           </Button>
-        </div>
-      </TableCell>
-    </TableRow>
+          {canDelete(account) && (
+            <DeleteButton label={`Excluir ${account.username}`} onClick={() => onDelete(account)} />
+          )}
+        </>
+      )}
+    />
   );
-});
+}
