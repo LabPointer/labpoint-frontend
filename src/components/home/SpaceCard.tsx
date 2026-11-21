@@ -3,6 +3,7 @@ import {
   AvailabilityBadge,
   RESERVE_CARD_CLASS,
   RESERVE_CARD_FOOTER_CLASS,
+  RESERVE_CARD_HEADER_CLASS,
   ReserveCardButton,
   ReserveCardDescription,
   ReserveCardIcon,
@@ -39,7 +40,7 @@ export function SpaceCard(props: SpaceCardProps) {
   return (
     <Card aria-label={name} className={RESERVE_CARD_CLASS}>
       {/* Identificação: ícone, nome, matérias e situação */}
-      <CardHeader className="flex flex-row items-start gap-3 p-0">
+      <CardHeader className={RESERVE_CARD_HEADER_CLASS}>
         <ReserveCardIcon>
           <FlaskConical aria-hidden="true" />
         </ReserveCardIcon>
@@ -54,7 +55,7 @@ export function SpaceCard(props: SpaceCardProps) {
             title={subjectNames || undefined}
           >
             <BookOpen className="size-3.5 shrink-0" aria-hidden="true" />
-            <span className="line-clamp-1">{subjectNames || "Sem matérias vinculadas"}</span>
+            <span className="line-clamp-2">{subjectNames || "Sem matérias vinculadas"}</span>
           </p>
         </div>
         <AvailabilityBadge available={!locked} unavailableLabel="Bloqueado" />

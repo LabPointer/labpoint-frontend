@@ -43,7 +43,7 @@ export function ReportReservesTable({ report, mode }: ReportReservesTableProps) 
   const centered = (column: number) => column >= lastColumn - 2 || (isResources && column === 1);
 
   return (
-    <Card className={cn(reportCardClass(mode), "gap-4 px-0")}>
+    <Card className={cn(reportCardClass(mode), "@container/report gap-4 px-0")}>
       <div className="flex flex-wrap items-center justify-between gap-3 px-4">
         <div className="flex items-center gap-3">
           <SectionIcon>
@@ -59,68 +59,112 @@ export function ReportReservesTable({ report, mode }: ReportReservesTableProps) 
         )}
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="pl-4">{report.copy.entityColumn}</TableHead>
-            {isResources && <TableHead className="text-center">Qtd.</TableHead>}
-            {isResources && <TableHead>Sala</TableHead>}
-            <TableHead>Usuário</TableHead>
-            <TableHead className="text-center">Início</TableHead>
-            <TableHead className="text-center">Fim</TableHead>
-            <TableHead className="pr-4 text-center">Status</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {hasData
-            ? items.map((reserve) => (
-                <TableRow key={reserve.id}>
-                  <TableCell className="pl-4 font-medium">{reserve.spaceName}</TableCell>
-                  {isResources && <TableCell className="text-center tabular-nums">{reserve.quantity}</TableCell>}
+      {/* Espaço estreito (celular, tablet com a barra lateral aberta): uma reserva por cartão, sem rolar para os lados. */}
+      <ul aria-label="Reservas do período" className="flex flex-col gap-3 px-4 @2xl/report:hidden">
+        {hasData
+          ? items.map((reserve) => (
+              <li
+                key={reserve.id}
+                className="flex flex-col gap-2 rounded-md border p-3 text-sm dark:border-violet-500/10"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <span className="min-w-0 font-bold wrap-break-word">{reserve.spaceName}</span>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "shrink-0 rounded-full px-3 py-0.5 text-xs font-medium",
+                      statusClasses[reserve.status],
+                    )}
+                  >
+                    {statusLabels[reserve.status]}
+                  </Badge>
+                </div>
+                <dl className="flex flex-col gap-1">
                   {isResources && (
-                    <TableCell className={reserve.linkedSpaceName ? undefined : "text-muted-foreground"}>
-                      {reserve.linkedSpaceName ?? "Avulsa"}
-                    </TableCell>
+                    <CardDetail label="Qtd. / sala">
+                      {reserve.quantity} · {reserve.linkedSpaceName ?? "Avulsa"}
+                    </CardDetail>
                   )}
-                  <TableCell>{reserve.userName}</TableCell>
-                  <TableCell className="text-center">{formatReportDate(reserve.dateFrom)}</TableCell>
-                  <TableCell className="text-center">{formatReportDate(reserve.dateTo)}</TableCell>
-                  <TableCell className="pr-4 text-center">
-                    <Badge
-                      variant="outline"
-                      className={cn("rounded-full px-3 py-0.5 text-xs font-medium", statusClasses[reserve.status])}
-                    >
-                      {statusLabels[reserve.status]}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))
-            : Array.from({ length: PREVIEW_ROWS }, (_, row) => (
-                <TableRow key={row} aria-hidden="true">
-                  {widths.map((width, column) => (
-                    <TableCell
-                      key={column}
-                      className={cn(
-                        column === 0 && "pl-4",
-                        column === lastColumn && "pr-4",
-                        centered(column) && "text-center",
-                      )}
-                    >
-                      <ReportSkeleton
-                        mode={mode}
-                        className={cn(
-                          "h-4",
-                          width,
-                          centered(column) && "mx-auto",
-                          column === lastColumn && "h-5 rounded-full",
-                        )}
-                      />
+                  <CardDetail label="Usuário">{reserve.userName}</CardDetail>
+                  <CardDetail label="Período">
+                    {formatReportDate(reserve.dateFrom)} a {formatReportDate(reserve.dateTo)}
+                  </CardDetail>
+                </dl>
+              </li>
+            ))
+          : Array.from({ length: 3 }, (_, row) => (
+              <li key={row} aria-hidden="true" className="flex flex-col gap-2 rounded-md border p-3">
+                <ReportSkeleton mode={mode} className="h-4 w-32" />
+                <ReportSkeleton mode={mode} className="h-3 w-40" />
+                <ReportSkeleton mode={mode} className="h-3 w-24" />
+              </li>
+            ))}
+      </ul>
+
+      <div className="hidden @2xl/report:block">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="pl-4">{report.copy.entityColumn}</TableHead>
+              {isResources && <TableHead className="text-center">Qtd.</TableHead>}
+              {isResources && <TableHead>Sala</TableHead>}
+              <TableHead>Usuário</TableHead>
+              <TableHead className="text-center">Início</TableHead>
+              <TableHead className="text-center">Fim</TableHead>
+              <TableHead className="pr-4 text-center">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {hasData
+              ? items.map((reserve) => (
+                  <TableRow key={reserve.id}>
+                    <TableCell className="pl-4 font-medium">{reserve.spaceName}</TableCell>
+                    {isResources && <TableCell className="text-center tabular-nums">{reserve.quantity}</TableCell>}
+                    {isResources && (
+                      <TableCell className={reserve.linkedSpaceName ? undefined : "text-muted-foreground"}>
+                        {reserve.linkedSpaceName ?? "Avulsa"}
+                      </TableCell>
+                    )}
+                    <TableCell>{reserve.userName}</TableCell>
+                    <TableCell className="text-center">{formatReportDate(reserve.dateFrom)}</TableCell>
+                    <TableCell className="text-center">{formatReportDate(reserve.dateTo)}</TableCell>
+                    <TableCell className="pr-4 text-center">
+                      <Badge
+                        variant="outline"
+                        className={cn("rounded-full px-3 py-0.5 text-xs font-medium", statusClasses[reserve.status])}
+                      >
+                        {statusLabels[reserve.status]}
+                      </Badge>
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-        </TableBody>
-      </Table>
+                  </TableRow>
+                ))
+              : Array.from({ length: PREVIEW_ROWS }, (_, row) => (
+                  <TableRow key={row} aria-hidden="true">
+                    {widths.map((width, column) => (
+                      <TableCell
+                        key={column}
+                        className={cn(
+                          column === 0 && "pl-4",
+                          column === lastColumn && "pr-4",
+                          centered(column) && "text-center",
+                        )}
+                      >
+                        <ReportSkeleton
+                          mode={mode}
+                          className={cn(
+                            "h-4",
+                            width,
+                            centered(column) && "mx-auto",
+                            column === lastColumn && "h-5 rounded-full",
+                          )}
+                        />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+          </TableBody>
+        </Table>
+      </div>
 
       {hasData && (
         <div className="px-4">
@@ -128,5 +172,14 @@ export function ReportReservesTable({ report, mode }: ReportReservesTableProps) 
         </div>
       )}
     </Card>
+  );
+}
+
+function CardDetail({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex min-w-0 justify-between gap-3">
+      <dt className="shrink-0 text-muted-foreground">{label}</dt>
+      <dd className="min-w-0 text-right wrap-break-word">{children}</dd>
+    </div>
   );
 }

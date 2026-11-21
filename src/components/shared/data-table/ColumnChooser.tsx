@@ -21,9 +21,22 @@ export function ColumnChooser<T, C>({ columns, state }: ColumnChooserProps<T, C>
 
   return (
     <Popover>
-      <PopoverTrigger render={<Button type="button" variant="outline" size="sm" />}>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            aria-label={
+              hiddenCount > 0 ? `Colunas da tabela (${preferences.visible.length} visíveis)` : "Colunas da tabela"
+            }
+            title="Colunas da tabela"
+          />
+        }
+      >
         <Columns3 className="size-4" />
-        Colunas
+        {/* No celular fica só o ícone e a contagem, para a barra caber sem rolar para os lados. */}
+        <span className="hidden sm:inline">Colunas</span>
         {hiddenCount > 0 && <span className="text-xs text-muted-foreground">({preferences.visible.length})</span>}
       </PopoverTrigger>
       {/* Fundo translúcido com desfoque, como os dialogs de formulário. */}

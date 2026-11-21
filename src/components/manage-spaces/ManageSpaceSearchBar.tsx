@@ -6,7 +6,7 @@ import { ResourceMultiSelect, SubjectMultiSelect } from "@/components/shared/ent
 import { type FilterOption, FilterSelect } from "@/components/shared/FilterSelect";
 import { PageLimitSelect } from "@/components/shared/PageLimitSelect";
 import type { RemoteOption } from "@/components/shared/RemoteCombobox";
-import { SearchPanel, SearchTextField } from "@/components/shared/SearchPanel";
+import { SearchFilters, SearchPanel, SearchTextField } from "@/components/shared/SearchPanel";
 import { Button } from "@/components/ui/button";
 
 export type SpaceFilters = {
@@ -65,14 +65,9 @@ export function ManageSpaceSearchBar({ onSearch, onAddNewSpace }: ManageSpaceSea
         <PageLimitSelect id="space-limit" value={limit} onValueChange={setLimit} className="w-full sm:w-40" />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <SearchFilters activeCount={[subjects.length, resources.length, locked !== undefined].filter(Boolean).length}>
         <SubjectMultiSelect id="space-subjects" label="Matérias" value={subjects} onValueChange={setSubjects} />
-        <ResourceMultiSelect
-          id="space-resources"
-          label="Recursos"
-          value={resources}
-          onValueChange={setResources}
-        />
+        <ResourceMultiSelect id="space-resources" label="Recursos" value={resources} onValueChange={setResources} />
         <FilterSelect
           id="space-status"
           label="Status"
@@ -80,7 +75,7 @@ export function ManageSpaceSearchBar({ onSearch, onAddNewSpace }: ManageSpaceSea
           value={locked}
           onValueChange={setLocked}
         />
-      </div>
+      </SearchFilters>
 
       <Button className="w-full shrink-0 lg:w-auto" type="button" onClick={onAddNewSpace}>
         <PlusIcon />

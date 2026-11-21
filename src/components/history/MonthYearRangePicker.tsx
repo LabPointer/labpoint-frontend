@@ -114,7 +114,7 @@ export function MonthYearRangePicker({
           render={
             <Button
               variant="outline"
-              className="h-10 min-w-72 justify-between bg-white/10 border dark:border-violet-400/20 shadow-md hover:shadow-lg dark:shadow-violet-300/20"
+              className="h-10 w-full min-w-0 justify-between sm:min-w-72 bg-white/10 border dark:border-violet-400/20 shadow-md hover:shadow-lg dark:shadow-violet-300/20"
             />
           }
         >

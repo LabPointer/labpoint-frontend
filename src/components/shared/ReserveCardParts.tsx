@@ -9,7 +9,14 @@ import { cn } from "@/lib/utils";
  * O Card do shadcn zera o padding de baixo quando há rodapé; o pb-4 devolve o respiro abaixo do botão.
  */
 export const RESERVE_CARD_CLASS =
-  "h-full w-full gap-4 rounded-md border bg-white p-4 shadow-md transition-shadow hover:shadow-lg has-data-[slot=card-footer]:pb-4 dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15";
+  "@container/reserve-card h-full w-full gap-4 rounded-md border bg-white p-4 shadow-md transition-shadow hover:shadow-lg has-data-[slot=card-footer]:pb-4 dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15";
+
+/**
+ * Cabeçalho do card: ícone, título e selo de situação numa linha; quando o card fica estreito (celular), o selo
+ * desce para baixo do título em vez de espremê-lo.
+ */
+export const RESERVE_CARD_HEADER_CLASS =
+  "grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-2 p-0 @[19rem]/reserve-card:grid-cols-[auto_minmax(0,1fr)_auto]";
 
 export const RESERVE_CARD_FOOTER_CLASS =
   "border-t border-neutral-200 bg-transparent px-0 pt-4 pb-0 dark:border-violet-500/10";
@@ -31,6 +38,10 @@ type AvailabilityBadgeProps = {
   unavailableIcon?: "lock" | "slash";
 };
 
+/** Posição do selo no cabeçalho (ver `RESERVE_CARD_HEADER_CLASS`). */
+const BADGE_POSITION_CLASS =
+  "col-start-2 justify-self-start @[19rem]/reserve-card:col-start-auto @[19rem]/reserve-card:justify-self-auto";
+
 export function AvailabilityBadge({
   available,
   availableLabel = "Disponível",
@@ -43,6 +54,7 @@ export function AvailabilityBadge({
       variant="outline"
       className={cn(
         "shrink-0 gap-1 rounded-full px-2.5 py-0.5 text-xs font-normal",
+        BADGE_POSITION_CLASS,
         available
           ? "border-emerald-500/30 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
           : "border-rose-500/30 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300",
@@ -71,9 +83,7 @@ export function ReserveCardStat({ icon, label, value, unit, children }: ReserveC
         {icon}
       </span>
       <div className="min-w-0 flex-1">
-        <dt className="text-[0.7rem] leading-none tracking-wide text-neutral-500 uppercase dark:text-neutral-400">
-          {label}
-        </dt>
+        <dt className="text-xs leading-none tracking-wide text-neutral-500 uppercase dark:text-neutral-400">{label}</dt>
         <dd className="mt-1 leading-none">
           <span className="text-lg font-bold text-neutral-900 tabular-nums dark:text-neutral-100">{value}</span>
           {unit && <span className="text-xs text-neutral-500 dark:text-neutral-400"> {unit}</span>}

@@ -23,6 +23,7 @@ import {
   Users,
 } from "lucide-react";
 import { api } from "#/lib/utils/restapi";
+import { NotificationDot } from "@/components/shared/NotificationDot";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,7 +44,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { NotificationDot } from "@/components/shared/NotificationDot";
 import { useCheckOutAlerts } from "@/components/usage/use-check-out-alerts";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
@@ -160,6 +160,7 @@ function NavLinks({ routes, alerts = {} }: { routes: PageRoute[]; alerts?: Route
         {routes.map((route) => (
           <SidebarMenuButton
             key={route.to}
+            tooltip={{ children: route.label, side: "right" }}
             render={
               <LinkButton
                 to={route.to}
@@ -168,11 +169,18 @@ function NavLinks({ routes, alerts = {} }: { routes: PageRoute[]; alerts?: Route
                   variant: "default",
                   className: "hover:bg-violet-600 hover:text-white",
                 }}
-                className="h-10 justify-start gap-3 rounded-xl px-3"
+                className="relative h-auto min-h-10 justify-start gap-3 rounded-xl px-3 py-2 group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:min-h-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0!"
               >
                 {route.icon}
-                <span>{route.label}</span>
-                {alerts[route.to as string] && <NotificationDot label="Há ações disponíveis" className="ml-auto" />}
+                <span className="whitespace-normal! text-left leading-tight group-data-[collapsible=icon]:hidden">
+                  {route.label}
+                </span>
+                {alerts[route.to as string] && (
+                  <NotificationDot
+                    label="Há ações disponíveis"
+                    className="ml-auto group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:top-1 group-data-[collapsible=icon]:right-1 group-data-[collapsible=icon]:size-2"
+                  />
+                )}
               </LinkButton>
             }
           />
@@ -189,7 +197,7 @@ function UserIdentity({ username, roles }: { username: string; roles: string }) 
         <AvatarImage src="https://github.com/shadcn.png" />
         <AvatarFallback>LP</AvatarFallback>
       </Avatar>
-      <div className="flex min-w-0 flex-col justify-center text-left">
+      <div className="flex min-w-0 flex-col justify-center text-left group-data-[collapsible=icon]:hidden">
         <span className="truncate text-sm font-semibold text-foreground">{username}</span>
         <span className="truncate text-xs text-[color:var(--sea-ink-soft)]">{roles}</span>
       </div>
@@ -211,13 +219,13 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar className="border-sidebar-border/70">
-      <SidebarHeader className="flex justify-center border-b border-sidebar-border/70 px-5 h-16">
+    <Sidebar collapsible="icon" className="border-sidebar-border/70">
+      <SidebarHeader className="flex h-16 justify-center border-b border-sidebar-border/70 px-5 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-0">
         <div className="flex items-center gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-violet-500 to-violet-700 text-white shadow-md shadow-violet-600/30 ring-1 ring-violet-700/20 ring-inset dark:from-violet-400 dark:to-violet-600 dark:shadow-violet-500/40 dark:ring-white/15">
             <FlaskConical aria-hidden="true" className="size-5" strokeWidth={2.2} />
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 group-data-[collapsible=icon]:hidden">
             <p className="truncate text-lg font-bold tracking-wide">
               Lab<span className="text-violet-600 dark:text-violet-400">point</span>
             </p>
@@ -225,23 +233,29 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup className="px-3 py-5">
-          <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Reservas</p>
+        <SidebarGroup className="px-3 py-5 group-data-[collapsible=icon]:px-3 group-data-[collapsible=icon]:py-3">
+          <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em] group-data-[collapsible=icon]:hidden">
+            Reservas
+          </p>
           <SidebarGroupContent>
             <NavLinks routes={userRoutes} alerts={{ "/check-out": checkOutAlerts.mine }} />
           </SidebarGroupContent>
         </SidebarGroup>
         {sessionInfo && (sessionInfo.roles.includes("Admin") || sessionInfo.roles.includes("Root")) && (
-          <SidebarGroup className="px-3 py-5">
-            <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Coordenação</p>
+          <SidebarGroup className="px-3 py-5 group-data-[collapsible=icon]:px-3 group-data-[collapsible=icon]:py-3">
+            <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em] group-data-[collapsible=icon]:hidden">
+              Coordenação
+            </p>
             <SidebarGroupContent>
               <NavLinks routes={adminRoutes} alerts={{ "/admin/manage-check-out": checkOutAlerts.admin }} />
             </SidebarGroupContent>
           </SidebarGroup>
         )}
         {sessionInfo && (sessionInfo.roles.includes("Admin") || sessionInfo.roles.includes("Root")) && (
-          <SidebarGroup className="px-3 py-5">
-            <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em]">Diretoria</p>
+          <SidebarGroup className="px-3 py-5 group-data-[collapsible=icon]:px-3 group-data-[collapsible=icon]:py-3">
+            <p className="mb-2 px-2 text-sm font-bold uppercase tracking-[0.18em] group-data-[collapsible=icon]:hidden">
+              Diretoria
+            </p>
             <SidebarGroupContent>
               <NavLinks routes={coordinatorRoutes} />
             </SidebarGroupContent>
@@ -249,7 +263,7 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border/70 px-3 py-3">
+      <SidebarFooter className="border-t border-sidebar-border/70 px-3 py-3 group-data-[collapsible=icon]:items-center">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
@@ -258,12 +272,12 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     size="lg"
                     aria-label="Menu do usuário"
-                    className="h-14 gap-3 rounded-xl px-2 data-popup-open:bg-sidebar-accent"
+                    className="h-14 gap-3 rounded-xl px-2 data-popup-open:bg-sidebar-accent group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0!"
                   />
                 }
               >
                 <UserIdentity username={username} roles={roles} />
-                <ChevronsUpDown className="ml-auto size-4 shrink-0 opacity-60" />
+                <ChevronsUpDown className="ml-auto size-4 shrink-0 opacity-60 group-data-[collapsible=icon]:hidden" />
               </DropdownMenuTrigger>
 
               <DropdownMenuContent side="top" align="end" sideOffset={8} className="min-w-56">

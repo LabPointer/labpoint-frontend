@@ -19,13 +19,28 @@ type DataTableProps<T, C> = {
   rowLabel?: (row: T) => string;
 };
 
+/**
+ * Largura do container a partir da qual a tabela aparece (abaixo dela, cartões). Depende de quantas colunas
+ * estão visíveis: é a largura do espaço da página, não da janela, então a barra lateral aberta também conta.
+ * As classes precisam ser literais para o Tailwind gerá-las.
+ */
+const layoutTiers = [
+  { maxColumns: 4, cards: "@lg/data-table:hidden", table: "@lg/data-table:block" },
+  { maxColumns: 6, cards: "@2xl/data-table:hidden", table: "@2xl/data-table:block" },
+  {
+    maxColumns: Number.POSITIVE_INFINITY,
+    cards: "@min-[54rem]/data-table:hidden",
+    table: "@min-[54rem]/data-table:block",
+  },
+];
+
 const surfaceClass =
   "border bg-white shadow-md hover:shadow-lg dark:border-violet-500/10 dark:bg-white/5 dark:shadow-violet-300/15";
 
 /**
  * Tabela padrão das telas da coordenação, com as colunas escolhidas pelo usuário.
- * Abaixo de `md` cada linha vira um cartão (rótulo: valor), então a tela nunca rola para os lados no celular;
- * as mesmas colunas escolhidas no seletor aparecem nos cartões, na mesma ordem.
+ * Quando o espaço disponível não comporta as colunas visíveis, cada linha vira um cartão (rótulo: valor), então a
+ * tela nunca rola para os lados; as mesmas colunas escolhidas no seletor aparecem nos cartões, na mesma ordem.
  */
 export function DataTable<T, C = undefined>({
   rows,
@@ -41,12 +56,19 @@ export function DataTable<T, C = undefined>({
   const selectedOnPage = selection ? rows.filter((row) => selection.isSelected(row)).length : 0;
   const allOnPage = rows.length > 0 && selectedOnPage === rows.length;
   const label = (row: T) => `Selecionar ${rowLabel ? rowLabel(row) : "linha"}`;
+  // Cartão compacto quando há poucos detalhes: as ações sobem para a linha do título, sem rodapé.
+  const compact = detailColumns.length <= 2;
+  const columnCount = columns.length + (actions ? 1 : 0) + (selection ? 1 : 0);
+  const tier = layoutTiers.find((t) => columnCount <= t.maxColumns) ?? layoutTiers[layoutTiers.length - 1];
 
   return (
-    <>
-      <ul aria-label={caption} className="flex flex-col gap-3 md:hidden">
+    <div className="@container/data-table">
+      <ul
+        aria-label={caption}
+        className={`grid grid-cols-1 items-start gap-3 @xl/data-table:grid-cols-2 ${tier.cards}`}
+      >
         {selection && rows.length > 0 && (
-          <li className="flex items-center gap-2 px-1 text-sm">
+          <li className="col-span-full flex items-center gap-2 px-1 text-sm">
             <Checkbox
               id="select-page-mobile"
               checked={allOnPage}
@@ -59,16 +81,18 @@ export function DataTable<T, C = undefined>({
         {rows.map((row) => (
           <li key={getRowKey(row)} className={`flex flex-col gap-3 rounded-md p-3 ${surfaceClass}`}>
             {titleColumn && (
-              <div className="flex min-w-0 items-start gap-2 font-bold wrap-break-word">
+              <div className="flex min-w-0 items-center gap-2 font-bold wrap-break-word">
                 {selection && (
                   <Checkbox
-                    className="mt-1"
                     aria-label={label(row)}
                     checked={selection.isSelected(row)}
                     onCheckedChange={(checked) => selection.toggle(row, checked === true)}
                   />
                 )}
-                <div className="min-w-0">{titleColumn.cell(row, context)}</div>
+                <div className="min-w-0 flex-1">{titleColumn.cell(row, context)}</div>
+                {compact && actions && (
+                  <div className="flex shrink-0 items-center gap-2 font-normal">{actions(row)}</div>
+                )}
               </div>
             )}
             {detailColumns.length > 0 && (
@@ -81,14 +105,14 @@ export function DataTable<T, C = undefined>({
                 ))}
               </dl>
             )}
-            {actions && (
+            {actions && !compact && (
               <div className="flex flex-wrap items-center justify-end gap-2 border-t pt-3">{actions(row)}</div>
             )}
           </li>
         ))}
       </ul>
 
-      <div className="hidden md:block">
+      <div className={`hidden ${tier.table}`}>
         <Table className={`w-full p-4 ${surfaceClass}`}>
           <TableCaption>{caption}</TableCaption>
           <TableHeader>
@@ -141,6 +165,6 @@ export function DataTable<T, C = undefined>({
           </TableBody>
         </Table>
       </div>
-    </>
+    </div>
   );
 }

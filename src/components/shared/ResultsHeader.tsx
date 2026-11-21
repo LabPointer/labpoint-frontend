@@ -11,7 +11,7 @@ export function ResultsHeader({ title, count, actions }: ResultsHeaderProps) {
   return (
     <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
       <h2 className="text-xl font-bold">{title}</h2>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
         <span className="text-sm font-bold">Exibindo: {count}</span>
         {actions}
       </div>

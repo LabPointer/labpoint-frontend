@@ -1,4 +1,6 @@
 import { createFileRoute, type LinkProps, Outlet, redirect, useLocation } from "@tanstack/react-router";
+import { type CSSProperties, useState } from "react";
+import { useMediaQuery } from "#/hooks/use-media-query";
 import { AppSidebar } from "@/components/AppSideBar";
 import { NotificationDot } from "@/components/shared/NotificationDot";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -45,33 +47,47 @@ function RouteComponent() {
   const checkOutAlerts = useCheckOutAlerts({ isAdmin });
   const hasAlert = checkOutAlerts.mine || checkOutAlerts.admin;
 
+  // Entre 768 e 1023px a barra lateral começa recolhida (só ícones) para sobrar espaço ao conteúdo;
+  // a partir de 1024px começa aberta. O botão do cabeçalho alterna nos dois casos.
+  const isWide = useMediaQuery("(min-width: 1024px)", true);
+  const [sidebarOpen, setSidebarOpen] = useState(isWide);
+  const [prevWide, setPrevWide] = useState(isWide);
+  if (prevWide !== isWide) {
+    setPrevWide(isWide);
+    setSidebarOpen(isWide);
+  }
+
   return (
-    <SidebarProvider>
-        <AppSidebar />
-        <main className="min-w-0 flex-1">
-          <header className="flex h-16 items-center justify-between border-b border-(--line) px-4 md:px-8">
-            <div className="relative flex items-center md:hidden">
-              <SidebarTrigger />
-              {hasAlert && (
-                <NotificationDot
-                  label="Há ações disponíveis no menu"
-                  className="pointer-events-none absolute -top-0.5 -right-0.5 size-2"
-                />
-              )}
-            </div>
-
-            <div>
-              <h1 className="text-lg font-bold  mt-0.5 text-center">{routeTitle}</h1>
-            </div>
-
-            <div className="flex items-center">
-              <ThemeToggle />
-            </div>
-          </header>
-          <div className="p-4 md:p-8 min-h-[calc(100vh-4rem)]">
-            <Outlet />
+    <SidebarProvider
+      open={sidebarOpen}
+      onOpenChange={setSidebarOpen}
+      style={{ "--sidebar-width-icon": "4rem" } as CSSProperties}
+    >
+      <AppSidebar />
+      <main className="min-w-0 flex-1">
+        <header className="flex h-16 items-center justify-between gap-2 border-b border-(--line) px-4 md:px-8">
+          <div className="relative flex items-center lg:hidden">
+            <SidebarTrigger />
+            {hasAlert && (
+              <NotificationDot
+                label="Há ações disponíveis no menu"
+                className="pointer-events-none absolute -top-0.5 -right-0.5 size-2"
+              />
+            )}
           </div>
-        </main>
-      </SidebarProvider>
+
+          <div>
+            <h1 className="mt-0.5 text-center text-base font-bold sm:text-lg">{routeTitle}</h1>
+          </div>
+
+          <div className="flex items-center">
+            <ThemeToggle />
+          </div>
+        </header>
+        <div className="p-4 md:p-8 min-h-[calc(100vh-4rem)]">
+          <Outlet />
+        </div>
+      </main>
+    </SidebarProvider>
   );
 }
