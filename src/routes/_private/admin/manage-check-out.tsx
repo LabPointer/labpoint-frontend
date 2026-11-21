@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { FileDown } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useFormDialog } from "#/hooks/use-form-dialog";
 import { usePagination } from "#/hooks/use-pagination";
 import {
@@ -11,12 +12,17 @@ import {
 } from "#/lib/queries/usage";
 import { succeeded } from "#/lib/utils/api-result";
 import { toPaged } from "#/lib/utils/pagination";
+import { exportUsagePdf, usagePdfFileName } from "#/lib/utils/usage-pdf";
 import { ColumnChooser } from "@/components/shared/data-table/ColumnChooser";
+import { SelectionExportButton } from "@/components/shared/data-table/SelectionExportButton";
 import { useColumnPreferences } from "@/components/shared/data-table/use-column-preferences";
+import { useRowSelection } from "@/components/shared/data-table/use-row-selection";
 import { InfoDialog } from "@/components/shared/InfoDialog";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
+import { Button } from "@/components/ui/button";
+import { exportSessionsUsagePdf } from "@/components/usage/export-usage-reports";
 import { type CheckOutFilters, ManageCheckOutSearchBar } from "@/components/usage/ManageCheckOutSearchBar";
 import { checkOutColumns, ManageCheckOutTable } from "@/components/usage/ManageCheckOutTable";
 import { UsageFormDialog } from "@/components/usage/UsageFormDialog";
@@ -27,6 +33,8 @@ import { sessionTitle } from "@/components/usage/usage-format";
 export const Route = createFileRoute("/_private/admin/manage-check-out")({
   component: RouteComponent,
 });
+
+const sessionKey = (session: UsageSession) => session.id;
 
 type FormTarget = { session: UsageSession; mode: "admin-edit" | "admin-check-out" };
 
@@ -52,6 +60,13 @@ function RouteComponent() {
   const saveEntries = useAdminSaveUsageEntries();
   const checkOut = useAdminCheckOut();
   const columns = useColumnPreferences("manage-check-out", checkOutColumns);
+  const selection = useRowSelection(sessionKey);
+  const clearSelection = selection.clear;
+
+  // Filtros novos = outra lista: a seleção anterior não vale mais.
+  useEffect(() => {
+    if (filters) clearSelection();
+  }, [filters, clearSelection]);
 
   async function handleSubmit(body: UsageEntriesBody) {
     const target = formDialog.target;
@@ -70,6 +85,30 @@ function RouteComponent() {
           onClose={viewDialog.close}
           title="Relatório de uso"
           description={sessionTitle(viewDialog.target)}
+          footerExtra={
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                const session = viewDialog.target;
+                if (!session) return;
+                exportUsagePdf(
+                  [
+                    {
+                      title: sessionTitle(session),
+                      subtitle: `${session.account.userName ?? "Sem nome"} (${session.account.registration})`,
+                      sessions: [session],
+                    },
+                  ],
+                  sessionTitle(session),
+                  usagePdfFileName(sessionTitle(session)),
+                );
+              }}
+            >
+              <FileDown className="size-4" />
+              Exportar PDF
+            </Button>
+          }
         >
           <div className="flex flex-col gap-3">
             <UsageSessionSummary session={viewDialog.target} showAccount />
@@ -105,7 +144,16 @@ function RouteComponent() {
         <ResultsHeader
           title="Sessões de uso"
           count={items.length}
-          actions={<ColumnChooser columns={checkOutColumns} state={columns} />}
+          actions={
+            <>
+              <SelectionExportButton
+                count={selection.count}
+                onExport={() => exportSessionsUsagePdf(selection.rows)}
+                onClear={selection.clear}
+              />
+              <ColumnChooser columns={checkOutColumns} state={columns} />
+            </>
+          }
         />
         <QueryBoundary
           isPending={usages.isPending}
@@ -122,6 +170,7 @@ function RouteComponent() {
             onView={viewDialog.open}
             onEdit={(session) => formDialog.open({ session, mode: "admin-edit" })}
             onCheckOut={(session) => formDialog.open({ session, mode: "admin-check-out" })}
+            selection={selection}
           />
         </QueryBoundary>
         <PaginationControls

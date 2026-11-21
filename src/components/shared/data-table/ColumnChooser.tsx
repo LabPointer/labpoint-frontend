@@ -26,7 +26,11 @@ export function ColumnChooser<T, C>({ columns, state }: ColumnChooserProps<T, C>
         Colunas
         {hiddenCount > 0 && <span className="text-xs text-muted-foreground">({preferences.visible.length})</span>}
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[min(18rem,calc(100vw-2rem))]">
+      {/* Fundo translúcido com desfoque, como os dialogs de formulário. */}
+      <PopoverContent
+        align="end"
+        className="w-[min(18rem,calc(100vw-2rem))] border bg-white/70 shadow-md backdrop-blur-xl dark:border-violet-500/10 dark:bg-black/70 dark:shadow-violet-300/15"
+      >
         <div className="flex flex-col gap-0.5">
           <p className="font-medium">Colunas da tabela</p>
           <p className="text-xs text-muted-foreground">Marque para exibir e use as setas para mudar a ordem.</p>

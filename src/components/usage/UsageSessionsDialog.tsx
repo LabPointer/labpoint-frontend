@@ -1,5 +1,5 @@
 import { createLink } from "@tanstack/react-router";
-import { ClipboardCheck, Pencil } from "lucide-react";
+import { ClipboardCheck, FileDown, Pencil } from "lucide-react";
 import { useState } from "react";
 import {
   hasCheckIn,
@@ -11,6 +11,7 @@ import {
   useReserveUsage,
 } from "#/lib/queries/usage";
 import { succeeded } from "#/lib/utils/api-result";
+import { exportUsagePdf, usagePdfFileName } from "#/lib/utils/usage-pdf";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -110,6 +111,22 @@ export function UsageSessionsDialog({
         )}
 
         <DialogFooter className="flex border-t bg-transparent">
+          {editable && sessions.length > 0 && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                exportUsagePdf(
+                  [{ title, subtitle: description, sessions }],
+                  title,
+                  usagePdfFileName(title, String(reserveId)),
+                )
+              }
+            >
+              <FileDown className="size-4" />
+              Exportar PDF
+            </Button>
+          )}
           <DialogClose render={<Button type="button" variant="outline" />}>Fechar</DialogClose>
         </DialogFooter>
       </DialogContent>

@@ -201,26 +201,30 @@ export function useCheckOut() {
 
 // ---------------------------------------------------------------- por reserva (dono ou admin)
 
+/** Busca as sessões de uma reserva (usado pelo hook e pela exportação em lote dos relatórios). */
+export async function fetchReserveUsage(kind: ReserveKind, reserveId: number, signal?: AbortSignal) {
+  return kind === "space"
+    ? unwrapList(
+        await api.GET("/usage/reserve/space/{spaceReserveId}", {
+          params: { path: { spaceReserveId: reserveId } },
+          signal,
+        }),
+        "Erro ao buscar o relatório de uso.",
+      )
+    : unwrapList(
+        await api.GET("/usage/reserve/resource/{resourceReserveId}", {
+          params: { path: { resourceReserveId: reserveId } },
+          signal,
+        }),
+        "Erro ao buscar o relatório de uso.",
+      );
+}
+
 /** Sessões de uma reserva (a de recurso vinculada devolve as da sala). Lista vazia quando ainda não há sessões. */
 export function useReserveUsage(kind: ReserveKind, reserveId: number, options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: usageKeys.reserve(kind, reserveId),
-    queryFn: async ({ signal }) =>
-      kind === "space"
-        ? unwrapList(
-            await api.GET("/usage/reserve/space/{spaceReserveId}", {
-              params: { path: { spaceReserveId: reserveId } },
-              signal,
-            }),
-            "Erro ao buscar o relatório de uso.",
-          )
-        : unwrapList(
-            await api.GET("/usage/reserve/resource/{resourceReserveId}", {
-              params: { path: { resourceReserveId: reserveId } },
-              signal,
-            }),
-            "Erro ao buscar o relatório de uso.",
-          ),
+    queryFn: ({ signal }) => fetchReserveUsage(kind, reserveId, signal),
     enabled: options.enabled ?? true,
   });
 }

@@ -1,10 +1,11 @@
-import { Info, Pencil } from "lucide-react";
+import { BookOpen, FileText, Package, Pencil } from "lucide-react";
 import { useMemo } from "react";
 import { useFormDialog } from "#/hooks/use-form-dialog";
 import type { Space } from "#/lib/queries/spaces";
 import { DeleteButton } from "@/components/shared/DeleteButton";
 import type { DataColumn } from "@/components/shared/data-table/columns";
 import { DataTable } from "@/components/shared/data-table/DataTable";
+import { IconCountButton } from "@/components/shared/IconCountButton";
 import { InfoDialog } from "@/components/shared/InfoDialog";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +32,11 @@ export const spaceColumns: DataColumn<Space, SpaceTableContext>[] = [
     headClassName: "text-center",
     cellClassName: "text-center",
     cell: (space, { onInfo }) =>
-      space.description ? <InfoButton label="Ver mais info" onClick={() => onInfo(space, "description")} /> : "—",
+      space.description ? (
+        <IconCountButton icon={FileText} label="Ver descrição" onClick={() => onInfo(space, "description")} />
+      ) : (
+        "—"
+      ),
   },
   {
     id: "subjects",
@@ -40,7 +45,12 @@ export const spaceColumns: DataColumn<Space, SpaceTableContext>[] = [
     cellClassName: "text-center",
     cell: (space, { onInfo }) =>
       space.subjects.length > 0 ? (
-        <InfoButton label={`Ver mais info (${space.subjects.length})`} onClick={() => onInfo(space, "subjects")} />
+        <IconCountButton
+          icon={BookOpen}
+          label="Ver matérias"
+          count={space.subjects.length}
+          onClick={() => onInfo(space, "subjects")}
+        />
       ) : (
         "—"
       ),
@@ -52,7 +62,12 @@ export const spaceColumns: DataColumn<Space, SpaceTableContext>[] = [
     cellClassName: "text-center",
     cell: (space, { onInfo }) =>
       space.resources.length > 0 ? (
-        <InfoButton label={`Ver mais info (${space.resources.length})`} onClick={() => onInfo(space, "resources")} />
+        <IconCountButton
+          icon={Package}
+          label="Ver recursos"
+          count={space.resources.length}
+          onClick={() => onInfo(space, "resources")}
+        />
       ) : (
         "—"
       ),
@@ -145,14 +160,5 @@ function SpaceInfoContent({ target }: { target: InfoTarget }) {
         </li>
       ))}
     </ul>
-  );
-}
-
-function InfoButton({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <Button type="button" variant="outline" size="sm" onClick={onClick}>
-      <Info className="size-4" />
-      <span className="text-sm font-medium">{label}</span>
-    </Button>
   );
 }

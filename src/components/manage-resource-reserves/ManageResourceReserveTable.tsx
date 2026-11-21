@@ -8,6 +8,8 @@ import { reportCount } from "#/lib/queries/usage";
 import { PeriodText, ReportButton, ReserveStatusBadge } from "@/components/manage-reserves/ManageReserveTable";
 import type { DataColumn } from "@/components/shared/data-table/columns";
 import { DataTable } from "@/components/shared/data-table/DataTable";
+import type { RowSelection } from "@/components/shared/data-table/use-row-selection";
+import { IconCountButton } from "@/components/shared/IconCountButton";
 import { InfoDialog } from "@/components/shared/InfoDialog";
 import { Button } from "@/components/ui/button";
 import { UsageSessionsDialog } from "@/components/usage/UsageSessionsDialog";
@@ -68,10 +70,12 @@ export const resourceReserveColumns: DataColumn<AdminResourceReserve, ResourceRe
     headClassName: "text-center",
     cellClassName: "text-center",
     cell: (reserve, { onSchedules }) => (
-      <Button type="button" variant="outline" size="sm" onClick={() => onSchedules(reserve)}>
-        <Clock className="size-4" />
-        Ver horários ({reserve.schedules.length})
-      </Button>
+      <IconCountButton
+        icon={Clock}
+        label="Ver horários"
+        count={reserve.schedules.length}
+        onClick={() => onSchedules(reserve)}
+      />
     ),
   },
   {
@@ -99,9 +103,17 @@ type ManageResourceReserveTableProps = {
   columns: DataColumn<AdminResourceReserve, ResourceReserveTableContext>[];
   onEdit: (reserve: AdminResourceReserve) => void;
   onCancel: (reserve: AdminResourceReserve) => void;
+  /** Linhas marcadas para exportar os relatórios de uso em PDF. */
+  selection?: RowSelection<AdminResourceReserve>;
 };
 
-export function ManageResourceReserveTable({ reserves, columns, onEdit, onCancel }: ManageResourceReserveTableProps) {
+export function ManageResourceReserveTable({
+  reserves,
+  columns,
+  onEdit,
+  onCancel,
+  selection,
+}: ManageResourceReserveTableProps) {
   const schedulesDialog = useFormDialog<AdminResourceReserve>();
   const reportDialog = useFormDialog<AdminResourceReserve>();
   const target = schedulesDialog.target;
@@ -153,6 +165,8 @@ export function ManageResourceReserveTable({ reserves, columns, onEdit, onCancel
         context={context}
         getRowKey={(reserve) => reserve.id}
         caption="Lista de reservas de recurso."
+        selection={selection}
+        rowLabel={(reserve) => `${reserve.resource.name}, ${reserve.account.username}`}
         actions={(reserve) => (
           <>
             <Button

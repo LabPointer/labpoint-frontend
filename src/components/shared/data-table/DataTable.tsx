@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { DataColumn } from "./columns";
+import type { RowSelection } from "./use-row-selection";
 
 type DataTableProps<T, C> = {
   rows: T[];
@@ -11,6 +13,10 @@ type DataTableProps<T, C> = {
   caption: string;
   /** Botões da linha; sempre a última coluna. */
   actions?: (row: T) => ReactNode;
+  /** Seleção de linhas (coluna de checkbox, com "selecionar todos da página" no cabeçalho). */
+  selection?: RowSelection<T>;
+  /** Nome da linha lido pelo leitor de tela no checkbox (ex.: "Laboratorio 02, 17/11/2026"). */
+  rowLabel?: (row: T) => string;
 };
 
 const surfaceClass =
@@ -28,19 +34,47 @@ export function DataTable<T, C = undefined>({
   getRowKey,
   caption,
   actions,
+  selection,
+  rowLabel,
 }: DataTableProps<T, C>) {
   const [titleColumn, ...detailColumns] = columns;
+  const selectedOnPage = selection ? rows.filter((row) => selection.isSelected(row)).length : 0;
+  const allOnPage = rows.length > 0 && selectedOnPage === rows.length;
+  const label = (row: T) => `Selecionar ${rowLabel ? rowLabel(row) : "linha"}`;
 
   return (
     <>
       <ul aria-label={caption} className="flex flex-col gap-3 md:hidden">
+        {selection && rows.length > 0 && (
+          <li className="flex items-center gap-2 px-1 text-sm">
+            <Checkbox
+              id="select-page-mobile"
+              checked={allOnPage}
+              indeterminate={selectedOnPage > 0 && !allOnPage}
+              onCheckedChange={(checked) => selection.togglePage(rows, checked === true)}
+            />
+            <label htmlFor="select-page-mobile">Selecionar todos da página</label>
+          </li>
+        )}
         {rows.map((row) => (
           <li key={getRowKey(row)} className={`flex flex-col gap-3 rounded-md p-3 ${surfaceClass}`}>
-            {titleColumn && <div className="min-w-0 font-bold wrap-break-word">{titleColumn.cell(row, context)}</div>}
+            {titleColumn && (
+              <div className="flex min-w-0 items-start gap-2 font-bold wrap-break-word">
+                {selection && (
+                  <Checkbox
+                    className="mt-1"
+                    aria-label={label(row)}
+                    checked={selection.isSelected(row)}
+                    onCheckedChange={(checked) => selection.toggle(row, checked === true)}
+                  />
+                )}
+                <div className="min-w-0">{titleColumn.cell(row, context)}</div>
+              </div>
+            )}
             {detailColumns.length > 0 && (
               <dl className="flex flex-col gap-2 text-sm">
                 {detailColumns.map((column) => (
-                  <div key={column.id} className="flex min-w-0 items-start justify-between gap-3">
+                  <div key={column.id} className="flex min-w-0 items-center justify-between gap-3">
                     <dt className="shrink-0 text-muted-foreground">{column.label}</dt>
                     <dd className="min-w-0 text-right wrap-break-word">{column.cell(row, context)}</dd>
                   </div>
@@ -59,6 +93,18 @@ export function DataTable<T, C = undefined>({
           <TableCaption>{caption}</TableCaption>
           <TableHeader>
             <TableRow>
+              {selection && (
+                <TableHead className="w-10 text-center">
+                  <Checkbox
+                    className="mx-auto"
+                    aria-label="Selecionar todos da página"
+                    checked={allOnPage}
+                    indeterminate={selectedOnPage > 0 && !allOnPage}
+                    disabled={rows.length === 0}
+                    onCheckedChange={(checked) => selection.togglePage(rows, checked === true)}
+                  />
+                </TableHead>
+              )}
               {columns.map((column) => (
                 <TableHead key={column.id} className={column.headClassName}>
                   {column.label}
@@ -69,7 +115,17 @@ export function DataTable<T, C = undefined>({
           </TableHeader>
           <TableBody>
             {rows.map((row) => (
-              <TableRow key={getRowKey(row)}>
+              <TableRow key={getRowKey(row)} data-state={selection?.isSelected(row) ? "selected" : undefined}>
+                {selection && (
+                  <TableCell className="w-10 text-center">
+                    <Checkbox
+                      className="mx-auto"
+                      aria-label={label(row)}
+                      checked={selection.isSelected(row)}
+                      onCheckedChange={(checked) => selection.toggle(row, checked === true)}
+                    />
+                  </TableCell>
+                )}
                 {columns.map((column) => (
                   <TableCell key={column.id} className={column.cellClassName}>
                     {column.cell(row, context)}

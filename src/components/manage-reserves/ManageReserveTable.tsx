@@ -11,6 +11,8 @@ import { reportCount } from "#/lib/queries/usage";
 import { statusLabel, statusVariantClass } from "#/lib/utils/reservation-utils";
 import type { DataColumn } from "@/components/shared/data-table/columns";
 import { DataTable } from "@/components/shared/data-table/DataTable";
+import type { RowSelection } from "@/components/shared/data-table/use-row-selection";
+import { IconCountButton } from "@/components/shared/IconCountButton";
 import { InfoDialog } from "@/components/shared/InfoDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,10 +52,12 @@ export const reserveColumns: DataColumn<AdminReserve, ReserveTableContext>[] = [
     headClassName: "text-center",
     cellClassName: "text-center",
     cell: (reserve, { onSchedules }) => (
-      <Button type="button" variant="outline" size="sm" onClick={() => onSchedules(reserve)}>
-        <Clock className="size-4" />
-        Ver horários ({reserve.schedules.length})
-      </Button>
+      <IconCountButton
+        icon={Clock}
+        label="Ver horários"
+        count={reserve.schedules.length}
+        onClick={() => onSchedules(reserve)}
+      />
     ),
   },
   {
@@ -62,10 +66,12 @@ export const reserveColumns: DataColumn<AdminReserve, ReserveTableContext>[] = [
     headClassName: "text-center",
     cellClassName: "text-center",
     cell: (reserve, { onResources }) => (
-      <Button type="button" variant="outline" size="sm" onClick={() => onResources(reserve)}>
-        <Package className="size-4" />
-        Ver recursos ({reserve.resources.length})
-      </Button>
+      <IconCountButton
+        icon={Package}
+        label="Ver recursos associados"
+        count={reserve.resources.length}
+        onClick={() => onResources(reserve)}
+      />
     ),
   },
   {
@@ -93,11 +99,13 @@ type ManageReserveTableProps = {
   columns: DataColumn<AdminReserve, ReserveTableContext>[];
   onEdit: (reserve: AdminReserve) => void;
   onCancel: (reserve: AdminReserve) => void;
+  /** Linhas marcadas para exportar os relatórios de uso em PDF. */
+  selection?: RowSelection<AdminReserve>;
 };
 
 const fmtDate = (date: string) => format(parseISO(date), "dd/MM/yyyy", { locale: ptBR });
 
-export function ManageReserveTable({ reserves, columns, onEdit, onCancel }: ManageReserveTableProps) {
+export function ManageReserveTable({ reserves, columns, onEdit, onCancel, selection }: ManageReserveTableProps) {
   const schedulesDialog = useFormDialog<AdminReserve>();
   const resourcesDialog = useFormDialog<AdminReserve>();
   const reportDialog = useFormDialog<AdminReserve>();
@@ -170,6 +178,8 @@ export function ManageReserveTable({ reserves, columns, onEdit, onCancel }: Mana
         context={context}
         getRowKey={(reserve) => reserve.id}
         caption="Lista de reservas."
+        selection={selection}
+        rowLabel={(reserve) => `${reserve.spaces.name}, ${reserve.account.username}`}
         actions={(reserve) => (
           <>
             <Button variant="outline" size="icon" aria-label="Alterar reserva" onClick={() => onEdit(reserve)}>
@@ -214,19 +224,16 @@ export function ReserveStatusBadge({ status }: { status: ReturnType<typeof statu
   );
 }
 
-/** "Ver relatório (n)": n = turnos com check-in. Sem nenhum, fica desabilitado. */
+/** Relatório de uso: ícone + (n), n = turnos com check-in. Sem nenhum, fica desabilitado. */
 export function ReportButton({ count, onClick }: { count: number; onClick: () => void }) {
   return (
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
+    <IconCountButton
+      icon={FileText}
+      label="Ver relatório de uso"
+      count={count}
       disabled={count === 0}
       title={count === 0 ? "Sem uso registrado" : undefined}
       onClick={onClick}
-    >
-      <FileText className="size-4" />
-      Ver relatório{count > 0 ? ` (${count})` : ""}
-    </Button>
+    />
   );
 }
