@@ -13,9 +13,18 @@ export function SelectionExportButton({ count, isPending = false, onExport, onCl
   if (count === 0) return null;
   return (
     <div className="flex items-center gap-1">
-      <Button type="button" size="sm" disabled={isPending} onClick={onExport}>
+      <Button
+        type="button"
+        size="sm"
+        disabled={isPending}
+        onClick={onExport}
+        aria-label={isPending ? "Gerando PDF" : `Exportar PDF (${count})`}
+        title={`Exportar PDF (${count})`}
+      >
+        {/* No celular fica só o ícone e a contagem, para a barra caber sem rolar para os lados. */}
         <FileDown className="size-4" />
-        {isPending ? "Gerando PDF..." : `Exportar PDF (${count})`}
+        <span className="hidden sm:inline">{isPending ? "Gerando PDF..." : "Exportar PDF"}</span>
+        <span className="tabular-nums">({count})</span>
       </Button>
       <Button
         type="button"

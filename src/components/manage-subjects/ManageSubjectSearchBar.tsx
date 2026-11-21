@@ -4,7 +4,7 @@ import { useDebouncedValue } from "#/hooks/use-debounced-value";
 import { DEFAULT_PAGE_LIMIT } from "#/lib/utils/pagination";
 import { type FilterOption, FilterSelect } from "@/components/shared/FilterSelect";
 import { PageLimitSelect } from "@/components/shared/PageLimitSelect";
-import { SearchPanel, SearchTextField } from "@/components/shared/SearchPanel";
+import { SearchFilters, SearchPanel, SearchTextField } from "@/components/shared/SearchPanel";
 import { Button } from "@/components/ui/button";
 
 export type SubjectFilters = {
@@ -48,14 +48,16 @@ export function ManageSubjectSearchBar({ onSearch, onAddNewSubject }: ManageSubj
         />
         <PageLimitSelect id="subject-limit" value={limit} onValueChange={setLimit} className="w-full sm:w-40" />
       </div>
-      <FilterSelect
-        id="subject-status"
-        label="Status"
-        options={statusOptions}
-        value={status}
-        onValueChange={setStatus}
-        className="w-full"
-      />
+      <SearchFilters activeCount={status === undefined ? 0 : 1}>
+        <FilterSelect
+          id="subject-status"
+          label="Status"
+          options={statusOptions}
+          value={status}
+          onValueChange={setStatus}
+          className="w-full"
+        />
+      </SearchFilters>
       <Button className="w-full shrink-0 lg:w-auto" type="button" onClick={onAddNewSubject}>
         <PlusIcon />
         Adicionar matéria

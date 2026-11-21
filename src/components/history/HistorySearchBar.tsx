@@ -10,7 +10,7 @@ import { SpaceMultiSelect } from "@/components/shared/entity-selects";
 import { FilterSelect } from "@/components/shared/FilterSelect";
 import { PageLimitSelect } from "@/components/shared/PageLimitSelect";
 import type { RemoteOption } from "@/components/shared/RemoteCombobox";
-import { SearchPanel } from "@/components/shared/SearchPanel";
+import { SearchFilters, SearchPanel } from "@/components/shared/SearchPanel";
 
 export type HistoryFilters = {
   /** yyyy-MM-dd */
@@ -73,8 +73,7 @@ export function HistorySearchBar({ onSearch }: HistorySearchBarProps) {
   return (
     <SearchPanel className="w-full">
       <SpaceMultiSelect id="history-spaces" label="Salas" value={spaces} onValueChange={setSpaces} />
-      {/* Colunas de no mínimo 16rem: o período não quebra linha; os campos descem quando não cabem. */}
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,16rem),1fr))] gap-4">
+      <SearchFilters activeCount={[status !== undefined].filter(Boolean).length}>
         <DateRangeField
           id="history-period"
           label="Período"
@@ -94,7 +93,7 @@ export function HistorySearchBar({ onSearch }: HistorySearchBarProps) {
           onValueChange={setStatus}
         />
         <PageLimitSelect id="history-limit" value={limit} onValueChange={setLimit} />
-      </div>
+      </SearchFilters>
     </SearchPanel>
   );
 }

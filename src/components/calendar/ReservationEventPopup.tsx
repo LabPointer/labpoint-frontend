@@ -42,7 +42,7 @@ export function ReservationEventPopup({ data, trigger }: ReservationEventPopupPr
           className="rounded-t-md px-4 py-3"
           style={{ backgroundColor: `color-mix(in srgb, ${getStatusBgColor(data.status)} 15%, transparent)` }}
         >
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {data.kind === "resource" ? "Reserva de recurso" : "Reserva de sala"}
           </p>
           <p className="text-sm font-semibold leading-tight">{data.spaceName}</p>

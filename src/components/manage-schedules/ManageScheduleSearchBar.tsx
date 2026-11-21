@@ -4,7 +4,7 @@ import { useDebouncedValue } from "#/hooks/use-debounced-value";
 import { DEFAULT_PAGE_LIMIT } from "#/lib/utils/pagination";
 import { type FilterOption, FilterSelect } from "@/components/shared/FilterSelect";
 import { PageLimitSelect } from "@/components/shared/PageLimitSelect";
-import { SearchPanel } from "@/components/shared/SearchPanel";
+import { SearchFilters, SearchPanel } from "@/components/shared/SearchPanel";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -60,14 +60,8 @@ export function ManageScheduleSearchBar({ onSearch, onAddNewSchedule }: ManageSc
 
   return (
     <SearchPanel>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <FilterSelect
-          id="schedule-shift"
-          label="Turno"
-          options={shiftOptions}
-          value={shift}
-          onValueChange={setShift}
-        />
+      <SearchFilters activeCount={[shift !== undefined, enabled !== undefined, startAt, endAt].filter(Boolean).length}>
+        <FilterSelect id="schedule-shift" label="Turno" options={shiftOptions} value={shift} onValueChange={setShift} />
         <FilterSelect
           id="schedule-status"
           label="Status"
@@ -100,7 +94,7 @@ export function ManageScheduleSearchBar({ onSearch, onAddNewSchedule }: ManageSc
             aria-invalid={invalidRange}
           />
         </Field>
-      </div>
+      </SearchFilters>
       {invalidRange && (
         <p className="text-sm text-destructive">A hora de início precisa ser igual ou anterior à hora de fim.</p>
       )}

@@ -76,11 +76,11 @@ export function ExtraHolidaysCard({ year, days }: ExtraHolidaysCardProps) {
         {holidays.map((holiday) => {
           const custom = Number(holiday.source) === HOLIDAY_SOURCE.CUSTOM;
           return (
-            <li key={holiday.id} className="flex items-center gap-3 px-3 py-2 text-sm">
+            <li key={holiday.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2 text-sm">
               <span className="w-12 shrink-0 font-medium tabular-nums">
                 {format(parseApiDate(holiday.date), "dd/MM")}
               </span>
-              <span className="min-w-0 flex-1 truncate">{holiday.name}</span>
+              <span className="min-w-0 flex-1 basis-32 wrap-break-word">{holiday.name}</span>
               {holiday.released && <span className="text-xs text-emerald-600 dark:text-emerald-400">Liberado</span>}
               <Badge variant="outline">{holidaySourceLabel(holiday.source)}</Badge>
               {custom ? (

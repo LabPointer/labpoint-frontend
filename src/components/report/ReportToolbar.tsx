@@ -40,7 +40,7 @@ export function ReportToolbar({
   return (
     <Card className={reportCardClass("data")}>
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white shadow-sm dark:bg-violet-400 dark:text-violet-950">
             <FileBarChartIcon aria-hidden="true" className="size-5" strokeWidth={2.2} />
           </div>
@@ -53,8 +53,9 @@ export function ReportToolbar({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           <MonthYearRangePicker
+            className="min-w-0 flex-1 basis-full min-[400px]:basis-0 sm:flex-none"
             value={period}
             onChange={(range) => {
               if (range.from && range.to) onPeriodChange({ from: range.from, to: range.to });
@@ -76,7 +77,12 @@ export function ReportToolbar({
           >
             <RefreshCwIcon className={isRefreshing ? "animate-spin" : undefined} />
           </Button>
-          <Button type="button" className="h-10 gap-2 px-4" disabled={!canExport || isExporting} onClick={onExport}>
+          <Button
+            type="button"
+            className="h-10 flex-1 gap-2 px-4 sm:flex-none"
+            disabled={!canExport || isExporting}
+            onClick={onExport}
+          >
             {isExporting ? <Spinner /> : <DownloadIcon />}
             {isExporting ? "Gerando PDF..." : "Exportar PDF"}
           </Button>

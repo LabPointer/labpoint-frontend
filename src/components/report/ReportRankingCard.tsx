@@ -100,8 +100,8 @@ function RankingRow({ row, mode, copy }: { row: RowConfig; mode: ReportMode; cop
     return (
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-4">
-          <p className={cn("text-sm font-semibold", row.tagClass)}>{row.tag}</p>
-          <ReportSkeleton mode={mode} className="h-3 w-32" />
+          <p className={cn("shrink-0 text-sm font-semibold", row.tagClass)}>{row.tag}</p>
+          <ReportSkeleton mode={mode} className="h-3 w-20 sm:w-32" />
         </div>
         <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
           <ReportSkeleton
@@ -118,7 +118,7 @@ function RankingRow({ row, mode, copy }: { row: RowConfig; mode: ReportMode; cop
     return (
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <p className="min-w-0 truncate text-sm font-semibold">
+          <p className="min-w-0 text-sm font-semibold wrap-break-word">
             <span className="text-muted-foreground">—</span>{" "}
             <span className={cn("text-xs font-medium", row.tagClass)}>({row.tag})</span>
           </p>
@@ -139,7 +139,7 @@ function RankingRow({ row, mode, copy }: { row: RowConfig; mode: ReportMode; cop
         renderItem={(stat) => (
           <div key={stat.spaceId} className="flex flex-col gap-2">
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-              <p className="min-w-0 truncate text-sm font-semibold" title={stat.name}>
+              <p className="min-w-0 text-sm font-semibold wrap-break-word" title={stat.name}>
                 {stat.name} <span className={cn("text-xs font-medium", row.tagClass)}>({row.tag})</span>
               </p>
               <p className="text-sm text-muted-foreground">{row.valueText(stat)}</p>

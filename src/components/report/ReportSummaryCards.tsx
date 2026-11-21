@@ -16,73 +16,76 @@ export function ReportSummaryCards({ report, mode }: ReportSummaryCardsProps) {
   const { visible, hidden } = limitList(disputed, MAX_DISPUTED_NAMES);
 
   return (
-    <div className="grid gap-4 md:grid-cols-3">
-      <SummaryCard label={copy.averageLabel} mode={mode}>
-        {hasData && summary.averageOccupancyRate !== null ? (
-          <>
-            <Value>{formatPercent(summary.averageOccupancyRate)}</Value>
-            <Caption>{copy.averageCaption}</Caption>
-          </>
-        ) : (
-          <ValueSkeleton mode={mode} />
-        )}
-      </SummaryCard>
+    // Pelo espaço da página: 1 coluna, depois 2 (o terceiro cartão ocupa a linha inteira) e 3.
+    <div className="@container/summary">
+      <div className="grid gap-4 @lg/summary:grid-cols-2 @lg/summary:[&>*:last-child]:col-span-2 @3xl/summary:grid-cols-3 @3xl/summary:[&>*:last-child]:col-span-1">
+        <SummaryCard label={copy.averageLabel} mode={mode}>
+          {hasData && summary.averageOccupancyRate !== null ? (
+            <>
+              <Value>{formatPercent(summary.averageOccupancyRate)}</Value>
+              <Caption>{copy.averageCaption}</Caption>
+            </>
+          ) : (
+            <ValueSkeleton mode={mode} />
+          )}
+        </SummaryCard>
 
-      <SummaryCard label="Taxa de ociosidade / no-show" mode={mode}>
-        {hasData && summary.idleRate !== null ? (
-          <>
-            <Value className="text-destructive">{formatPercent(summary.idleRate)}</Value>
-            <Caption>
-              dos horários reservados ·{" "}
-              {pluralize(summary.absentReserves, "reserva ausente", "reservas ausentes")} de {summary.totalReserves}
-            </Caption>
-          </>
-        ) : (
-          <ValueSkeleton mode={mode} />
-        )}
-      </SummaryCard>
-
-      <SummaryCard label={tied ? copy.mostDisputedMany : copy.mostDisputedOne} mode={mode}>
-        {hasData && disputed.length === 1 ? (
-          <>
-            <Value className="truncate text-violet-600 dark:text-violet-400" title={disputed[0].name}>
-              {disputed[0].name}
-            </Value>
-            <Caption>
-              {formatPercent(disputed[0].occupancyRate)} de {copy.rate}
-            </Caption>
-          </>
-        ) : hasData && tied ? (
-          <>
-            <ul className="flex flex-col py-0.5">
-              {visible.map((space) => (
-                <li
-                  key={space.spaceId}
-                  title={space.name}
-                  className="truncate text-xl font-bold leading-snug text-violet-600 dark:text-violet-400"
-                >
-                  {space.name}
-                </li>
-              ))}
-            </ul>
-            {hidden > 0 && (
+        <SummaryCard label="Taxa de ociosidade / no-show" mode={mode}>
+          {hasData && summary.idleRate !== null ? (
+            <>
+              <Value className="text-destructive">{formatPercent(summary.idleRate)}</Value>
               <Caption>
-                e mais {hidden} {hidden === 1 ? copy.tiedOne : copy.tiedMany}
+                dos horários reservados · {pluralize(summary.absentReserves, "reserva ausente", "reservas ausentes")} de{" "}
+                {summary.totalReserves}
               </Caption>
-            )}
-            <Caption>
-              {formatPercent(disputed[0].occupancyRate)} de {copy.rate} cada
-            </Caption>
-          </>
-        ) : hasData ? (
-          <>
-            <Value className="text-muted-foreground">—</Value>
-            <Caption>{copy.noneWithReserves}</Caption>
-          </>
-        ) : (
-          <ValueSkeleton mode={mode} />
-        )}
-      </SummaryCard>
+            </>
+          ) : (
+            <ValueSkeleton mode={mode} />
+          )}
+        </SummaryCard>
+
+        <SummaryCard label={tied ? copy.mostDisputedMany : copy.mostDisputedOne} mode={mode}>
+          {hasData && disputed.length === 1 ? (
+            <>
+              <Value className="truncate text-violet-600 dark:text-violet-400" title={disputed[0].name}>
+                {disputed[0].name}
+              </Value>
+              <Caption>
+                {formatPercent(disputed[0].occupancyRate)} de {copy.rate}
+              </Caption>
+            </>
+          ) : hasData && tied ? (
+            <>
+              <ul className="flex flex-col py-0.5">
+                {visible.map((space) => (
+                  <li
+                    key={space.spaceId}
+                    title={space.name}
+                    className="truncate text-xl font-bold leading-snug text-violet-600 dark:text-violet-400"
+                  >
+                    {space.name}
+                  </li>
+                ))}
+              </ul>
+              {hidden > 0 && (
+                <Caption>
+                  e mais {hidden} {hidden === 1 ? copy.tiedOne : copy.tiedMany}
+                </Caption>
+              )}
+              <Caption>
+                {formatPercent(disputed[0].occupancyRate)} de {copy.rate} cada
+              </Caption>
+            </>
+          ) : hasData ? (
+            <>
+              <Value className="text-muted-foreground">—</Value>
+              <Caption>{copy.noneWithReserves}</Caption>
+            </>
+          ) : (
+            <ValueSkeleton mode={mode} />
+          )}
+        </SummaryCard>
+      </div>
     </div>
   );
 }

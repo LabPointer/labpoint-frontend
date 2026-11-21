@@ -6,7 +6,7 @@ import { SubjectSelect } from "@/components/shared/entity-selects";
 import { type FilterOption, FilterSelect } from "@/components/shared/FilterSelect";
 import { PageLimitSelect } from "@/components/shared/PageLimitSelect";
 import type { RemoteOption } from "@/components/shared/RemoteCombobox";
-import { SearchPanel, SearchTextField } from "@/components/shared/SearchPanel";
+import { SearchFilters, SearchPanel, SearchTextField } from "@/components/shared/SearchPanel";
 
 export type UserFilters = {
   search: string;
@@ -64,7 +64,7 @@ export function ManageUserSearchBar({ onSearch }: ManageUserSearchBarProps) {
         <PageLimitSelect id="user-limit" value={limit} onValueChange={setLimit} className="w-full sm:w-40" />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <SearchFilters activeCount={[role !== undefined, subject, enabled !== undefined].filter(Boolean).length}>
         <FilterSelect id="user-role" label="Cargo" options={roleOptions} value={role} onValueChange={setRole} />
         <SubjectSelect
           id="user-subject"
@@ -80,7 +80,7 @@ export function ManageUserSearchBar({ onSearch }: ManageUserSearchBarProps) {
           value={enabled}
           onValueChange={setEnabled}
         />
-      </div>
+      </SearchFilters>
     </SearchPanel>
   );
 }

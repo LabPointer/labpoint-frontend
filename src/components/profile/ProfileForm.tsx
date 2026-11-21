@@ -63,14 +63,14 @@ export function ProfileForm({ account }: { account: Account }) {
 
   return (
     <Card className="mx-auto w-full max-w-2xl bg-white/70 p-4 shadow-md backdrop-blur-xl hover:shadow-lg sm:max-w-md dark:border-violet-500/10 dark:bg-black/30 dark:shadow-violet-300/15">
-      <CardHeader className="flex flex-row items-center gap-4">
-        <Avatar className="size-16">
+      <CardHeader className="flex flex-row items-start gap-3 sm:items-center sm:gap-4">
+        <Avatar className="size-12 shrink-0 sm:size-16">
           <AvatarImage src="https://github.com/shadcn.png" />
           <AvatarFallback>{initials(account.username)}</AvatarFallback>
         </Avatar>
         <div className="flex min-w-0 flex-col gap-1">
-          <CardTitle className="truncate text-xl">{account.username}</CardTitle>
-          <CardDescription className="truncate">{account.email}</CardDescription>
+          <CardTitle className="text-lg wrap-break-word sm:text-xl">{account.username}</CardTitle>
+          <CardDescription className="break-all">{account.email}</CardDescription>
           <Badge variant="secondary" className="w-fit">
             {roleLabel(account.role)}
           </Badge>

@@ -79,7 +79,7 @@ export function MonthReleaseCalendar({
         onSelect={handleSelect}
         disabled={isLocked}
         showOutsideDays={false}
-        className="w-full p-0 [--cell-size:--spacing(10)] sm:[--cell-size:--spacing(12)]"
+        className="w-full p-0 [--cell-size:--spacing(8)] min-[400px]:[--cell-size:--spacing(10)] sm:[--cell-size:--spacing(12)]"
         classNames={{ root: "w-full" }}
         modifiers={{
           blockedDay: (date) => dayOf(date)?.blocked ?? false,
@@ -111,7 +111,7 @@ export function MonthReleaseCalendar({
         >
           Liberar selecionados{selected.length > 0 && ` (${selected.length})`}
         </Button>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(9.5rem,1fr))] gap-2">
           <Button
             type="button"
             variant="outline"

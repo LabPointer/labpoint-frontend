@@ -14,6 +14,9 @@ type MonthRestrictedDaysListProps = {
 };
 
 /** Fins de semana e feriados do mês, um por linha, com um switch para liberar (o jeito mais simples no celular). */
+const statusClass = (released: boolean) =>
+  released ? "text-xs text-emerald-600 dark:text-emerald-400" : "text-xs text-muted-foreground";
+
 export function MonthRestrictedDaysList({ month, days, pending, onRelease, onRevoke }: MonthRestrictedDaysListProps) {
   const restricted = daysOfMonth(days, month).filter(isRestricted);
   const releasedCount = restricted.filter((day) => day.released).length;
@@ -37,13 +40,17 @@ export function MonthRestrictedDaysList({ month, days, pending, onRelease, onRev
                 <span className="text-sm font-medium first-letter:uppercase">
                   {format(date, "EEEE, dd/MM", { locale: ptBR })}
                 </span>
+                {/* No celular o status fica embaixo da data, para não espremer o interruptor. */}
+                <span className={`${statusClass(day.released)} sm:hidden`}>
+                  {day.released ? "Liberado" : "Bloqueado"}
+                </span>
                 {day.holidays.length > 0 && (
                   <span className="flex flex-wrap gap-1">
                     {day.holidays.map((holiday) => (
                       <Badge
                         key={holiday.id}
                         variant="outline"
-                        className="border-amber-500/30 bg-amber-500/15 text-amber-700 dark:text-amber-300"
+                        className="h-auto max-w-full border-amber-500/30 bg-amber-500/15 text-left whitespace-normal text-amber-700 dark:text-amber-300"
                       >
                         {holiday.name}
                       </Badge>
@@ -51,11 +58,7 @@ export function MonthRestrictedDaysList({ month, days, pending, onRelease, onRev
                   </span>
                 )}
               </label>
-              <span
-                className={
-                  day.released ? "text-xs text-emerald-600 dark:text-emerald-400" : "text-xs text-muted-foreground"
-                }
-              >
+              <span aria-hidden="true" className={`${statusClass(day.released)} hidden sm:inline`}>
                 {day.released ? "Liberado" : "Bloqueado"}
               </span>
               <Switch

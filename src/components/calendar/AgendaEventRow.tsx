@@ -45,10 +45,7 @@ export function AgendaEventRow({ data }: AgendaEventRowProps) {
 
       {/* Badge de status */}
       <span
-        className={cn(
-          "shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-semibold",
-          statusVariantClass(data.status),
-        )}
+        className={cn("shrink-0 rounded border px-1.5 py-0.5 text-xs font-semibold", statusVariantClass(data.status))}
       >
         {statusLabel(data.status)}
       </span>

@@ -10,7 +10,7 @@ import { AccountMultiSelect, ScheduleMultiSelect, SpaceMultiSelect } from "@/com
 import { FilterSelect } from "@/components/shared/FilterSelect";
 import { PageLimitSelect } from "@/components/shared/PageLimitSelect";
 import type { RemoteOption } from "@/components/shared/RemoteCombobox";
-import { SearchPanel } from "@/components/shared/SearchPanel";
+import { SearchFilters, SearchPanel } from "@/components/shared/SearchPanel";
 
 export type ReserveFilters = {
   /** ids dos espaços escolhidos; vazio = todos */
@@ -91,8 +91,7 @@ export function ManageReserveSearchBar({ onSearch }: ManageReserveSearchBarProps
         <PageLimitSelect id="reserve-limit" value={limit} onValueChange={setLimit} className="w-full sm:w-40" />
       </div>
 
-      {/* Colunas de no mínimo 16rem: o período não quebra linha; os campos descem quando não cabem. */}
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,16rem),1fr))] gap-4">
+      <SearchFilters activeCount={[schedules.length, accounts.length, status !== undefined].filter(Boolean).length}>
         <DateRangeField
           id="reserve-period"
           label="Período"
@@ -123,7 +122,7 @@ export function ManageReserveSearchBar({ onSearch }: ManageReserveSearchBarProps
           value={status}
           onValueChange={setStatus}
         />
-      </div>
+      </SearchFilters>
     </SearchPanel>
   );
 }

@@ -4,6 +4,7 @@ import {
   AvailabilityBadge,
   RESERVE_CARD_CLASS,
   RESERVE_CARD_FOOTER_CLASS,
+  RESERVE_CARD_HEADER_CLASS,
   ReserveCardButton,
   ReserveCardDescription,
   ReserveCardIcon,
@@ -28,7 +29,7 @@ export function ResourceCard({ resource, showAvailability, onReserve }: Resource
   return (
     <Card aria-label={resource.name} className={RESERVE_CARD_CLASS}>
       {/* Identificação: ícone, nome, total de unidades e situação */}
-      <CardHeader className="flex flex-row items-start gap-3 p-0">
+      <CardHeader className={RESERVE_CARD_HEADER_CLASS}>
         <ReserveCardIcon>
           <Package aria-hidden="true" />
         </ReserveCardIcon>

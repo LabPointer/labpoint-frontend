@@ -1,13 +1,21 @@
 import { getDaysInMonth, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AgendaEventRow } from "#/components/calendar/AgendaEventRow";
 import { MonthEventChip } from "#/components/calendar/MonthEventChip";
 import { StatusFilterButton } from "#/components/calendar/StatusFilterButton";
 import { EventCalendar, type EventCalendarApi } from "#/components/reui/event-calendar/event-calendar.tsx";
 import { EventCalendarContent } from "#/components/reui/event-calendar/event-calendar-content.tsx";
 import type { EventCalendarI18nOverrides } from "#/components/reui/event-calendar/event-calendar-i18n.tsx";
-import { EventCalendarNav, EventCalendarToolbar } from "#/components/reui/event-calendar/event-calendar-nav.tsx";
+import {
+  EventCalendarNav,
+  EventCalendarNavNext,
+  EventCalendarNavPrev,
+  EventCalendarNavToday,
+  EventCalendarTitle,
+  EventCalendarToolbar,
+  EventCalendarViewSwitcher,
+} from "#/components/reui/event-calendar/event-calendar-nav.tsx";
 import type {
   CalendarEvent,
   CalendarView,
@@ -15,6 +23,7 @@ import type {
 } from "#/components/reui/event-calendar/event-calendar-types.tsx";
 import { Card, CardContent } from "#/components/ui/card.tsx";
 import { Skeleton } from "#/components/ui/skeleton.tsx";
+import { useMediaQuery } from "#/hooks/use-media-query";
 import { useMonthReserves } from "#/lib/queries/reserves";
 import { useMonthResourceReserves } from "#/lib/queries/resource-reserves";
 import type { ReservationEventData, ReservationStatus } from "#/lib/types/reservation-types";
@@ -138,6 +147,16 @@ export function HistoryCalendar() {
   // ---------------------------------------------------------------------------
   const agendaDayCount = getDaysInMonth(activeMonth);
 
+  // No celular as células do mês ficam pequenas demais: abre na Agenda (uma vez; depois vale a escolha do usuário).
+  const isNarrow = useMediaQuery("(max-width: 639px)");
+  const calendarReady = !reserves.isPending;
+  const openedAgenda = useRef(false);
+  useEffect(() => {
+    if (!isNarrow || !calendarReady || openedAgenda.current || !apiRef.current) return;
+    openedAgenda.current = true;
+    apiRef.current.setView("agenda");
+  }, [isNarrow, calendarReady]);
+
   // ---------------------------------------------------------------------------
   // renderEvent — chip para a view de Mês (renderizado dentro do wrapper do chip)
   // ---------------------------------------------------------------------------
@@ -185,8 +204,8 @@ export function HistoryCalendar() {
   }
 
   return (
-    <div className="w-full p-4">
-      <Card className="w-full py-0 bg-white/70 dark:bg-black/70 backdrop-blur-xl rounded-md border dark:border-violet-500/10 shadow-md hover:shadow-lg p-4 dark:shadow-violet-300/15">
+    <div className="w-full md:p-4">
+      <Card className="w-full py-0 bg-white/70 dark:bg-black/70 backdrop-blur-xl rounded-md border dark:border-violet-500/10 shadow-md hover:shadow-lg p-2 sm:p-4 dark:shadow-violet-300/15">
         <CardContent className="p-0">
           <EventCalendar<ReservationEventData>
             events={events}
@@ -207,9 +226,19 @@ export function HistoryCalendar() {
             renderAgendaEvent={renderAgendaEvent}
             className="h-160 w-full"
           >
-            {/* Barra de navegação — sem botões de Settings e New Event */}
+            {/* Barra de navegação — sem botões de Settings e New Event. No celular: mês e setas na primeira
+                linha; Hoje e a troca de visão na segunda. */}
             <div className="flex flex-wrap items-center gap-2 pe-2">
-              <EventCalendarNav className="min-w-0 flex-1" />
+              <EventCalendarNav className="w-full min-w-0 sm:w-auto sm:flex-1">
+                <EventCalendarNavToday className="order-2 sm:order-none" />
+                <EventCalendarViewSwitcher className="order-2 sm:order-none" />
+                <div className="order-1 flex items-center sm:order-none">
+                  <EventCalendarNavPrev />
+                  <EventCalendarNavNext />
+                </div>
+                <EventCalendarTitle className="order-1 ms-1 sm:order-none sm:ms-3" />
+                <span aria-hidden="true" className="order-1 h-0 basis-full sm:hidden" />
+              </EventCalendarNav>
               <EventCalendarToolbar>
                 <StatusFilterButton value={visibleStatuses} onChange={setVisibleStatuses} />
               </EventCalendarToolbar>

@@ -19,10 +19,7 @@ export function ReservedResourcesList({
             <span className="text-muted-foreground"> × {resource.quantity}</span>
           </span>
           <span
-            className={cn(
-              "shrink-0 rounded border px-1 text-[10px] font-semibold",
-              statusVariantClass(resource.status),
-            )}
+            className={cn("shrink-0 rounded border px-1 text-xs font-semibold", statusVariantClass(resource.status))}
           >
             {statusLabel(resource.status)}
           </span>

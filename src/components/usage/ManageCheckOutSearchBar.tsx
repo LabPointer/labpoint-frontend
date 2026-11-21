@@ -10,7 +10,7 @@ import { AccountMultiSelect, SpaceMultiSelect } from "@/components/shared/entity
 import { FilterSelect } from "@/components/shared/FilterSelect";
 import { PageLimitSelect } from "@/components/shared/PageLimitSelect";
 import type { RemoteOption } from "@/components/shared/RemoteCombobox";
-import { SearchPanel } from "@/components/shared/SearchPanel";
+import { SearchFilters, SearchPanel } from "@/components/shared/SearchPanel";
 
 export type CheckOutFilters = {
   /** yyyy-MM-dd */
@@ -74,9 +74,7 @@ export function ManageCheckOutSearchBar({ onSearch }: { onSearch: (filters: Chec
 
   return (
     <SearchPanel>
-      {/* Colunas de no mínimo 16rem: os campos descem para a linha de baixo em vez de espremer o período e os
-          textos (o período "01/11/2026 - 30/11/2026" cabe numa linha só). */}
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,16rem),1fr))] gap-4">
+      <SearchFilters activeCount={[status !== "open", spaces.length, accounts.length].filter(Boolean).length}>
         <DateRangeField
           id="check-out-period"
           label="Período"
@@ -97,7 +95,7 @@ export function ManageCheckOutSearchBar({ onSearch }: { onSearch: (filters: Chec
         <SpaceMultiSelect id="check-out-spaces" label="Sala" value={spaces} onValueChange={setSpaces} />
         <AccountMultiSelect id="check-out-accounts" label="Usuários" value={accounts} onValueChange={setAccounts} />
         <PageLimitSelect id="check-out-limit" value={limit} onValueChange={setLimit} className="w-full" />
-      </div>
+      </SearchFilters>
     </SearchPanel>
   );
 }
