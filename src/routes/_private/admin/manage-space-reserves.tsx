@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormDialog } from "#/hooks/use-form-dialog";
 import { usePagination } from "#/hooks/use-pagination";
 import {
@@ -22,19 +22,53 @@ import {
   ManageReserveSearchBar,
   type ReserveFilters,
 } from "@/components/manage-reserves/ManageReserveSearchBar";
-import { ManageReserveTable } from "@/components/manage-reserves/ManageReserveTable";
+import { ManageReserveTable, reserveColumns } from "@/components/manage-reserves/ManageReserveTable";
 import { sameResources } from "@/components/reserve/ReserveResourcesField";
+import { ColumnChooser } from "@/components/shared/data-table/ColumnChooser";
+import { SelectionExportButton } from "@/components/shared/data-table/SelectionExportButton";
+import { useColumnPreferences } from "@/components/shared/data-table/use-column-preferences";
+import { useRowSelection } from "@/components/shared/data-table/use-row-selection";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 import { ResultsHeader } from "@/components/shared/ResultsHeader";
+import { exportReservesUsagePdf } from "@/components/usage/export-usage-reports";
 
 export const Route = createFileRoute("/_private/admin/manage-space-reserves")({
   component: RouteComponent,
 });
 
+const reserveKey = (reserve: { id: number | string }) => Number(reserve.id);
+
+const formatDay = (date: string) => date.split("-").reverse().join("/");
+
 function RouteComponent() {
+  const selection = useRowSelection<AdminReserve>(reserveKey);
+  const clearSelection = selection.clear;
+  const [isExporting, setIsExporting] = useState(false);
+  const columns = useColumnPreferences("manage-space-reserves", reserveColumns);
   const [filters, setFilters] = useState<ReserveFilters>(initialReserveFilters);
   const pagination = usePagination(filters);
+
+  // Filtros novos = outra lista: a seleção anterior não vale mais.
+  useEffect(() => {
+    void filters;
+    clearSelection();
+  }, [filters, clearSelection]);
+
+  async function handleExportSelected() {
+    setIsExporting(true);
+    await exportReservesUsagePdf(
+      "space",
+      selection.rows.map((r) => ({
+        id: Number(r.id),
+        title: r.spaces.name,
+        subtitle: `${r.account.username} (${r.account.registration}) · ${
+          r.dateFrom === r.dateTo ? formatDay(r.dateFrom) : `${formatDay(r.dateFrom)} a ${formatDay(r.dateTo)}`
+        }`,
+      })),
+    );
+    setIsExporting(false);
+  }
   const reserves = useAdminReserves({
     spaceIds: filters.spaceIds,
     startAt: filters.startAt,
@@ -127,7 +161,21 @@ function RouteComponent() {
       </section>
 
       <section className="container">
-        <ResultsHeader title="Reservas" count={items.length} />
+        <ResultsHeader
+          title="Reservas"
+          count={items.length}
+          actions={
+            <>
+              <SelectionExportButton
+                count={selection.count}
+                isPending={isExporting}
+                onExport={handleExportSelected}
+                onClear={selection.clear}
+              />
+              <ColumnChooser columns={reserveColumns} state={columns} />
+            </>
+          }
+        />
         <QueryBoundary
           isPending={reserves.isPending}
           isFetching={reserves.isFetching}
@@ -137,7 +185,13 @@ function RouteComponent() {
           loadingText="Carregando reservas..."
           emptyText="Nenhuma reserva encontrada."
         >
-          <ManageReserveTable reserves={items} onEdit={editDialog.open} onCancel={cancelDialog.open} />
+          <ManageReserveTable
+            reserves={items}
+            columns={columns.visibleColumns}
+            selection={selection}
+            onEdit={editDialog.open}
+            onCancel={cancelDialog.open}
+          />
         </QueryBoundary>
         <PaginationControls
           page={pagination.page}

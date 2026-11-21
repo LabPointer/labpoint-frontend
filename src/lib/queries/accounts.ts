@@ -153,3 +153,21 @@ export function useEditAccount() {
     onError: notifyError,
   });
 }
+
+/**
+ * Exclusão permanente (a coordenação digita o nome para confirmar). Apaga em cascata reservas e históricos
+ * ligados ao item, então todas as consultas são invalidadas.
+ */
+export function useDeleteAccount() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (body: components["schemas"]["AdminAccountDeleteRequestDTO"]) =>
+      assertOk(await api.DELETE("/account/admin/delete", { body })),
+    onSuccess: () => {
+      notifySuccess("Usuário excluído permanentemente.");
+      return queryClient.invalidateQueries();
+    },
+    onError: notifyError,
+  });
+}

@@ -87,7 +87,8 @@ export function ManageResourceReserveSearchBar({ onSearch }: ManageResourceReser
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      {/* Colunas de no mínimo 16rem: o período não quebra linha; os campos descem quando não cabem. */}
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,16rem),1fr))] gap-4">
         <DateRangeField
           id="resource-reserve-period"
           label="Período"

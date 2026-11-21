@@ -317,6 +317,95 @@ export interface paths {
         };
         trace?: never;
     };
+    "/account/admin/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Admin: excluir usuário permanentemente
+         * @description Exclui a conta de vez, junto com as reservas e o histórico de uso dela. Exige cargo estritamente superior ao do
+         *     usuário alvo e digitar o nome de usuário para confirmar. Liberações de calendário feitas pela conta passam
+         *     para quem excluiu.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminAccountDeleteRequestDTO"];
+                    "text/json": components["schemas"]["AdminAccountDeleteRequestDTO"];
+                    "application/*+json": components["schemas"]["AdminAccountDeleteRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/sign-up": {
         parameters: {
             query?: never;
@@ -2076,6 +2165,71 @@ export interface paths {
         };
         trace?: never;
     };
+    "/resource/admin/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Excluir recurso permanentemente
+         * @description Exclui o recurso de vez, junto com as reservas dele e o histórico de uso. Exige digitar o nome do recurso.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminDeleteRequestDTO"];
+                    "text/json": components["schemas"]["AdminDeleteRequestDTO"];
+                    "application/*+json": components["schemas"]["AdminDeleteRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/resource-reserve": {
         parameters: {
             query?: never;
@@ -2748,6 +2902,71 @@ export interface paths {
         };
         trace?: never;
     };
+    "/schedule/admin/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Excluir horário permanentemente
+         * @description Exclui o horário de vez e o retira das reservas e dos relatórios de uso; reservas que ficarem sem horários são excluídas. Exige digitar o rótulo "HH:mm - HH:mm".
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminDeleteRequestDTO"];
+                    "text/json": components["schemas"]["AdminDeleteRequestDTO"];
+                    "application/*+json": components["schemas"]["AdminDeleteRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/space": {
         parameters: {
             query?: never;
@@ -2939,6 +3158,71 @@ export interface paths {
                 };
             };
         };
+        trace?: never;
+    };
+    "/space/admin/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Excluir espaço permanentemente
+         * @description Exclui o espaço de vez, junto com as reservas dele (e os recursos reservados com elas) e o histórico de uso. Exige digitar o nome do espaço.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminDeleteRequestDTO"];
+                    "text/json": components["schemas"]["AdminDeleteRequestDTO"];
+                    "application/*+json": components["schemas"]["AdminDeleteRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/space-reserve": {
@@ -3608,6 +3892,71 @@ export interface paths {
         };
         trace?: never;
     };
+    "/subject/admin/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Excluir matéria permanentemente
+         * @description Exclui a matéria de vez e remove o vínculo dela com usuários e espaços. Exige digitar o nome da matéria.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminDeleteRequestDTO"];
+                    "text/json": components["schemas"]["AdminDeleteRequestDTO"];
+                    "application/*+json": components["schemas"]["AdminDeleteRequestDTO"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ErroResponseDTO"];
+                        "application/json": components["schemas"]["ErroResponseDTO"];
+                        "text/json": components["schemas"]["ErroResponseDTO"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3626,6 +3975,10 @@ export interface components {
             subject: null | components["schemas"]["SubjectResponseDTO"];
             enabled: boolean;
         };
+        AdminAccountDeleteRequestDTO: {
+            id: string;
+            confirmName: string;
+        };
         AdminAccountEditRequestDTO: {
             id: string;
             registration: null | string;
@@ -3634,6 +3987,11 @@ export interface components {
             /** Format: int64 */
             subjectId: null | number | string;
             lockAccount: null | boolean;
+        };
+        AdminDeleteRequestDTO: {
+            /** Format: int64 */
+            id: number | string;
+            confirmName: string;
         };
         AdminResourceReserveEditRequestDTO: {
             status: null | components["schemas"]["EReserveStatus"];
@@ -3707,6 +4065,7 @@ export interface components {
             blocked: boolean;
         };
         EAccountRole: number;
+        EEmailStatus: number;
         EHolidaySource: number;
         EmailRequestDTO: {
             email: string;
@@ -4130,6 +4489,15 @@ export interface components {
             userName: null | string;
             registration: string;
         };
+        UsageEmailDTO: {
+            status: components["schemas"]["EEmailStatus"];
+            /** Format: int32 */
+            attempts: number | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            sentAt: null | string;
+        };
         UsageEntriesRequestDTO: {
             entries: components["schemas"]["UsageEntryInputDTO"][];
             /** @default false */
@@ -4199,6 +4567,8 @@ export interface components {
             checkedOutAt: null | string;
             checkedOutBy: null | components["schemas"]["UsageAccountDTO"];
             entries: components["schemas"]["UsageEntryResponseDTO"][];
+            checkInEmail?: null | components["schemas"]["UsageEmailDTO"];
+            checkOutEmail?: null | components["schemas"]["UsageEmailDTO"];
         };
         UsageSummaryDTO: {
             /** Format: int32 */

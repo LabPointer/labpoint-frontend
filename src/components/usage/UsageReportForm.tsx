@@ -236,7 +236,12 @@ export function UsageReportForm({
         const title = repeat ? `Todos os horários (${defaultRows.map((r) => r.label).join(" · ")})` : row.label;
 
         return (
-          <fieldset key={row.scheduleId} className="flex flex-col gap-3 rounded-md border p-3" disabled={disabled}>
+          // `min-w-0`: o fieldset tem largura mínima = conteúdo por padrão e vazaria do dialog no celular.
+          <fieldset
+            key={row.scheduleId}
+            className="flex min-w-0 flex-col gap-3 rounded-md border p-3"
+            disabled={disabled}
+          >
             <legend className="px-1 text-sm font-semibold">{title}</legend>
 
             <div className="grid gap-3 sm:grid-cols-2">

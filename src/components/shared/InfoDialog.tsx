@@ -16,13 +16,15 @@ type InfoDialogProps = {
   title: string;
   description: string;
   children: ReactNode;
+  /** Botões extras no rodapé, antes do "Fechar" (ex.: exportar em PDF). */
+  footerExtra?: ReactNode;
 };
 
 /**
  * Dialog (e não popover) para "ver mais info": em telas pequenas um popover fica espremido
  * ou sai da tela, enquanto o dialog ocupa a largura útil e rola o conteúdo.
  */
-export function InfoDialog({ open, onClose, title, description, children }: InfoDialogProps) {
+export function InfoDialog({ open, onClose, title, description, children, footerExtra }: InfoDialogProps) {
   return (
     <Dialog
       open={open}
@@ -37,6 +39,7 @@ export function InfoDialog({ open, onClose, title, description, children }: Info
         </DialogHeader>
         <div className="text-sm">{children}</div>
         <DialogFooter className="flex border-t bg-transparent">
+          {footerExtra}
           <DialogClose render={<Button type="button" variant="outline" />}>Fechar</DialogClose>
         </DialogFooter>
       </DialogContent>

@@ -2,12 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useFormDialog } from "#/hooks/use-form-dialog";
 import { usePagination } from "#/hooks/use-pagination";
-import { type Space, useCreateSpace, useEditSpace, useSpaces } from "#/lib/queries/spaces";
+import { type Space, useCreateSpace, useDeleteSpace, useEditSpace, useSpaces } from "#/lib/queries/spaces";
 import { succeeded } from "#/lib/utils/api-result";
 import { DEFAULT_PAGE_LIMIT, toPaged } from "#/lib/utils/pagination";
 import { ManageSpaceDialog, type SpaceFormData } from "@/components/manage-spaces/ManageSpaceDialog";
 import { ManageSpaceSearchBar, type SpaceFilters } from "@/components/manage-spaces/ManageSpaceSearchBar";
-import { ManageSpaceTable } from "@/components/manage-spaces/ManageSpaceTable";
+import { ManageSpaceTable, spaceColumns } from "@/components/manage-spaces/ManageSpaceTable";
+import { DeleteConfirmDialog } from "@/components/shared/DeleteConfirmDialog";
+import { ColumnChooser } from "@/components/shared/data-table/ColumnChooser";
+import { useColumnPreferences } from "@/components/shared/data-table/use-column-preferences";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { QueryBoundary } from "@/components/shared/QueryBoundary";
 
@@ -41,6 +44,16 @@ function RouteComponent() {
   const editSpace = useEditSpace();
   const createDialog = useFormDialog();
   const editDialog = useFormDialog<Space>();
+  const deleteSpace = useDeleteSpace();
+  const deleteDialog = useFormDialog<Space>();
+  const columns = useColumnPreferences("manage-spaces", spaceColumns);
+
+  async function handleDelete() {
+    const space = deleteDialog.target;
+    if (!space) return;
+    const ok = await succeeded(deleteSpace.mutateAsync({ id: space.id, confirmName: space.name }));
+    if (ok) deleteDialog.close();
+  }
 
   // contagens da página exibida
   const inactive = items.filter((space) => space.locked).length;
@@ -109,14 +122,30 @@ function RouteComponent() {
         />
       )}
 
+      {deleteDialog.target && (
+        <DeleteConfirmDialog
+          key={deleteDialog.session}
+          open={deleteDialog.isOpen}
+          entityLabel="espaço"
+          itemName={deleteDialog.target.name}
+          consequences="Todas as reservas deste espaço, os recursos reservados junto com elas e o histórico de uso também serão excluídos."
+          isPending={deleteSpace.isPending}
+          onClose={deleteDialog.close}
+          onConfirm={handleDelete}
+        />
+      )}
+
       <section className="container mb-8">
         <ManageSpaceSearchBar onSearch={setFilters} onAddNewSpace={() => createDialog.open()} />
       </section>
 
       <section className="container flex flex-col gap-8">
-        <h2 className="text-sm font-bold">
-          {summary.total} espaço(s) exibido(s) · {summary.active} ativo(s) · {summary.inactive} inativo(s)
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm font-bold">
+            {summary.total} espaço(s) exibido(s) · {summary.active} ativo(s) · {summary.inactive} inativo(s)
+          </h2>
+          <ColumnChooser columns={spaceColumns} state={columns} />
+        </div>
         <QueryBoundary
           isPending={spaces.isPending}
           isFetching={spaces.isFetching}
@@ -126,7 +155,12 @@ function RouteComponent() {
           loadingText="Carregando espaços..."
           emptyText="Nenhum espaço encontrado."
         >
-          <ManageSpaceTable spaces={items} onEdit={editDialog.open} />
+          <ManageSpaceTable
+            spaces={items}
+            columns={columns.visibleColumns}
+            onEdit={editDialog.open}
+            onDelete={deleteDialog.open}
+          />
         </QueryBoundary>
         <PaginationControls
           page={pagination.page}
