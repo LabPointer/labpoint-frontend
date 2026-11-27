@@ -11,7 +11,8 @@
     "generate-routes": "tsr generate",
     "build": "vite build",
     "preview": "vite preview",
-    "format": "biome format",
+    "prod": "node --env-file .env .output/server/index.mjs",
+    "format": "biome format --host --port 8080",
     "lint": "biome lint",
     "check": "biome check",
     "generate:types": "npx openapi-typescript http://localhost:8080/openapi/v1.json -o src/lib/utils/api.ts"
